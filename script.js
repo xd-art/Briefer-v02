@@ -7,35 +7,54 @@ class CardEditor {
         this.originalContent = '';
         this.isEditingMode = false;
         this.hasUnsavedChanges = false;
+        this.isNewCard = false;
+        this.originalCardsContent = {};
+        this.lastAIRequest = 0; // For rate limiting
+        this.aiRequestCooldown = 10000; // 10 seconds
         
         this.init();
     }
     
     init() {
+        this.storeOriginalContent(); // Store original content before any editing
         this.bindEvents();
         this.setupKeyboardShortcuts();
         this.loadSavedData();
     }
     
+    storeOriginalContent() {
+        // Store the original content of all cards before any editing
+        document.querySelectorAll('[data-card-id]').forEach(card => {
+            const cardId = card.dataset.cardId;
+            const cardClone = card.cloneNode(true);
+            const editLink = cardClone.querySelector('.edit-link');
+            if (editLink && editLink.parentNode) {
+                editLink.parentNode.remove();
+            }
+            this.originalCardsContent[cardId] = cardClone.innerHTML;
+        });
+    }
+    
     bindEvents() {
-        // Card edit links
-        document.querySelectorAll('.edit-link').forEach(link => {
-            link.addEventListener('click', (e) => {
+        // Use event delegation for edit links
+        this.handleEditClick = (e) => {
+            if (e.target.classList.contains('edit-link')) {
                 e.preventDefault();
                 e.stopPropagation();
                 const card = e.target.closest('[data-card-id]');
-                this.openEditModal(card);
-            });
-        });
+                if (card) {
+                    this.openEditModal(card);
+                }
+            }
+        };
+        document.addEventListener('click', this.handleEditClick);
         
         // Modal controls
         const modal = document.getElementById('editModal');
         const closeBtn = document.getElementById('closeModal');
-        const cancelBtn = document.getElementById('cancelEdit');
         const saveBtn = document.getElementById('saveCardEdit');
         
         closeBtn.addEventListener('click', () => this.closeModal());
-        cancelBtn.addEventListener('click', () => this.closeModal());
         saveBtn.addEventListener('click', () => this.saveCardChanges());
         
         // Close modal when clicking outside
@@ -48,6 +67,7 @@ class CardEditor {
         // AI Prompt functionality
         const sendPromptBtn = document.getElementById('sendPrompt');
         const promptInput = document.getElementById('aiPrompt');
+        const promptCounter = document.getElementById('promptCounter');
         
         sendPromptBtn.addEventListener('click', () => this.sendAIPrompt());
         promptInput.addEventListener('keydown', (e) => {
@@ -57,15 +77,39 @@ class CardEditor {
             }
         });
         
+        // Character counter for AI prompt
+        promptInput.addEventListener('input', (e) => {
+            const length = e.target.value.length;
+            promptCounter.textContent = length;
+            
+            // Color coding based on length
+            if (length < 10) {
+                promptCounter.className = 'text-gray-400';
+            } else if (length <= 500) {
+                promptCounter.className = 'text-green-600';
+            } else {
+                promptCounter.className = 'text-red-600';
+                // Trim to maximum length
+                e.target.value = e.target.value.substring(0, 500);
+                promptCounter.textContent = 500;
+            }
+        });
+        
         // Header action buttons
         document.getElementById('saveEdits').addEventListener('click', () => this.saveEdits());
-        document.getElementById('saveToProfile').addEventListener('click', () => this.saveToProfile());
+        document.getElementById('saveToProfile').addEventListener('click', () => this.reloadPage());
+        document.getElementById('addCard').addEventListener('click', () => this.addNewCard());
         
-        // Track changes in editor
+        // Track changes in editor and title
         const editor = document.getElementById('cardEditor');
+        const titleInput = document.getElementById('cardTitle');
+        
         editor.addEventListener('input', () => {
             this.hasUnsavedChanges = true;
-            this.updateSaveButtonState();
+        });
+        
+        titleInput.addEventListener('input', () => {
+            this.hasUnsavedChanges = true;
         });
     }
     
@@ -92,34 +136,36 @@ class CardEditor {
         const cardContent = card.cloneNode(true);
         const editLink = cardContent.querySelector('.edit-link');
         if (editLink && editLink.parentNode) {
-            editLink.parentNode.remove(); // Remove the entire flex container with the edit link
+            editLink.parentNode.remove();
         }
         this.originalContent = cardContent.innerHTML;
         
-        // Extract text content for editing
+        // Extract title and content
+        const titleElement = cardContent.querySelector('h2');
+        const title = titleElement ? titleElement.textContent : '';
+        
+        // Get text content without the title
+        if (titleElement) {
+            titleElement.remove();
+        }
         const textContent = this.extractTextContent(cardContent);
         
-        // Populate the editor
-        const editor = document.getElementById('cardEditor');
-        editor.value = textContent;
+        // Populate the editor fields
+        document.getElementById('cardTitle').value = title;
+        document.getElementById('cardEditor').value = textContent;
         
         // Show modal
         const modal = document.getElementById('editModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         
-        // Focus the editor
+        // Focus the title input
         setTimeout(() => {
-            editor.focus();
-            editor.setSelectionRange(0, 0);
+            document.getElementById('cardTitle').focus();
         }, 100);
-        
-        // Add editing class to card
-        card.classList.add('editing');
         
         // Reset states
         this.hasUnsavedChanges = false;
-        this.updateSaveButtonState();
     }
     
     closeModal() {
@@ -133,36 +179,101 @@ class CardEditor {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         
-        // Remove editing class from current card
-        if (this.currentCard) {
-            this.currentCard.classList.remove('editing');
-        }
-        
         // Clear AI prompt
         document.getElementById('aiPrompt').value = '';
         
         this.currentCard = null;
         this.isEditingMode = false;
+        this.isNewCard = false;
         this.hasUnsavedChanges = false;
     }
     
     saveCardChanges() {
         if (!this.currentCard) return;
         
-        const editor = document.getElementById('cardEditor');
-        const newContent = editor.value;
+        const title = document.getElementById('cardTitle').value.trim();
+        const content = document.getElementById('cardEditor').value.trim();
         
+        // Validate that at least title or content is provided
+        if (!title && !content) {
+            this.showNotification('Please enter a title or content for the card.', 'warning');
+            return;
+        }
+        
+        // Create new card HTML
+        let newHTML = '';
+        
+        if (title) {
+            newHTML += `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${this.escapeHtml(title)}</h2>`;
+        }
+        
+        if (content) {
+            // Convert text content to paragraphs
+            const paragraphs = content.split('\n\n').filter(p => p.trim());
+            paragraphs.forEach(paragraph => {
+                if (paragraph.trim()) {
+                    newHTML += `<p class="text-gray-600 mb-4">${this.escapeHtml(paragraph.trim())}</p>`;
+                }
+            });
+        }
+        
+        if (this.isNewCard) {
+            // Create a new card and add it to the article
+            this.addCardToArticle(newHTML);
+        } else {
+            // Update existing card
+            this.updateExistingCard(newHTML);
+        }
+        
+        // Save to localStorage
+        this.saveCardData();
+        
+        // Show success feedback
+        const message = this.isNewCard ? 'New card added successfully!' : 'Card updated successfully!';
+        this.showNotification(message, 'success');
+        
+        // Close modal
+        this.closeModal();
+    }
+    
+    addCardToArticle(htmlContent) {
+        // Generate unique card ID
+        const cardId = 'card-' + Date.now();
+        
+        // Create new card element
+        const newCard = document.createElement('div');
+        newCard.className = 'mb-8';
+        newCard.dataset.cardId = cardId;
+        newCard.innerHTML = htmlContent;
+        
+        // Add edit link
+        const editLinkDiv = document.createElement('div');
+        editLinkDiv.className = 'flex justify-end';
+        editLinkDiv.innerHTML = '<a href="#" class="text-blue-500 font-medium text-sm edit-link">EDIT</a>';
+        newCard.appendChild(editLinkDiv);
+        
+        // Find the button container and insert new card before it
+        const buttonContainer = document.querySelector('.mt-8.flex.justify-center');
+        const parentContainer = buttonContainer.parentNode;
+        parentContainer.insertBefore(newCard, buttonContainer);
+        
+        // Add to original content storage
+        const cardClone = newCard.cloneNode(true);
+        const editLink = cardClone.querySelector('.edit-link');
+        if (editLink && editLink.parentNode) {
+            editLink.parentNode.remove();
+        }
+        this.originalCardsContent[cardId] = cardClone.innerHTML;
+        
+        // Rebind events to include the new card
+        this.rebindEditEvents();
+    }
+    
+    updateExistingCard(htmlContent) {
         // Update the card content
-        const newCardContent = this.convertTextToHTML(newContent);
-        
-        // Create a temporary element to hold the new content
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newCardContent;
-        
-        // Clear current card content but preserve the data-card-id and classes
         const cardId = this.currentCard.dataset.cardId;
         const cardClasses = this.currentCard.className;
-        this.currentCard.innerHTML = tempDiv.innerHTML;
+        this.currentCard.innerHTML = htmlContent;
         this.currentCard.dataset.cardId = cardId;
         this.currentCard.className = cardClasses;
         
@@ -172,23 +283,11 @@ class CardEditor {
         editLinkDiv.innerHTML = '<a href="#" class="text-blue-500 font-medium text-sm edit-link">EDIT</a>';
         this.currentCard.appendChild(editLinkDiv);
         
-        // Rebind the edit event for the new link
-        const newEditLink = editLinkDiv.querySelector('.edit-link');
-        newEditLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const card = e.target.closest('[data-card-id]');
-            this.openEditModal(card);
-        });
+        // Add edited indicator if not a new card
+        this.addEditedIndicator(this.currentCard);
         
-        // Save to localStorage
-        this.saveCardData();
-        
-        // Show success feedback
-        this.showNotification('Card updated successfully!', 'success');
-        
-        // Close modal
-        this.closeModal();
+        // Rebind the edit event for the updated card
+        this.rebindEditEvents();
     }
     
     extractTextContent(element) {
@@ -285,22 +384,176 @@ class CardEditor {
         const promptInput = document.getElementById('aiPrompt');
         const prompt = promptInput.value.trim();
         
-        if (!prompt) {
-            this.showNotification('Please enter a prompt for AI assistance.', 'warning');
+        // Validate prompt
+        const validation = this.validatePrompt(prompt);
+        if (!validation.isValid) {
+            this.showNotification(`Validation Error: ${validation.error}`, 'error');
             return;
         }
         
-        // Simulate AI processing
-        this.showNotification('AI prompt sent! This is a placeholder for AI integration.', 'info');
+        // Check rate limiting
+        const now = Date.now();
+        if (now - this.lastAIRequest < this.aiRequestCooldown) {
+            const remainingTime = Math.ceil((this.aiRequestCooldown - (now - this.lastAIRequest)) / 1000);
+            this.showNotification(`Please wait ${remainingTime} seconds before next AI request.`, 'warning');
+            return;
+        }
         
-        // In a real implementation, this would send the prompt to an AI service
-        // For now, we'll just show a demo response
-        setTimeout(() => {
-            this.showNotification('AI Response: This is a demo. In the full version, AI would help improve your content based on the prompt: "' + prompt + '"', 'success');
-        }, 2000);
+        // Get current card content for context
+        const currentTitle = document.getElementById('cardTitle').value;
+        const currentContent = document.getElementById('cardEditor').value;
         
-        // Clear the prompt
-        promptInput.value = '';
+        // Show loading state
+        const sendBtn = document.getElementById('sendPrompt');
+        const originalBtnContent = sendBtn.innerHTML;
+        sendBtn.innerHTML = '<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>';
+        sendBtn.disabled = true;
+        
+        // Make API request
+        this.callPerplexityAPI(prompt, currentTitle, currentContent)
+            .then(response => {
+                this.handleAIResponse(response);
+                this.lastAIRequest = now;
+                promptInput.value = '';
+                document.getElementById('promptCounter').textContent = '0';
+            })
+            .catch(error => {
+                console.error('AI API Error:', error);
+                this.showNotification('AI service temporarily unavailable. Please try again later.', 'error');
+            })
+            .finally(() => {
+                // Restore button state
+                sendBtn.innerHTML = originalBtnContent;
+                sendBtn.disabled = false;
+            });
+    }
+    
+    validatePrompt(prompt) {
+        // Length validation
+        if (prompt.length < 10) {
+            return { isValid: false, error: 'Prompt too short. Minimum 10 characters required.' };
+        }
+        if (prompt.length > 500) {
+            return { isValid: false, error: 'Prompt too long. Maximum 500 characters allowed.' };
+        }
+        
+        // Forbidden phrases
+        const forbiddenPhrases = [
+            'измени тему',
+            'добавь рекламу', 
+            'смени направление',
+            'change topic',
+            'add advertisement',
+            'change direction'
+        ];
+        
+        const lowerPrompt = prompt.toLowerCase();
+        for (const phrase of forbiddenPhrases) {
+            if (lowerPrompt.includes(phrase.toLowerCase())) {
+                return { 
+                    isValid: false, 
+                    error: `Forbidden phrase detected: "${phrase}". Please reformulate your request for clarity/structure improvement.` 
+                };
+            }
+        }
+        
+        return { isValid: true };
+    }
+    
+    async callPerplexityAPI(prompt, currentTitle, currentContent) {
+        const systemPrompt = `You are an article editor for project management content for digital projects.
+
+YOU CAN:
+- Improve clarity of formulations
+- Add structure (lists, headings)
+- Add checklists and stages
+
+YOU CANNOT:
+- Add unconfirmed facts
+- Advertise tools without marking
+- Contradict original meaning
+
+If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."
+
+Current title: "${currentTitle}"
+Current content: "${currentContent}"
+
+User requests: ${prompt}
+
+Return improved content in JSON format:
+{
+  "title": "improved title",
+  "content": "improved content"
+}`;
+
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer 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'
+            },
+            body: JSON.stringify({
+                model: 'sonar-pro',
+                messages: [
+                    { role: 'user', content: systemPrompt }
+                ],
+                temperature: 0.7,
+                max_tokens: 1000
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content;
+    }
+    
+    handleAIResponse(aiResponse) {
+        try {
+            // Check if response is an error
+            if (aiResponse.startsWith('ERROR:')) {
+                this.showNotification(aiResponse, 'error');
+                return;
+            }
+            
+            // Try to parse JSON response
+            let parsedResponse;
+            try {
+                // Extract JSON from response if it's wrapped in quotes or other text
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    parsedResponse = JSON.parse(jsonMatch[0]);
+                } else {
+                    throw new Error('No JSON found in response');
+                }
+            } catch (e) {
+                // If not JSON, treat as plain text improvement
+                parsedResponse = {
+                    title: document.getElementById('cardTitle').value,
+                    content: aiResponse
+                };
+            }
+            
+            // Update the form fields with AI suggestions
+            if (parsedResponse.title) {
+                document.getElementById('cardTitle').value = parsedResponse.title;
+            }
+            
+            if (parsedResponse.content) {
+                document.getElementById('cardEditor').value = parsedResponse.content;
+            }
+            
+            // Mark as having unsaved changes
+            this.hasUnsavedChanges = true;
+            
+            this.showNotification('AI improvements applied! Review and save changes.', 'success');
+            
+        } catch (error) {
+            console.error('Error handling AI response:', error);
+            this.showNotification('Error processing AI response. Please try again.', 'error');
+        }
     }
     
     saveEdits() {
@@ -308,10 +561,20 @@ class CardEditor {
         this.showNotification('All edits saved locally!', 'success');
     }
     
-    saveToProfile() {
-        this.saveAllData();
-        // In a real implementation, this would save to user profile/server
-        this.showNotification('Article saved to profile! (Demo mode)', 'success');
+    cleanAllEdits() {
+        if (confirm('Are you sure you want to restore all cards to their original content? All your edits will be lost.')) {
+            // Clear saved data from localStorage
+            localStorage.removeItem('cardEditorData');
+            localStorage.removeItem('cardEditorTimestamp');
+            
+            // Reload the page to restore original content
+            location.reload();
+        }
+    }
+    
+    reloadPage() {
+        // Simple page reload for Clean button
+        location.reload();
     }
     
     saveCardData() {
@@ -377,17 +640,7 @@ class CardEditor {
             console.error('Error loading saved data:', error);
         }
     }
-    
-    updateSaveButtonState() {
-        const saveBtn = document.getElementById('saveCardEdit');
-        if (this.hasUnsavedChanges) {
-            saveBtn.textContent = 'Save Changes *';
-            saveBtn.style.fontWeight = 'bold';
-        } else {
-            saveBtn.textContent = 'Save Changes';
-            saveBtn.style.fontWeight = 'normal';
-        }
-    }
+
     
     showNotification(message, type = 'info') {
         // Create notification element
@@ -427,19 +680,61 @@ class CardEditor {
     }
     
     rebindEditEvents() {
-        // Rebind edit link events
-        document.querySelectorAll('.edit-link').forEach(link => {
-            // Remove existing event listeners by cloning the element
-            const newLink = link.cloneNode(true);
-            link.parentNode.replaceChild(newLink, link);
+        // Event delegation is already set up in bindEvents, no need to rebind individual elements
+        // This method is kept for compatibility but doesn't need to do anything
+        console.log('Edit events are handled by event delegation');
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    addNewCard() {
+        // Create a temporary card for editing
+        this.currentCard = this.createTempCard();
+        this.isEditingMode = true;
+        this.isNewCard = true;
+        
+        // Clear the editor fields for new content
+        document.getElementById('cardTitle').value = '';
+        document.getElementById('cardEditor').value = '';
+        
+        // Show modal
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        
+        // Focus the title input
+        setTimeout(() => {
+            document.getElementById('cardTitle').focus();
+        }, 100);
+        
+        // Reset states
+        this.hasUnsavedChanges = false;
+    }
+    
+    createTempCard() {
+        // Create a temporary card element for new card creation
+        const tempCard = document.createElement('div');
+        tempCard.dataset.cardId = 'temp-' + Date.now();
+        tempCard.className = 'mb-8';
+        return tempCard;
+    }
+    
+    addEditedIndicator(card) {
+        // Add visual indicator that card has been edited
+        if (!card.querySelector('.edited-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'edited-badge text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full ml-2';
+            badge.textContent = 'Edited';
             
-            newLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const card = e.target.closest('[data-card-id]');
-                this.openEditModal(card);
-            });
-        });
+            const title = card.querySelector('h2');
+            if (title) {
+                title.appendChild(badge);
+            }
+        }
     }
 }
 
