@@ -11,38 +11,34 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
         }
-        
-        /* .container {
+        .container {
             max-width: 768px;
-        } */
-
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
     <div class="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
-        <h1 class="text-4xl font-bold mb-8 text-gray-900">Basic Information About How to Write a Creative Project Brief for Any Digital Work</h1>
-        
+        <h1 class="text-4xl font-bold mb-8 text-gray-900">Getting Started with Card Editing</h1>
         <div class="mb-8" data-card-id="intro">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Background and Overview Information</h2>
-            <p class="text-gray-600 mb-2">The background and overview section of a project brief explains what the project is about and what needs to be achieved, it includes information about the product and the main message that needs to be conveyed. It sets the context for the project and aligns everyone's understanding of the project.</p>
-            <p class="text-gray-600 mb-4">A company that has been in the market for a long time basically already has ready-made materials in the form of a presentation of the brand book, etc. All you need to do is to attach all relevant materials and describe a brief general description of the project. Beginners at least can provide some information about themselves, the business, and project ideas.</p>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Introduction</h2>
+            <p class="text-gray-600 mb-4">Welcome to our revolutionary card-based editing system! This innovative approach allows you to edit text content in an intuitive, modular way. Each paragraph or section of your article becomes an editable card that you can modify independently.</p>
             <div class="flex justify-end">
                 <a href="#" class="text-blue-500 font-medium text-sm edit-link">EDIT</a>
             </div>
         </div>
 
         <div class="mb-8" data-card-id="main-content">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Goals and Objectives</h2>
-            <p class="text-gray-600 mb-4">Before establishing a long-term partnership, it is natural for people to want to learn more about each other. A creative brief is a useful way to do this, as it allows both parties to understand each other's past experiences and goals. While it is not necessary to share extensive personal information in the short term, it is important to clearly outline the purpose of the project. <strong>This helps to build trust between people and leads to better outcomes.</strong></p>
-            <p class="text-gray-600 mb-4">Setting goals and objectives involves defining broad outcomes you wish to achieve (goals) and the specific, measurable, and time-bound actions (objectives) you will take to get there. Using the SMART framework—making goals Specific, Measurable, Achievable, Relevant, and Time-bound—provides clear steps and a roadmap for success, fostering motivation and a tangible path to your future vision.</p>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">How the Card System Works</h2>
+            <p class="text-gray-600 mb-2">Each text block in this article is contained within a card. When you click the EDIT link, you'll see a modal dialog where you can modify the text content using our advanced editor.</p>
+            <p class="text-gray-600 mb-4">The editor includes AI assistance features - simply type your prompt in the dedicated field and use the up arrow (↑) button to send it for processing. This helps you improve, expand, or refine your content with intelligent suggestions.</p>
             <div class="flex justify-end">
                 <a href="#" class="text-blue-500 font-medium text-sm edit-link">EDIT</a>
             </div>
         </div>
 
         <div class="mb-8" data-card-id="features">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Measurable Result</h2>
-            <p class="text-gray-600 mb-4">To set measurable results in a project brief, define specific, quantifiable outcomes using the SMART framework (Specific, Measurable, Achievable, Relevant, Time-bound), identify key performance indicators (KPIs) to track progress, and use numerical data and milestones to evaluate success against the set deadline.</p>
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Key Features</h2>
+            <p class="text-gray-600 mb-4">Intuitive Editing: Click the edit button to open a modal with advanced text editing capabilities. AI Integration: Use prompts to enhance your content with AI assistance. Save Options: Choose between saving edits temporarily or saving to your profile permanently. Responsive Design: Works seamlessly on both desktop and mobile devices. Keyboard Shortcuts: Use Ctrl+Enter to save or Esc to cancel in the editor.</p>
             <div class="flex justify-end">
                 <a href="#" class="text-blue-500 font-medium text-sm edit-link">EDIT</a>
             </div>
@@ -68,11 +64,11 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-       <div class="bg-white rounded-lg w-full max-w-2xl shadow-xl transition-all duration-300">
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <input type="text" id="cardTitle" class="text-xl font-bold text-gray-800 border-none outline-none bg-transparent flex-1 mr-4" placeholder="Enter section title">
+    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-0 hidden z-50" style="display: none;">
+       <div class="bg-white rounded-none w-full h-full shadow-xl transition-all duration-300 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <!-- Buttons moved to top and right-aligned -->
+                <div class="flex justify-end mb-4">
                     <div class="flex items-center space-x-4">
                         <button id="saveCardEdit" class="text-blue-500 font-semibold text-sm hover:underline focus:outline-none">SAVE</button>
                         <button id="closeModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -83,20 +79,29 @@
                     </div>
                 </div>
                 
-                <textarea id="cardEditor" class="w-full min-h-32 p-0 text-gray-600 border-none outline-none bg-transparent resize-none" placeholder="Enter your content here..."></textarea>
+                <!-- Title input below buttons -->
+                <input type="text" id="cardTitle" class="text-xl font-bold text-gray-800 border-none outline-none bg-transparent w-full" placeholder="Enter section title">
+            </div>
+            
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <div class="flex-1 overflow-y-auto p-4">
+                    <textarea id="cardEditor" class="w-full min-h-[200px] h-full p-0 text-gray-600 border-none outline-none bg-transparent resize-none" placeholder="Enter your content here..."></textarea>
+                </div>
                 
-                <div class="mt-6 flex flex-col items-end">
-                    <textarea id="aiPrompt" class="w-full p-4 border-t border-gray-200 outline-none text-gray-600 resize-none transition-colors focus:border-blue-300" placeholder="Write prompt for AI assistance..." rows="2"></textarea>
-                    <div class="mt-2 flex items-center justify-between w-full">
-                        <div class="text-xs text-gray-400">
-                            <span id="promptCounter">0</span>/500 characters
-                            <span class="ml-2 text-green-600 text-xs" id="aiStatus">• AI Ready</span>
+                <div class="border-t border-gray-200 p-4">
+                    <div class="flex flex-col items-end">
+                        <textarea id="aiPrompt" class="w-full p-3  rounded-lg outline-none text-gray-600 resize-none transition-colors focus:border-blue-300" placeholder="Write prompt for AI assistance..." rows="2"></textarea>
+                        <div class="mt-2 flex items-center justify-between w-full">
+                            <div class="text-xs text-gray-400">
+                                <span id="promptCounter">0</span>/500 characters
+                                <span class="ml-2 text-green-600 text-xs" id="aiStatus">• AI Ready</span>
+                            </div>
+                            <button id="sendPrompt" class="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
                         </div>
-                        <button id="sendPrompt" class="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                            </svg>
-                        </button>
                     </div>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 
 class CardEditor {
     constructor() {
+        console.log('CardEditor constructor called');
         this.currentCard = null;
         this.originalContent = '';
         this.isEditingMode = false;
@@ -16,6 +17,7 @@ class CardEditor {
     }
     
     init() {
+        console.log('CardEditor init called');
         this.storeOriginalContent(); // Store original content before any editing
         this.bindEvents();
         this.setupKeyboardShortcuts();
@@ -38,16 +40,32 @@ class CardEditor {
     bindEvents() {
         // Use event delegation for edit links
         this.handleEditClick = (e) => {
-            if (e.target.classList.contains('edit-link')) {
-                e.preventDefault();
-                e.stopPropagation();
-                const card = e.target.closest('[data-card-id]');
-                if (card) {
-                    this.openEditModal(card);
+            console.log('Document click event triggered:', e.target);
+            console.log('Target classes:', e.target.classList);
+            console.log('Target data attributes:', e.target.dataset);
+            
+            // Check if the clicked element or its parent is an edit link
+            let target = e.target;
+            while (target && target !== document) {
+                if (target.classList && target.classList.contains('edit-link')) {
+                    console.log('Edit link clicked on element:', target);
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const card = target.closest('[data-card-id]');
+                    console.log('Found card:', card);
+                    if (card) {
+                        console.log('Found card, opening modal');
+                        this.openEditModal(card);
+                    } else {
+                        console.log('Card not found');
+                    }
+                    return; // Exit the function after handling the edit link
                 }
+                target = target.parentElement;
             }
         };
         document.addEventListener('click', this.handleEditClick);
+        console.log('Edit click event listener attached');
         
         // Modal controls
         const modal = document.getElementById('editModal');
@@ -129,6 +147,7 @@ class CardEditor {
     }
     
     openEditModal(card) {
+        console.log('Opening edit modal for card:', card);
         this.currentCard = card;
         this.isEditingMode = true;
         
@@ -156,8 +175,14 @@ class CardEditor {
         
         // Show modal
         const modal = document.getElementById('editModal');
+        console.log('Modal element:', modal);
+        // Use style.display instead of class manipulation for more reliable showing
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        console.log('Modal classes after update:', modal.classList);
+        
+        // Set modal to full height
+        this.setModalFullHeight();
         
         // Focus the title input
         setTimeout(() => {
@@ -168,7 +193,21 @@ class CardEditor {
         this.hasUnsavedChanges = false;
     }
     
+    setModalFullHeight() {
+        // Set modal to always be 100% of the screen height
+        const modal = document.getElementById('editModal');
+        const modalContent = modal.querySelector('.bg-white');
+        
+        // Always use full height and full width
+        modalContent.style.height = '100vh';
+        modalContent.style.maxHeight = '100vh';
+        modalContent.style.width = '100vw';
+        modalContent.style.maxWidth = '100vw';
+        modalContent.style.borderRadius = '0'; // Remove rounded corners for full screen
+    }
+    
     closeModal() {
+        console.log('Closing modal');
         if (this.hasUnsavedChanges) {
             if (!confirm('You have unsaved changes. Are you sure you want to close without saving?')) {
                 return;
@@ -176,8 +215,11 @@ class CardEditor {
         }
         
         const modal = document.getElementById('editModal');
+        console.log('Modal element:', modal);
+        // Use style.display instead of class manipulation for more reliable hiding
+        modal.style.display = 'none';
         modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        console.log('Modal classes after update:', modal.classList);
         
         // Clear AI prompt
         document.getElementById('aiPrompt').value = '';
@@ -703,8 +745,11 @@ Return improved content in JSON format:
         
         // Show modal
         const modal = document.getElementById('editModal');
+        modal.style.display = 'flex';
         modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        
+        // Set modal to full height
+        this.setModalFullHeight();
         
         // Focus the title input
         setTimeout(() => {
@@ -767,6 +812,7 @@ document.head.appendChild(style);
 
 // Initialize the card editor when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM content loaded, initializing CardEditor');
     new CardEditor();
 });
 
