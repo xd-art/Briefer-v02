@@ -1,0 +1,460 @@
+import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+
+const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref) => {
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [currentCard, setCurrentCard] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isNewCard, setIsNewCard] = useState(false);
+  const [lastAIRequest, setLastAIRequest] = useState(0);
+  const [aiRequestCooldown] = useState(10000); // 10 seconds
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [promptCounter, setPromptCounter] = useState(0);
+  const [aiStatus, setAiStatus] = useState('AI Ready');
+  
+  const titleInputRef = useRef(null);
+  const modalRef = useRef(null);
+  const quillRef = useRef(null);
+
+  // Quill modules configuration
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+      ['clean']
+    ],
+  };
+
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link'
+  ];
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    openEditModal: (card) => {
+      openEditModal(card);
+    }
+  }));
+
+  // Setup keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isEditingMode) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeModal();
+        } else if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          saveCardChanges();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isEditingMode]);
+
+  // Handle custom event for opening modal
+  useEffect(() => {
+    const handleOpenEditModal = (e) => {
+      openEditModal(e.detail);
+    };
+
+    window.addEventListener('openEditModal', handleOpenEditModal);
+    return () => {
+      window.removeEventListener('openEditModal', handleOpenEditModal);
+    };
+  }, []);
+
+  // Focus title input when modal opens
+  useEffect(() => {
+    if (isEditingMode && titleInputRef.current) {
+      setTimeout(() => {
+        titleInputRef.current.focus();
+      }, 100);
+    }
+  }, [isEditingMode]);
+
+  const openEditModal = (card) => {
+    setCurrentCard(card);
+    setIsEditingMode(true);
+    setHasUnsavedChanges(false);
+    setIsNewCard(false);
+
+    // Extract title and content from card HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(card.content, 'text/html');
+    
+    const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
+    const titleText = titleElement ? titleElement.textContent : '';
+    
+    // Remove title element to get content
+    if (titleElement) {
+      titleElement.remove();
+    }
+    
+    // Get remaining content
+    const contentElements = Array.from(doc.body.children);
+    let contentHTML = '';
+    contentElements.forEach(element => {
+      if (element.classList && !element.classList.contains('flex')) {
+        contentHTML += element.outerHTML;
+      }
+    });
+
+    setTitle(titleText);
+    setContent(contentHTML);
+  };
+
+  const closeModal = () => {
+    if (hasUnsavedChanges) {
+      if (!window.confirm('You have unsaved changes. Are you sure you want to close without saving?')) {
+        return;
+      }
+    }
+
+    setIsEditingMode(false);
+    setCurrentCard(null);
+    setIsNewCard(false);
+    setHasUnsavedChanges(false);
+    setTitle('');
+    setContent('');
+    setAiPrompt('');
+    setPromptCounter(0);
+  };
+
+  const saveCardChanges = () => {
+    // Validate that at least title or content is provided
+    if (!title.trim() && !content.trim()) {
+      showNotification('Please enter a title or content for the card.', 'warning');
+      return;
+    }
+
+    // Create new card HTML
+    let newHTML = '';
+
+    if (title.trim()) {
+      newHTML += `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${escapeHtml(title.trim())}</h2>`;
+    }
+
+    if (content.trim()) {
+      // Use the HTML content directly from Quill
+      newHTML += content;
+    }
+
+    // Add edit link
+    newHTML += `
+      <div class="flex justify-end">
+        <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="${currentCard ? currentCard.id : 'new-card'}">EDIT</a>
+      </div>
+    `;
+
+    if (isNewCard) {
+      // Create a new card
+      const newCard = {
+        id: 'card-' + Date.now(),
+        content: newHTML
+      };
+      setCards([...cards, newCard]);
+    } else {
+      // Update existing card
+      const updatedCards = cards.map(card => {
+        if (card.id === currentCard.id) {
+          return { ...card, content: newHTML };
+        }
+        return card;
+      });
+      setCards(updatedCards);
+    }
+
+    // Show success feedback
+    const message = isNewCard ? 'New card added successfully!' : 'Card updated successfully!';
+    showNotification(message, 'success');
+
+    // Close modal
+    closeModal();
+  };
+
+  const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+
+  const handleAiPromptChange = (e) => {
+    const value = e.target.value;
+    setAiPrompt(value);
+    setPromptCounter(value.length);
+
+    // Color coding based on length
+    if (value.length < 10) {
+      setAiStatus('AI Ready');
+    } else if (value.length <= 500) {
+      setAiStatus('Ready');
+    } else {
+      // Trim to maximum length
+      const trimmedValue = value.substring(0, 500);
+      setAiPrompt(trimmedValue);
+      setPromptCounter(500);
+    }
+  };
+
+  const validatePrompt = (prompt) => {
+    // Length validation
+    if (prompt.length < 10) {
+      return { isValid: false, error: 'Prompt too short. Minimum 10 characters required.' };
+    }
+    if (prompt.length > 500) {
+      return { isValid: false, error: 'Prompt too long. Maximum 500 characters allowed.' };
+    }
+
+    // Forbidden phrases
+    const forbiddenPhrases = [
+      'измени тему',
+      'добавь рекламу', 
+      'смени направление',
+      'change topic',
+      'add advertisement',
+      'change direction'
+    ];
+
+    const lowerPrompt = prompt.toLowerCase();
+    for (const phrase of forbiddenPhrases) {
+      if (lowerPrompt.includes(phrase.toLowerCase())) {
+        return { 
+          isValid: false, 
+          error: `Forbidden phrase detected: "${phrase}". Please reformulate your request for clarity/structure improvement.` 
+        };
+      }
+    }
+
+    return { isValid: true };
+  };
+
+  const sendAIPrompt = async () => {
+    const validation = validatePrompt(aiPrompt);
+    if (!validation.isValid) {
+      showNotification(`Validation Error: ${validation.error}`, 'error');
+      return;
+    }
+
+    // Check rate limiting
+    const now = Date.now();
+    if (now - lastAIRequest < aiRequestCooldown) {
+      const remainingTime = Math.ceil((aiRequestCooldown - (now - lastAIRequest)) / 1000);
+      showNotification(`Please wait ${remainingTime} seconds before next AI request.`, 'warning');
+      return;
+    }
+
+    // Show loading state
+    setAiStatus('Processing...');
+
+    try {
+      // Get current card content for context
+      const systemPrompt = `You are an article editor for project management content for digital projects.
+
+YOU CAN:
+- Improve clarity of formulations
+- Add structure (lists, headings)
+- Add checklists and stages
+
+YOU CANNOT:
+- Add unconfirmed facts
+- Advertise tools without marking
+- Contradict original meaning
+
+If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."
+
+Current title: "${title}"
+Current content: "${content.replace(/<[^>]*>/g, '')}"
+
+User requests: ${aiPrompt}
+
+Return improved content in JSON format:
+{
+  "title": "improved title",
+  "content": "improved content"
+}`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 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'
+        },
+        body: JSON.stringify({
+          model: 'sonar-pro',
+          messages: [
+            { role: 'user', content: systemPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+
+      // Check if response is an error
+      if (aiResponse.startsWith('ERROR:')) {
+        showNotification(aiResponse, 'error');
+        return;
+      }
+
+      // Try to parse JSON response
+      let parsedResponse;
+      try {
+        // Extract JSON from response if it's wrapped in quotes or other text
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('No JSON found in response');
+        }
+      } catch (e) {
+        // If not JSON, treat as plain text improvement
+        parsedResponse = {
+          title: title,
+          content: aiResponse
+        };
+      }
+
+      // Update the form fields with AI suggestions
+      if (parsedResponse.title) {
+        setTitle(parsedResponse.title);
+      }
+
+      if (parsedResponse.content) {
+        setContent(parsedResponse.content);
+      }
+
+      // Mark as having unsaved changes
+      setHasUnsavedChanges(true);
+
+      showNotification('AI improvements applied! Review and save changes.', 'success');
+      setLastAIRequest(now);
+    } catch (error) {
+      console.error('AI API Error:', error);
+      showNotification('AI service temporarily unavailable. Please try again later.', 'error');
+    } finally {
+      setAiStatus('AI Ready');
+      setAiPrompt('');
+      setPromptCounter(0);
+    }
+  };
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleContentChange = (value) => {
+    setContent(value);
+    setHasUnsavedChanges(true);
+  };
+
+  return (
+    <div 
+      id="editModal" 
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-0 hidden z-50"
+      style={{ display: isEditingMode ? 'flex' : 'none' }}
+      ref={modalRef}
+    >
+      <div className="bg-white rounded-none w-full h-full shadow-xl transition-all duration-300 flex flex-col">
+        <div className="p-4 border-b border-gray-200">
+          {/* Buttons moved to top and right-aligned */}
+          <div className="flex justify-end mb-4">
+            <div className="flex items-center space-x-4">
+              <button 
+                id="saveCardEdit" 
+                className="text-blue-500 font-semibold text-sm hover:underline focus:outline-none"
+                onClick={saveCardChanges}
+              >
+                SAVE
+              </button>
+              <button 
+                id="closeModal" 
+                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                onClick={closeModal}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          {/* Title input below buttons */}
+          <input 
+            type="text" 
+            id="cardTitle" 
+            className="text-xl font-bold text-gray-800 border-none outline-none bg-transparent w-full" 
+            placeholder="Enter section title"
+            value={title}
+            onChange={handleTitleChange}
+            ref={titleInputRef}
+          />
+        </div>
+        
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-4">
+            <ReactQuill
+              ref={quillRef}
+              theme="snow"
+              value={content}
+              onChange={handleContentChange}
+              modules={modules}
+              formats={formats}
+              className="h-full"
+            />
+          </div>
+          
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex flex-col items-end">
+              <textarea 
+                id="aiPrompt" 
+                className="w-full p-3 rounded-lg outline-none text-gray-600 resize-none transition-colors focus:border-blue-300" 
+                placeholder="Write prompt for AI assistance..." 
+                rows="2"
+                value={aiPrompt}
+                onChange={handleAiPromptChange}
+              />
+              <div className="mt-2 flex items-center justify-between w-full">
+                <div className="text-xs text-gray-400">
+                  <span id="promptCounter">{promptCounter}</span>/500 characters
+                  <span className="ml-2 text-green-600 text-xs" id="aiStatus">• {aiStatus}</span>
+                </div>
+                <button 
+                  id="sendPrompt" 
+                  className="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={sendAIPrompt}
+                  disabled={aiStatus === 'Processing...'}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+export default CardEditor;
