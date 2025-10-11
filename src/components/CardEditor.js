@@ -3,6 +3,11 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { convertToHtml } from '../utils/markdown'; // Import the markdown utility
 
+// Function to remove citations like [1], [2], [123] from text
+export function removeCitations(text) {
+  return text.replace(/\[\d+\]/g, '');
+}
+
 const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref) => {
   const [isEditingMode, setIsEditingMode] = useState(false);
   const [currentCard, setCurrentCard] = useState(null);
@@ -347,6 +352,11 @@ Return improved content in JSON format:
           title: title,
           content: aiResponse
         };
+      }
+
+      // Remove citations from the AI response content
+      if (parsedResponse.content) {
+        parsedResponse.content = removeCitations(parsedResponse.content);
       }
 
       // Update the form fields with AI suggestions

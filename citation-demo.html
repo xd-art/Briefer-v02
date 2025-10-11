@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citation Removal Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .demo-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+        }
+
+        .demo-section h2 {
+            color: #1f2937;
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .before {
+            background-color: #fee2e2;
+        }
+
+        .after {
+            background-color: #dcfce7;
+        }
+
+        .example {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .example-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #4b5563;
+        }
+
+        .example-text {
+            font-family: monospace;
+            background-color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Citation Removal Demo</h1>
+        
+        <div class="demo-section before">
+            <h2>Before (With Citations)</h2>
+            
+            <div class="example">
+                <div class="example-label">Example 1:</div>
+                <div class="example-text">Текст с цитатой[1]</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 2:</div>
+                <div class="example-text">Несколько[1][2][3] подряд</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 3:</div>
+                <div class="example-text">Обычный текст</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 4:</div>
+                <div class="example-text">Текст[123] с длинной цитатой</div>
+            </div>
+        </div>
+        
+        <div class="demo-section after">
+            <h2>After (Citations Removed)</h2>
+            
+            <div class="example">
+                <div class="example-label">Example 1:</div>
+                <div class="example-text">Текст с цитатой</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 2:</div>
+                <div class="example-text">Несколько подряд</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 3:</div>
+                <div class="example-text">Обычный текст</div>
+            </div>
+            
+            <div class="example">
+                <div class="example-label">Example 4:</div>
+                <div class="example-text">Текст с длинной цитатой</div>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Implementation</h2>
+            <p>The citation removal function has been added to the React application:</p>
+            <pre><code>function removeCitations(text) {
+  return text.replace(/\[\d+\]/g, '');
+}</code></pre>
+            <p>This function is applied to Perplexity API responses before they are displayed in the editor.</p>
+        </div>
+    </div>
+</body>
+</html>
