@@ -144,6 +144,15 @@ body {
 .card-content ul {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
+    list-style: disc; /* Add explicit list style */
+    padding-left: 1.5rem; /* Add padding to show markers */
+}
+
+.card-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+    list-style: decimal; /* Add explicit list style */
+    padding-left: 1.5rem; /* Add padding to show markers */
 }
 
 .card-content li {
@@ -194,6 +203,15 @@ body {
 .rich-text-content ol {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
+    padding-left: 1.5rem; /* Add padding to show markers */
+}
+
+.rich-text-content ul {
+    list-style: disc; /* Add explicit list style for unordered lists */
+}
+
+.rich-text-content ol {
+    list-style: decimal; /* Add explicit list style for ordered lists */
 }
 
 .rich-text-content li {
