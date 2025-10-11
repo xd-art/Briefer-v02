@@ -1,18 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
-import CardEditor from './components/CardEditor';
+import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import Card from './components/Card';
+import ActionButtons from './components/ActionButtons';
+import { optimizedLocalStorage } from './utils/performance';
+
+// Lazy load the CardEditor component
+const CardEditor = lazy(() => import('./components/CardEditor'));
 
 function App() {
   const [cards, setCards] = useState([]);
   const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
   const cardEditorRef = useRef();
+  const [isEditorLoaded, setIsEditorLoaded] = useState(false);
 
   // Load saved data on component mount
   useEffect(() => {
-    const savedData = localStorage.getItem('cardEditorData');
+    const savedData = optimizedLocalStorage.getItem('cardEditorData');
     if (savedData) {
       try {
-        const parsedData = JSON.parse(savedData);
-        const cardArray = Object.entries(parsedData).map(([id, content]) => ({
+        const cardArray = Object.entries(savedData).map(([id, content]) => ({
           id,
           content
         }));
@@ -70,26 +75,11 @@ function App() {
   }, []);
 
   // Handle edit link clicks
-  useEffect(() => {
-    const handleEditClick = (e) => {
-      if (e.target.classList.contains('edit-link')) {
-        e.preventDefault();
-        const cardId = e.target.dataset.cardId;
-        const card = cards.find(c => c.id === cardId);
-        if (card && cardEditorRef.current) {
-          // Access the openEditModal function through the CardEditor component
-          // We'll need to pass a callback to the CardEditor component
-          const event = new CustomEvent('openEditModal', { detail: card });
-          window.dispatchEvent(event);
-        }
-      }
-    };
-
-    document.addEventListener('click', handleEditClick);
-    return () => {
-      document.removeEventListener('click', handleEditClick);
-    };
-  }, [cards]);
+  const handleEditCard = (card) => {
+    // Dispatch custom event to open the editor
+    const event = new CustomEvent('openEditModal', { detail: card });
+    window.dispatchEvent(event);
+  };
 
   const showNotificationMessage = (message, type = 'info') => {
     setShowNotification({ show: true, message, type });
@@ -103,8 +93,8 @@ function App() {
     cards.forEach(card => {
       cardsData[card.id] = card.content;
     });
-    localStorage.setItem('cardEditorData', JSON.stringify(cardsData));
-    localStorage.setItem('cardEditorTimestamp', new Date().toISOString());
+    optimizedLocalStorage.setItem('cardEditorData', cardsData);
+    optimizedLocalStorage.setItem('cardEditorTimestamp', new Date().toISOString());
     showNotificationMessage('All edits saved locally!', 'success');
   };
 
@@ -133,45 +123,34 @@ function App() {
     }
   };
 
+  // Preload the editor when the app loads
+  useEffect(() => {
+    // Set a timeout to simulate loading
+    const timer = setTimeout(() => {
+      setIsEditorLoaded(true);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
         <h1 className="text-4xl font-bold mb-8 text-gray-900">Getting Started with Card Editing</h1>
         
         {cards.map((card) => (
-          <div 
+          <Card 
             key={card.id} 
-            className="mb-8" 
-            data-card-id={card.id}
-            dangerouslySetInnerHTML={{ __html: card.content }}
+            card={card} 
+            onEdit={handleEditCard}
           />
         ))}
         
-        <div className="mt-8 flex justify-center w-full px-4 space-x-8">
-          <button 
-            id="saveEdits" 
-            className="bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 hover:bg-blue-600"
-            onClick={saveAllData}
-          >
-            Save
-          </button>
-          <div 
-            id="addCard" 
-            className="bg-blue-500 rounded-full w-14 h-14 flex items-center justify-center shadow-lg transition-all duration-300 hover:bg-blue-600 cursor-pointer"
-            onClick={addNewCard}
-          >
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd"></path>
-            </svg>
-          </div>
-          <button 
-            id="saveToProfile" 
-            className="bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 hover:bg-blue-600"
-            onClick={reloadPage}
-          >
-            Clean
-          </button>
-        </div>
+        <ActionButtons 
+          onSave={saveAllData}
+          onAddCard={addNewCard}
+          onClean={reloadPage}
+        />
       </div>
       
       {/* Notification */}
@@ -181,13 +160,17 @@ function App() {
         </div>
       )}
       
-      {/* Edit Modal */}
-      <CardEditor 
-        ref={cardEditorRef}
-        cards={cards} 
-        setCards={setCards} 
-        showNotification={showNotificationMessage} 
-      />
+      {/* Edit Modal - Lazy loaded */}
+      {isEditorLoaded && (
+        <Suspense fallback={<div>Loading editor...</div>}>
+          <CardEditor 
+            ref={cardEditorRef}
+            cards={cards} 
+            setCards={setCards} 
+            showNotification={showNotificationMessage} 
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, memo } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { convertToHtml } from '../utils/markdown'; // Import the markdown utility
 
 const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref) => {
   const [isEditingMode, setIsEditingMode] = useState(false);
@@ -13,13 +14,13 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   const [content, setContent] = useState('');
   const [aiPrompt, setAiPrompt] = useState('');
   const [promptCounter, setPromptCounter] = useState(0);
-  const [aiStatus, setAiStatus] = useState('AI Ready');
+  const [aiStatus, setAiStatus] = useState('• AI Ready');
   
   const titleInputRef = useRef(null);
   const modalRef = useRef(null);
   const quillRef = useRef(null);
 
-  // Quill modules configuration
+  // Quill modules configuration to match original styling
   const modules = {
     toolbar: [
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
@@ -42,7 +43,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     openEditModal: (card) => {
       openEditModal(card);
     }
-  }));
+  }), []);
 
   // Setup keyboard shortcuts
   useEffect(() => {
@@ -131,6 +132,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setContent('');
     setAiPrompt('');
     setPromptCounter(0);
+    setAiStatus('• AI Ready');
   };
 
   const saveCardChanges = () => {
@@ -152,7 +154,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
       newHTML += content;
     }
 
-    // Add edit link
+    // Add edit link exactly as in the original
     newHTML += `
       <div class="flex justify-end">
         <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="${currentCard ? currentCard.id : 'new-card'}">EDIT</a>
@@ -196,16 +198,26 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setAiPrompt(value);
     setPromptCounter(value.length);
 
-    // Color coding based on length
+    // Color coding based on length (matching original behavior)
     if (value.length < 10) {
-      setAiStatus('AI Ready');
+      const counterElement = document.getElementById('promptCounter');
+      if (counterElement) {
+        counterElement.className = 'text-gray-400';
+      }
     } else if (value.length <= 500) {
-      setAiStatus('Ready');
+      const counterElement = document.getElementById('promptCounter');
+      if (counterElement) {
+        counterElement.className = 'text-green-600';
+      }
     } else {
       // Trim to maximum length
       const trimmedValue = value.substring(0, 500);
       setAiPrompt(trimmedValue);
       setPromptCounter(500);
+      const counterElement = document.getElementById('promptCounter');
+      if (counterElement) {
+        counterElement.className = 'text-red-600';
+      }
     }
   };
 
@@ -257,7 +269,11 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     }
 
     // Show loading state
-    setAiStatus('Processing...');
+    setAiStatus('• Processing...');
+    const statusElement = document.getElementById('aiStatus');
+    if (statusElement) {
+      statusElement.className = 'ml-2 text-blue-600 text-xs';
+    }
 
     try {
       // Get current card content for context
@@ -339,7 +355,9 @@ Return improved content in JSON format:
       }
 
       if (parsedResponse.content) {
-        setContent(parsedResponse.content);
+        // Convert AI-generated content from markdown/plain text to HTML
+        const htmlContent = convertToHtml(parsedResponse.content);
+        setContent(htmlContent);
       }
 
       // Mark as having unsaved changes
@@ -351,7 +369,11 @@ Return improved content in JSON format:
       console.error('AI API Error:', error);
       showNotification('AI service temporarily unavailable. Please try again later.', 'error');
     } finally {
-      setAiStatus('AI Ready');
+      setAiStatus('• AI Ready');
+      const statusElement = document.getElementById('aiStatus');
+      if (statusElement) {
+        statusElement.className = 'ml-2 text-green-600 text-xs';
+      }
       setAiPrompt('');
       setPromptCounter(0);
     }
@@ -366,6 +388,18 @@ Return improved content in JSON format:
     setContent(value);
     setHasUnsavedChanges(true);
   };
+
+  // Handle Enter key in AI prompt (matching original behavior)
+  const handleAiPromptKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendAIPrompt();
+    }
+  };
+
+  // Memoize the Quill component to prevent unnecessary re-renders
+  const quillModules = React.useMemo(() => modules, []);
+  const quillFormats = React.useMemo(() => formats, []);
 
   return (
     <div 
@@ -417,8 +451,8 @@ Return improved content in JSON format:
               theme="snow"
               value={content}
               onChange={handleContentChange}
-              modules={modules}
-              formats={formats}
+              modules={quillModules}
+              formats={quillFormats}
               className="h-full"
             />
           </div>
@@ -432,17 +466,18 @@ Return improved content in JSON format:
                 rows="2"
                 value={aiPrompt}
                 onChange={handleAiPromptChange}
+                onKeyDown={handleAiPromptKeyDown}
               />
               <div className="mt-2 flex items-center justify-between w-full">
                 <div className="text-xs text-gray-400">
                   <span id="promptCounter">{promptCounter}</span>/500 characters
-                  <span className="ml-2 text-green-600 text-xs" id="aiStatus">• {aiStatus}</span>
+                  <span id="aiStatus" className="ml-2 text-green-600 text-xs">{aiStatus}</span>
                 </div>
                 <button 
                   id="sendPrompt" 
                   className="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={sendAIPrompt}
-                  disabled={aiStatus === 'Processing...'}
+                  disabled={aiStatus === '• Processing...'}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
@@ -457,4 +492,5 @@ Return improved content in JSON format:
   );
 });
 
-export default CardEditor;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(CardEditor);
