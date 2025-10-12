@@ -572,6 +572,30 @@ div.flex.justify-end .edit-link:hover {
     text-decoration: underline !important;
 }
 
+/* Quill Editor Border Overrides */
+/* White borders (almost invisible on white background) */
+.ql-toolbar {
+  border: 1px solid white !important;
+  border-bottom: 1px solid white !important;
+  background: white;
+}
+
+.ql-container {
+  border: 1px solid white !important;
+  background: white;
+}
+
+.ql-editor {
+  background: white;
+}
+
+/* If you need to completely hide borders, uncomment the following: */
+/*
+.ql-toolbar, .ql-container {
+  border: none !important;
+}
+*/
+
 /* Additional responsive edit link adjustments */
 @media (max-width: 768px) {
     a.edit-link,
