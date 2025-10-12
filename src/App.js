@@ -89,17 +89,15 @@ function App() {
   };
 
   const addNewCard = () => {
+    // Instead of directly adding a new card, open the editor for a new card
     const newCard = {
       id: 'card-' + Date.now(),
-      content: `
-        <h2 class="text-2xl font-semibold mb-4 text-gray-800">New Card</h2>
-        <p class="text-gray-600 mb-4">Click EDIT to add content to this new card.</p>
-        <div class="flex justify-end">
-          <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="card-${Date.now()}">EDIT</a>
-        </div>
-      `
+      content: ''
     };
-    setCards([...cards, newCard]);
+    
+    // Dispatch custom event to open the editor for a new card
+    const event = new CustomEvent('openEditModal', { detail: newCard });
+    window.dispatchEvent(event);
   };
 
   // Callback function to open the edit modal

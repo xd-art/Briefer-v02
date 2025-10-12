@@ -95,31 +95,39 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setCurrentCard(card);
     setIsEditingMode(true);
     setHasUnsavedChanges(false);
-    setIsNewCard(false);
+    
+    // Check if this is a new card (empty content)
+    setIsNewCard(!card.content || card.content.trim() === '');
 
     // Extract title and content from card HTML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(card.content, 'text/html');
-    
-    const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
-    const titleText = titleElement ? titleElement.textContent : '';
-    
-    // Remove title element to get content
-    if (titleElement) {
-      titleElement.remove();
-    }
-    
-    // Get remaining content
-    const contentElements = Array.from(doc.body.children);
-    let contentHTML = '';
-    contentElements.forEach(element => {
-      if (element.classList && !element.classList.contains('flex')) {
-        contentHTML += element.outerHTML;
+    if (card.content && card.content.trim() !== '') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(card.content, 'text/html');
+      
+      const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
+      const titleText = titleElement ? titleElement.textContent : '';
+      
+      // Remove title element to get content
+      if (titleElement) {
+        titleElement.remove();
       }
-    });
+      
+      // Get remaining content
+      const contentElements = Array.from(doc.body.children);
+      let contentHTML = '';
+      contentElements.forEach(element => {
+        if (element.classList && !element.classList.contains('flex')) {
+          contentHTML += element.outerHTML;
+        }
+      });
 
-    setTitle(titleText);
-    setContent(contentHTML);
+      setTitle(titleText);
+      setContent(contentHTML);
+    } else {
+      // For new cards, initialize with empty values
+      setTitle('');
+      setContent('');
+    }
   };
 
   const closeModal = () => {
