@@ -170,7 +170,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     // Add edit link exactly as in the original
     newHTML += `
       <div class="flex justify-end">
-        <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="${currentCard ? currentCard.id : 'new-card'}">EDIT</a>
+        <a href="#" class="edit-link" data-card-id="${currentCard ? currentCard.id : 'new-card'}">EDIT</a>
       </div>
     `;
 

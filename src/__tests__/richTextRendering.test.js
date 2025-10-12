@@ -10,12 +10,12 @@ describe('Rich Text Rendering', () => {
       content: `
         <h2 class="text-2xl font-semibold mb-4 text-gray-800">Test Card</h2>
         <p class="text-gray-600 mb-4">This is <strong>rich</strong> text content with <em>formatting</em>.</p>
-        <ul class="list-disc pl-5">
-          <li class="mb-2">Item 1</li>
-          <li class="mb-2">Item 2</li>
+        <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
         </ul>
         <div class="flex justify-end">
-          <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="test-card-1">EDIT</a>
+          <a href="#" class="edit-link" data-card-id="test-card-1">EDIT</a>
         </div>
       `
     };
@@ -53,7 +53,7 @@ describe('Rich Text Rendering', () => {
           <li>Ordered item 2</li>
         </ol>
         <div class="flex justify-end">
-          <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="complex-card">EDIT</a>
+          <a href="#" class="edit-link" data-card-id="complex-card">EDIT</a>
         </div>
       `
     };
@@ -81,7 +81,7 @@ describe('Rich Text Rendering', () => {
         <h2>Minimal Content</h2>
         <p>Just a simple paragraph.</p>
         <div class="flex justify-end">
-          <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="minimal-card">EDIT</a>
+          <a href="#" class="edit-link" data-card-id="minimal-card">EDIT</a>
         </div>
       `
     };
@@ -102,7 +102,7 @@ describe('Rich Text Rendering', () => {
         <h2 class="text-2xl font-semibold mb-4 text-gray-800">Styled Card</h2>
         <p class="text-gray-600 mb-4">Content with Tailwind classes.</p>
         <div class="flex justify-end">
-          <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="styled-card">EDIT</a>
+          <a href="#" class="edit-link" data-card-id="styled-card">EDIT</a>
         </div>
       `
     };

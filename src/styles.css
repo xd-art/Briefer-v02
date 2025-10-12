@@ -274,28 +274,6 @@ body {
     gap: 0.5rem;
 }
 
-.edit-btn {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.edit-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-}
-
-.edit-btn:active {
-    transform: translateY(0);
-}
 
 /* Modal Styles */
 .modal {
@@ -569,5 +547,39 @@ body {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+}
+
+/* Edit link styles */
+a.edit-link,
+.rich-text-content a.edit-link,
+.rich-text-content .edit-link,
+.edit-link,
+div.flex.justify-end a.edit-link,
+div.flex.justify-end .edit-link {
+    color: #4299e1 !important; /* Changed from #4f46e5 to #4299e1 */
+    font-weight: 500 !important; /* font-medium equivalent */
+    font-size: 0.875rem !important; /* text-sm equivalent */
+    text-decoration: none !important;
+}
+
+a.edit-link:hover,
+.rich-text-content a.edit-link:hover,
+.rich-text-content .edit-link:hover,
+.edit-link:hover,
+div.flex.justify-end a.edit-link:hover,
+div.flex.justify-end .edit-link:hover {
+    text-decoration: underline !important;
+}
+
+/* Additional responsive edit link adjustments */
+@media (max-width: 768px) {
+    a.edit-link,
+    .rich-text-content a.edit-link,
+    .rich-text-content .edit-link,
+    .edit-link,
+    div.flex.justify-end a.edit-link,
+    div.flex.justify-end .edit-link {
+        font-size: 0.875rem !important;
     }
 }

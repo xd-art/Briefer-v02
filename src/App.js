@@ -36,7 +36,7 @@ function App() {
             '<p class="text-gray-600 mb-4">A company that has been in the market for a long time typically has ready-made materials such as a brand book or presentation. Simply attach all relevant materials and provide a general description of the project. Beginners can share basic information about themselves, their business, and their project ideas.</p>' +
             '<p class="text-gray-600 mb-4">Before establishing a long-term partnership, it\'s natural for people to want to learn more about each other. A creative brief is a useful tool for this, allowing both parties to understand each other\'s past experiences and goals. While extensive personal details aren\'t necessary, clearly outlining the project\'s purpose is essential. <b>This helps build trust and leads to better outcomes.</b></p>' +
             '<div class="flex justify-end">' +
-              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="background">EDIT</a>' +
+              '<a href="#" class="edit-link" data-card-id="background">EDIT</a>' +
             '</div>'
         },
         {
@@ -44,7 +44,7 @@ function App() {
           content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Goals and Objectives</h2>' +
             '<p class="text-gray-600 mb-4">Setting goals and objectives involves defining broad outcomes (goals) and specific, measurable, time-bound actions (objectives) to achieve them. Using the SMART framework—Specific, Measurable, Achievable, Relevant, and Time-bound—provides a clear roadmap for success, fostering motivation and clarity.</p>' +
             '<div class="flex justify-end">' +
-              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="goals">EDIT</a>' +
+              '<a href="#" class="edit-link" data-card-id="goals">EDIT</a>' +
             '</div>'
         },
         {
@@ -52,7 +52,7 @@ function App() {
           content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Measurable Results</h2>' +
             '<p class="text-gray-600 mb-4">To set measurable results in a project brief, define specific, quantifiable outcomes using the SMART framework. Identify key performance indicators (KPIs) to track progress, and use numerical data and milestones to evaluate success against the set deadline.</p>' +
             '<div class="flex justify-end">' +
-              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="results">EDIT</a>' +
+              '<a href="#" class="edit-link" data-card-id="results">EDIT</a>' +
             '</div>'
         }
       ];
