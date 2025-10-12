@@ -26,51 +26,37 @@ function App() {
         console.error('Error loading saved data:', error);
       }
     } else {
-      // Initialize with default content if no saved data
-      const defaultCards = [
+      // Initialize with article content
+      const articleCards = [
         {
-          id: 'intro',
-          content: `
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Introduction</h2>
-            <p class="text-gray-600 mb-4">Welcome to our revolutionary card-based editing system! This innovative approach allows you to edit text content in an intuitive, modular way. Each paragraph or section of your article becomes an editable card that you can modify independently.</p>
-            <div class="flex justify-end">
-              <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="intro">EDIT</a>
-            </div>
-          `
+          id: 'background',
+          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Background and Overview Information</h2>' +
+            '<p class="text-gray-600 mb-4">The background and overview section of a project brief explains what the project is about and what needs to be achieved.</p>' +
+            '<p class="text-gray-600 mb-4">It includes information about the product and the main message that needs to be conveyed. This section sets the context for the project and aligns everyone\'s understanding.</p>' +
+            '<p class="text-gray-600 mb-4">A company that has been in the market for a long time typically has ready-made materials such as a brand book or presentation. Simply attach all relevant materials and provide a general description of the project. Beginners can share basic information about themselves, their business, and their project ideas.</p>' +
+            '<p class="text-gray-600 mb-4">Before establishing a long-term partnership, it\'s natural for people to want to learn more about each other. A creative brief is a useful tool for this, allowing both parties to understand each other\'s past experiences and goals. While extensive personal details aren\'t necessary, clearly outlining the project\'s purpose is essential. <b>This helps build trust and leads to better outcomes.</b></p>' +
+            '<div class="flex justify-end">' +
+              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="background">EDIT</a>' +
+            '</div>'
         },
         {
-          id: 'main-content',
-          content: `
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">How the Card System Works</h2>
-            <p class="text-gray-600 mb-2">Each text block in this article is contained within a card. When you click the EDIT link, you'll see a modal dialog where you can modify the text content using our advanced editor.</p>
-            <p class="text-gray-600 mb-4">The editor includes AI assistance features - simply type your prompt in the dedicated field and use the up arrow (↑) button to send it for processing. This helps you improve, expand, or refine your content with intelligent suggestions.</p>
-            <div class="flex justify-end">
-              <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="main-content">EDIT</a>
-            </div>
-          `
+          id: 'goals',
+          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Goals and Objectives</h2>' +
+            '<p class="text-gray-600 mb-4">Setting goals and objectives involves defining broad outcomes (goals) and specific, measurable, time-bound actions (objectives) to achieve them. Using the SMART framework—Specific, Measurable, Achievable, Relevant, and Time-bound—provides a clear roadmap for success, fostering motivation and clarity.</p>' +
+            '<div class="flex justify-end">' +
+              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="goals">EDIT</a>' +
+            '</div>'
         },
         {
-          id: 'features',
-          content: `
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Key Features</h2>
-            <p class="text-gray-600 mb-4">Intuitive Editing: Click the edit button to open a modal with advanced text editing capabilities. AI Integration: Use prompts to enhance your content with AI assistance. Save Options: Choose between saving edits temporarily or saving to your profile permanently. Responsive Design: Works seamlessly on both desktop and mobile devices. Keyboard Shortcuts: Use Ctrl+Enter to save or Esc to cancel in the editor.</p>
-            <div class="flex justify-end">
-              <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="features">EDIT</a>
-            </div>
-          `
-        },
-        {
-          id: 'conclusion',
-          content: `
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Conclusion</h2>
-            <p class="text-gray-600 mb-4">This card-based editing system represents the future of content creation and editing. By breaking down articles into manageable, editable cards, we make the writing and editing process more intuitive and efficient. Try editing any of these cards to experience the system firsthand!</p>
-            <div class="flex justify-end">
-              <a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="conclusion">EDIT</a>
-            </div>
-          `
+          id: 'results',
+          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Measurable Results</h2>' +
+            '<p class="text-gray-600 mb-4">To set measurable results in a project brief, define specific, quantifiable outcomes using the SMART framework. Identify key performance indicators (KPIs) to track progress, and use numerical data and milestones to evaluate success against the set deadline.</p>' +
+            '<div class="flex justify-end">' +
+              '<a href="#" class="text-blue-500 font-medium text-sm edit-link" data-card-id="results">EDIT</a>' +
+            '</div>'
         }
       ];
-      setCards(defaultCards);
+      setCards(articleCards);
     }
   }, []);
 
@@ -136,7 +122,7 @@ function App() {
   return (
     <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900">Getting Started with Card Editing</h1>
+        <h1 className="text-4xl font-bold mb-8 text-gray-900">Basic Information About How to Write a Creative Project Brief for Any Digital Work</h1>
         
         {cards.map((card) => (
           <Card 
