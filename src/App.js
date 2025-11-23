@@ -1,62 +1,42 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Card from './components/Card';
 import ActionButtons from './components/ActionButtons';
+import ArticleGenerator from './components/ArticleGenerator';
 import { optimizedLocalStorage } from './utils/performance';
+import { convertToHtml } from './utils/markdown';
 
 // Lazy load the CardEditor component
 const CardEditor = lazy(() => import('./components/CardEditor'));
 
 function App() {
   const [cards, setCards] = useState([]);
+  const [articleTitle, setArticleTitle] = useState('');
+  const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
   const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
+  const [isGenerating, setIsGenerating] = useState(false);
   const cardEditorRef = useRef();
   const [isEditorLoaded, setIsEditorLoaded] = useState(false);
 
   // Load saved data on component mount
   useEffect(() => {
     const savedData = optimizedLocalStorage.getItem('cardEditorData');
-    if (savedData) {
+    const savedTitle = optimizedLocalStorage.getItem('articleTitle');
+
+    if (savedData && Object.keys(savedData).length > 0) {
       try {
         const cardArray = Object.entries(savedData).map(([id, content]) => ({
           id,
           content
         }));
         setCards(cardArray);
+        setArticleTitle(savedTitle || 'Untitled Article');
+        setView('editor');
       } catch (error) {
         console.error('Error loading saved data:', error);
+        setView('generator');
       }
     } else {
-      // Initialize with article content
-      const articleCards = [
-        {
-          id: 'background',
-          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Background and Overview Information</h2>' +
-            '<p class="text-gray-600 mb-4">The background and overview section of a project brief explains what the project is about and what needs to be achieved.</p>' +
-            '<p class="text-gray-600 mb-4">It includes information about the product and the main message that needs to be conveyed. This section sets the context for the project and aligns everyone\'s understanding.</p>' +
-            '<p class="text-gray-600 mb-4">A company that has been in the market for a long time typically has ready-made materials such as a brand book or presentation. Simply attach all relevant materials and provide a general description of the project. Beginners can share basic information about themselves, their business, and their project ideas.</p>' +
-            '<p class="text-gray-600 mb-4">Before establishing a long-term partnership, it\'s natural for people to want to learn more about each other. A creative brief is a useful tool for this, allowing both parties to understand each other\'s past experiences and goals. While extensive personal details aren\'t necessary, clearly outlining the project\'s purpose is essential. <b>This helps build trust and leads to better outcomes.</b></p>' +
-            '<div class="flex justify-end">' +
-              '<a href="#" class="edit-link" data-card-id="background">EDIT</a>' +
-            '</div>'
-        },
-        {
-          id: 'goals',
-          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Goals and Objectives</h2>' +
-            '<p class="text-gray-600 mb-4">Setting goals and objectives involves defining broad outcomes (goals) and specific, measurable, time-bound actions (objectives) to achieve them. Using the SMART framework—Specific, Measurable, Achievable, Relevant, and Time-bound—provides a clear roadmap for success, fostering motivation and clarity.</p>' +
-            '<div class="flex justify-end">' +
-              '<a href="#" class="edit-link" data-card-id="goals">EDIT</a>' +
-            '</div>'
-        },
-        {
-          id: 'results',
-          content: '<h2 class="text-2xl font-semibold mb-4 text-gray-800">Setting Measurable Results</h2>' +
-            '<p class="text-gray-600 mb-4">To set measurable results in a project brief, define specific, quantifiable outcomes using the SMART framework. Identify key performance indicators (KPIs) to track progress, and use numerical data and milestones to evaluate success against the set deadline.</p>' +
-            '<div class="flex justify-end">' +
-              '<a href="#" class="edit-link" data-card-id="results">EDIT</a>' +
-            '</div>'
-        }
-      ];
-      setCards(articleCards);
+      setView('generator');
     }
   }, []);
 
@@ -80,12 +60,17 @@ function App() {
       cardsData[card.id] = card.content;
     });
     optimizedLocalStorage.setItem('cardEditorData', cardsData);
+    optimizedLocalStorage.setItem('articleTitle', articleTitle);
     optimizedLocalStorage.setItem('cardEditorTimestamp', new Date().toISOString());
     showNotificationMessage('All edits saved locally!', 'success');
   };
 
   const reloadPage = () => {
-    window.location.reload();
+    if (window.confirm('Are you sure you want to start over? All unsaved changes will be lost.')) {
+      optimizedLocalStorage.removeItem('cardEditorData');
+      optimizedLocalStorage.removeItem('articleTitle');
+      window.location.reload();
+    }
   };
 
   const addNewCard = () => {
@@ -94,10 +79,128 @@ function App() {
       id: 'card-' + Date.now(),
       content: ''
     };
-    
+
     // Dispatch custom event to open the editor for a new card
     const event = new CustomEvent('openEditModal', { detail: newCard });
     window.dispatchEvent(event);
+  };
+
+  const handleGenerate = async (topic, detailedPrompt) => {
+    setIsGenerating(true);
+
+    try {
+      const systemPrompt = `You are an expert technical writer and content creator.
+      Create a comprehensive, detailed guide on the topic: "${topic}".
+      
+      ${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
+      
+      Return a JSON object with the following structure:
+      {
+        "title": "The Article Title",
+        "sections": [
+          {
+            "id": "intro",
+            "title": "Introduction",
+            "content": "Detailed introduction content..."
+          },
+          {
+            "id": "step1",
+            "title": "Step 1 Title",
+            "content": "Detailed content for step 1..."
+          },
+          ... more steps ...
+          {
+            "id": "conclusion",
+            "title": "Conclusion",
+            "content": "Conclusion content..."
+          }
+        ]
+      }
+      
+      IMPORTANT:
+      1. The content MUST be in Markdown format.
+      2. Make the content detailed, practical, and high-quality.
+      3. Use bolding, lists, and clear structure.
+      4. Return ONLY the JSON object, no markdown code blocks around it.`;
+
+      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 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'
+        },
+        body: JSON.stringify({
+          model: 'sonar-pro',
+          messages: [
+            { role: 'user', content: systemPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 3000
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+
+      // Parse JSON response
+      let parsedResponse;
+      try {
+        // Extract JSON if wrapped in code blocks
+        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          parsedResponse = JSON.parse(jsonMatch[0]);
+        } else {
+          parsedResponse = JSON.parse(aiResponse);
+        }
+      } catch (e) {
+        console.error('JSON Parse Error:', e);
+        console.log('Raw Response:', aiResponse);
+        throw new Error('Failed to parse AI response. Please try again.');
+      }
+
+      setArticleTitle(parsedResponse.title);
+
+      const newCards = parsedResponse.sections.map(section => {
+        // Convert markdown content to HTML
+        let htmlContent = convertToHtml(section.content);
+
+        // Prepend the title as an H2 if it's not already there (simple check)
+        if (!htmlContent.includes(`<h2`)) {
+          htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${section.title}</h2>` + htmlContent;
+        }
+
+        // Add edit link
+        htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${section.id}">EDIT</a></div>`;
+
+        return {
+          id: section.id || `card-${Date.now()}-${Math.random()}`,
+          content: htmlContent
+        };
+      });
+
+      setCards(newCards);
+
+      // Save immediately
+      const cardsData = {};
+      newCards.forEach(card => {
+        cardsData[card.id] = card.content;
+      });
+      optimizedLocalStorage.setItem('cardEditorData', cardsData);
+      optimizedLocalStorage.setItem('articleTitle', parsedResponse.title);
+
+      setView('editor');
+      showNotificationMessage('Article generated successfully!', 'success');
+
+    } catch (error) {
+      console.error('Generation Error:', error);
+      showNotificationMessage(`Generation failed: ${error.message}`, 'error');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   // Callback function to open the edit modal
@@ -113,45 +216,56 @@ function App() {
     const timer = setTimeout(() => {
       setIsEditorLoaded(true);
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, []);
+
+  if (view === 'loading') {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (view === 'generator') {
+    return <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />;
+  }
 
   return (
     <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
       <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900">Basic Information About How to Write a Creative Project Brief for Any Digital Work</h1>
-        
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-900">{articleTitle}</h1>
+          <button onClick={reloadPage} className="text-gray-500 hover:text-red-500 text-sm">Start Over</button>
+        </div>
+
         {cards.map((card) => (
-          <Card 
-            key={card.id} 
-            card={card} 
+          <Card
+            key={card.id}
+            card={card}
             onEdit={handleEditCard}
           />
         ))}
-        
-        <ActionButtons 
+
+        <ActionButtons
           onSave={saveAllData}
           onAddCard={addNewCard}
           onClean={reloadPage}
         />
       </div>
-      
+
       {/* Notification */}
       {showNotification.show && (
         <div className={`notification notification-${showNotification.type}`}>
           {showNotification.message}
         </div>
       )}
-      
+
       {/* Edit Modal - Lazy loaded */}
       {isEditorLoaded && (
         <Suspense fallback={<div>Loading editor...</div>}>
-          <CardEditor 
+          <CardEditor
             ref={cardEditorRef}
-            cards={cards} 
-            setCards={setCards} 
-            showNotification={showNotificationMessage} 
+            cards={cards}
+            setCards={setCards}
+            showNotification={showNotificationMessage}
           />
         </Suspense>
       )}
