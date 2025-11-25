@@ -18,7 +18,7 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   return (
     <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl w-full">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900">Article Generator</h1>
+        <h1 className="text-4xl font-bold mb-8 text-gray-900"> How To Article Generator</h1>
 
         <div className="mb-8 p-6 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
           <h2 className="text-4xl font-semibold mb-4 text-gray-800">How To</h2>

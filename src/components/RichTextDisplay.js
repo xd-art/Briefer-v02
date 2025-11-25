@@ -16,7 +16,7 @@ configureDOMPurify();
 
 const RichTextDisplay = ({ content }) => {
   // Sanitize the HTML content to prevent XSS attacks
-  // Allow Quill.js specific formatting
+  // Allow custom <ai-link> tag and its attributes
   const sanitizedContent = DOMPurify.sanitize(content, {
     ALLOWED_TAGS: [
       'h2', 'h3', 'h4', 'h5', 'h6',
@@ -25,20 +25,22 @@ const RichTextDisplay = ({ content }) => {
       'ul', 'ol', 'li',
       'a', 'img',
       'blockquote', 'code', 'pre',
-      'div'
+      'div',
+      'ai-link'
     ],
     ALLOWED_ATTR: [
-      'class', 'id', 'href', 'src', 'alt', 'title', 
-      'style', 'data-', 'contenteditable'
+      'class', 'id', 'href', 'src', 'alt', 'title',
+      'style', 'data-', 'contenteditable',
+      'topic', 'template'
     ],
-    // Allow specific classes for Quill.js formatting
+    // Allow data attributes and other needed options
     ALLOW_DATA_ATTR: true,
     ADD_TAGS: ['iframe'],
     ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
   });
 
   return (
-    <div 
+    <div
       className="rich-text-content quill-content"
       dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       data-testid="rich-text-content"

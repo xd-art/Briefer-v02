@@ -144,15 +144,19 @@ body {
 .card-content ul {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
-    list-style: disc; /* Add explicit list style */
-    padding-left: 1.5rem; /* Add padding to show markers */
+    list-style: disc;
+    /* Add explicit list style */
+    padding-left: 1.5rem;
+    /* Add padding to show markers */
 }
 
 .card-content ol {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
-    list-style: decimal; /* Add explicit list style */
-    padding-left: 1.5rem; /* Add padding to show markers */
+    list-style: decimal;
+    /* Add explicit list style */
+    padding-left: 1.5rem;
+    /* Add padding to show markers */
 }
 
 .card-content li {
@@ -203,15 +207,18 @@ body {
 .rich-text-content ol {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
-    padding-left: 1.5rem; /* Add padding to show markers */
+    padding-left: 1.5rem;
+    /* Add padding to show markers */
 }
 
 .rich-text-content ul {
-    list-style: disc; /* Add explicit list style for unordered lists */
+    list-style: disc;
+    /* Add explicit list style for unordered lists */
 }
 
 .rich-text-content ol {
-    list-style: decimal; /* Add explicit list style for ordered lists */
+    list-style: decimal;
+    /* Add explicit list style for ordered lists */
 }
 
 .rich-text-content li {
@@ -297,8 +304,13 @@ body {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
@@ -317,6 +329,7 @@ body {
         opacity: 0;
         transform: translateY(30px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -449,45 +462,45 @@ body {
     .container {
         box-shadow: none;
     }
-    
+
     .header-panel {
         padding: 1rem;
     }
-    
+
     .header-content {
         flex-direction: column;
         align-items: stretch;
         text-align: center;
     }
-    
+
     .header-actions {
         justify-content: center;
     }
-    
+
     .main-content {
         padding: 1rem;
     }
-    
+
     .card-content {
         padding: 1rem;
     }
-    
+
     .modal-content {
         margin: 1rem;
         max-height: 90vh;
     }
-    
+
     .modal-header,
     .modal-body,
     .modal-footer {
         padding: 1rem;
     }
-    
+
     .prompt-container {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .ai-submit-btn {
         align-self: flex-end;
         min-width: auto;
@@ -500,16 +513,16 @@ body {
     .article-title {
         font-size: 1.25rem;
     }
-    
+
     .header-actions {
         flex-direction: column;
         gap: 0.5rem;
     }
-    
+
     .btn {
         justify-content: center;
     }
-    
+
     .card-content h2 {
         font-size: 1.25rem;
     }
@@ -520,7 +533,7 @@ body {
     .text-card .card-overlay {
         opacity: 1;
     }
-    
+
     .text-card {
         border-color: #e5e7eb;
     }
@@ -531,11 +544,11 @@ body {
     .text-card {
         border-color: #000;
     }
-    
+
     .btn-primary {
         background-color: #000;
     }
-    
+
     .edit-btn {
         background: #000;
     }
@@ -557,9 +570,12 @@ a.edit-link,
 .edit-link,
 div.flex.justify-end a.edit-link,
 div.flex.justify-end .edit-link {
-    color: #4299e1 !important; /* Changed from #4f46e5 to #4299e1 */
-    font-weight: 500 !important; /* font-medium equivalent */
-    font-size: 0.875rem !important; /* text-sm equivalent */
+    color: #4299e1 !important;
+    /* Changed from #4f46e5 to #4299e1 */
+    font-weight: 500 !important;
+    /* font-medium equivalent */
+    font-size: 0.875rem !important;
+    /* text-sm equivalent */
     text-decoration: none !important;
 }
 
@@ -575,18 +591,18 @@ div.flex.justify-end .edit-link:hover {
 /* Quill Editor Border Overrides */
 /* White borders (almost invisible on white background) */
 .ql-toolbar {
-  border: 1px solid white !important;
-  border-bottom: 1px solid white !important;
-  background: white;
+    border: 1px solid white !important;
+    border-bottom: 1px solid white !important;
+    background: white;
 }
 
 .ql-container {
-  border: 1px solid white !important;
-  background: white;
+    border: 1px solid white !important;
+    background: white;
 }
 
 .ql-editor {
-  background: white;
+    background: white;
 }
 
 /* If you need to completely hide borders, uncomment the following: */
@@ -598,6 +614,7 @@ div.flex.justify-end .edit-link:hover {
 
 /* Additional responsive edit link adjustments */
 @media (max-width: 768px) {
+
     a.edit-link,
     .rich-text-content a.edit-link,
     .rich-text-content .edit-link,
@@ -606,4 +623,30 @@ div.flex.justify-end .edit-link:hover {
     div.flex.justify-end .edit-link {
         font-size: 0.875rem !important;
     }
+}
+
+/* AI Link Styles */
+ai-link {
+    color: #7c3aed;
+    /* Violet-600 */
+    text-decoration: none;
+    border-bottom: 1px dashed #7c3aed;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    position: relative;
+    display: inline-block;
+}
+
+ai-link:hover {
+    background-color: rgba(124, 58, 237, 0.1);
+    border-bottom-style: solid;
+}
+
+ai-link::after {
+    content: '✨';
+    font-size: 0.7em;
+    margin-left: 2px;
+    vertical-align: super;
+    opacity: 0.7;
 }

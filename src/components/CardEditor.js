@@ -20,7 +20,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   const [aiPrompt, setAiPrompt] = useState('');
   const [promptCounter, setPromptCounter] = useState(0);
   const [aiStatus, setAiStatus] = useState('• AI Ready');
-  
+
   const titleInputRef = useRef(null);
   const modalRef = useRef(null);
   const quillRef = useRef(null);
@@ -30,7 +30,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     toolbar: [
       [{ 'header': [3, 4, 5, 6, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
       ['link'],
       ['clean']
     ],
@@ -95,7 +95,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setCurrentCard(card);
     setIsEditingMode(true);
     setHasUnsavedChanges(false);
-    
+
     // Check if this is a new card (empty content)
     setIsNewCard(!card.content || card.content.trim() === '');
 
@@ -103,15 +103,15 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     if (card.content && card.content.trim() !== '') {
       const parser = new DOMParser();
       const doc = parser.parseFromString(card.content, 'text/html');
-      
+
       const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
       const titleText = titleElement ? titleElement.textContent : '';
-      
+
       // Remove title element to get content
       if (titleElement) {
         titleElement.remove();
       }
-      
+
       // Get remaining content
       const contentElements = Array.from(doc.body.children);
       let contentHTML = '';
@@ -246,7 +246,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     // Forbidden phrases
     const forbiddenPhrases = [
       'измени тему',
-      'добавь рекламу', 
+      'добавь рекламу',
       'смени направление',
       'change topic',
       'add advertisement',
@@ -256,9 +256,9 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     const lowerPrompt = prompt.toLowerCase();
     for (const phrase of forbiddenPhrases) {
       if (lowerPrompt.includes(phrase.toLowerCase())) {
-        return { 
-          isValid: false, 
-          error: `Forbidden phrase detected: "${phrase}". Please reformulate your request for clarity/structure improvement.` 
+        return {
+          isValid: false,
+          error: `Forbidden phrase detected: "${phrase}". Please reformulate your request for clarity/structure improvement.`
         };
       }
     }
@@ -296,11 +296,16 @@ YOU CAN:
 - Improve clarity of formulations
 - Add structure (lists, headings)
 - Add checklists and stages
+- Add <ai-link> tags for complex sub-topics
 
 YOU CANNOT:
 - Add unconfirmed facts
 - Advertise tools without marking
 - Contradict original meaning
+
+AI LINKS INSTRUCTION:
+If you mention a complex sub-topic that deserves its own separate guide, wrap it in an <ai-link> tag.
+Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
 
 If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."
 
@@ -420,8 +425,8 @@ Return improved content in JSON format:
   const quillFormats = React.useMemo(() => formats, []);
 
   return (
-    <div 
-      id="editModal" 
+    <div
+      id="editModal"
       className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-0 hidden z-50"
       style={{ display: isEditingMode ? 'flex' : 'none' }}
       ref={modalRef}
@@ -431,15 +436,15 @@ Return improved content in JSON format:
           {/* Buttons moved to top and right-aligned */}
           <div className="flex justify-end mb-4">
             <div className="flex items-center space-x-4">
-              <button 
-                id="saveCardEdit" 
+              <button
+                id="saveCardEdit"
                 className="text-blue-500 font-semibold text-sm hover:underline focus:outline-none"
                 onClick={saveCardChanges}
               >
                 SAVE
               </button>
-              <button 
-                id="closeModal" 
+              <button
+                id="closeModal"
                 className="text-gray-400 hover:text-gray-600 focus:outline-none"
                 onClick={closeModal}
               >
@@ -449,19 +454,19 @@ Return improved content in JSON format:
               </button>
             </div>
           </div>
-          
+
           {/* Title input below buttons */}
-          <input 
-            type="text" 
-            id="cardTitle" 
-            className="text-xl font-bold text-gray-800 border-none outline-none bg-transparent w-full" 
+          <input
+            type="text"
+            id="cardTitle"
+            className="text-xl font-bold text-gray-800 border-none outline-none bg-transparent w-full"
             placeholder="Enter section title"
             value={title}
             onChange={handleTitleChange}
             ref={titleInputRef}
           />
         </div>
-        
+
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4">
             <ReactQuill
@@ -474,13 +479,13 @@ Return improved content in JSON format:
               className="h-full"
             />
           </div>
-          
+
           <div className="border-t border-gray-200 p-4">
             <div className="flex flex-col items-end">
-              <textarea 
-                id="aiPrompt" 
-                className="w-full p-3 rounded-lg outline-none text-gray-600 resize-none transition-colors focus:border-blue-300" 
-                placeholder="Write prompt for AI assistance..." 
+              <textarea
+                id="aiPrompt"
+                className="w-full p-3 rounded-lg outline-none text-gray-600 resize-none transition-colors focus:border-blue-300"
+                placeholder="Write prompt for AI assistance..."
                 rows="2"
                 value={aiPrompt}
                 onChange={handleAiPromptChange}
@@ -491,8 +496,8 @@ Return improved content in JSON format:
                   <span id="promptCounter">{promptCounter}</span>/500 characters
                   <span id="aiStatus" className="ml-2 text-green-600 text-xs">{aiStatus}</span>
                 </div>
-                <button 
-                  id="sendPrompt" 
+                <button
+                  id="sendPrompt"
                   className="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={sendAIPrompt}
                   disabled={aiStatus === '• Processing...'}

@@ -4,92 +4,44 @@ import ActionButtons from './components/ActionButtons';
 import ArticleGenerator from './components/ArticleGenerator';
 import { optimizedLocalStorage } from './utils/performance';
 import { convertToHtml } from './utils/markdown';
+import { ArticleManager } from './utils/ArticleManager';
 
 // Lazy load the CardEditor component
 const CardEditor = lazy(() => import('./components/CardEditor'));
 
 function App() {
-  const [cards, setCards] = useState([]);
-  const [articleTitle, setArticleTitle] = useState('');
-  const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
-  const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
-  const [isGenerating, setIsGenerating] = useState(false);
-  const cardEditorRef = useRef();
-  const [isEditorLoaded, setIsEditorLoaded] = useState(false);
+    const [cards, setCards] = useState([]);
+    const [articleTitle, setArticleTitle] = useState('');
+    const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
+    const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [currentArticleId, setCurrentArticleId] = useState(null);
+    const cardEditorRef = useRef();
+    const [isEditorLoaded, setIsEditorLoaded] = useState(false);
 
-  // Load saved data on component mount
-  useEffect(() => {
-    const savedData = optimizedLocalStorage.getItem('cardEditorData');
-    const savedTitle = optimizedLocalStorage.getItem('articleTitle');
-
-    if (savedData && Object.keys(savedData).length > 0) {
-      try {
-        const cardArray = Object.entries(savedData).map(([id, content]) => ({
-          id,
-          content
-        }));
-        setCards(cardArray);
-        setArticleTitle(savedTitle || 'Untitled Article');
-        setView('editor');
-      } catch (error) {
-        console.error('Error loading saved data:', error);
-        setView('generator');
-      }
-    } else {
-      setView('generator');
-    }
-  }, []);
-
-  // Handle edit link clicks
-  const handleEditCard = (card) => {
-    // Dispatch custom event to open the editor
-    const event = new CustomEvent('openEditModal', { detail: card });
-    window.dispatchEvent(event);
-  };
-
-  const showNotificationMessage = (message, type = 'info') => {
-    setShowNotification({ show: true, message, type });
-    setTimeout(() => {
-      setShowNotification({ show: false, message: '', type: 'info' });
-    }, 4000);
-  };
-
-  const saveAllData = () => {
-    const cardsData = {};
-    cards.forEach(card => {
-      cardsData[card.id] = card.content;
-    });
-    optimizedLocalStorage.setItem('cardEditorData', cardsData);
-    optimizedLocalStorage.setItem('articleTitle', articleTitle);
-    optimizedLocalStorage.setItem('cardEditorTimestamp', new Date().toISOString());
-    showNotificationMessage('All edits saved locally!', 'success');
-  };
-
-  const reloadPage = () => {
-    if (window.confirm('Are you sure you want to start over? All unsaved changes will be lost.')) {
-      optimizedLocalStorage.removeItem('cardEditorData');
-      optimizedLocalStorage.removeItem('articleTitle');
-      window.location.reload();
-    }
-  };
-
-  const addNewCard = () => {
-    // Instead of directly adding a new card, open the editor for a new card
-    const newCard = {
-      id: 'card-' + Date.now(),
-      content: ''
+    // Helper for notifications
+    const showNotificationMessage = (message, type = 'info') => {
+        setShowNotification({ show: true, message, type });
+        setTimeout(() => {
+            setShowNotification({ show: false, message: '', type: 'info' });
+        }, 4000);
     };
 
-    // Dispatch custom event to open the editor for a new card
-    const event = new CustomEvent('openEditModal', { detail: newCard });
-    window.dispatchEvent(event);
-  };
+    // Core generation logic
+    const handleGenerate = async (topic, detailedPrompt, targetId = null) => {
+        setIsGenerating(true);
 
-  const handleGenerate = async (topic, detailedPrompt) => {
-    setIsGenerating(true);
+        // Determine ID: use targetId if provided, otherwise create new
+        let activeId = targetId;
+        if (!activeId) {
+            activeId = ArticleManager.createArticle(topic);
+            setCurrentArticleId(activeId);
+            // Update URL to reflect the new ID
+            window.history.pushState(null, '', `?id=${activeId}`);
+        }
 
-    try {
-      const systemPrompt = `You are an expert technical writer and content creator.
+        try {
+            const systemPrompt = `You are an expert technical writer and content creator.
       Create a comprehensive, detailed guide on the topic: "${topic}".
       
       ${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
@@ -117,160 +69,262 @@ function App() {
         ]
       }
       
-      IMPORTANT:
+      IMPORTANT RULES:
       1. The content MUST be in Markdown format.
       2. Make the content detailed, practical, and high-quality.
       3. Use bolding, lists, and clear structure.
-      4. Return ONLY the JSON object, no markdown code blocks around it.`;
+      4. Return ONLY the JSON object, no markdown code blocks around it.
+      
+      CRITICAL - AI LINKS:
+      If you mention a complex sub-topic that deserves its own separate guide (e.g., "Setting up Nginx", "Configuring DNS", "Installing Node.js"), you MUST wrap that phrase in a special <ai-link> tag.
+      Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
+      
+      Example:
+      "First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server."
+      
+      Use these links generously to create a network of knowledge.`;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
-        },
-        body: JSON.stringify({
-          model: 'sonar-pro',
-          messages: [
-            { role: 'user', content: systemPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 3000
-        })
-      });
+            const response = await fetch('https://api.perplexity.ai/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer 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'
+                },
+                body: JSON.stringify({
+                    model: 'sonar-pro',
+                    messages: [
+                        { role: 'user', content: systemPrompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 3000
+                })
+            });
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
-      }
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status}`);
+            }
 
-      const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+            const data = await response.json();
+            const aiResponse = data.choices[0].message.content;
 
-      // Parse JSON response
-      let parsedResponse;
-      try {
-        // Extract JSON if wrapped in code blocks
-        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsedResponse = JSON.parse(jsonMatch[0]);
+            // Parse JSON response
+            let parsedResponse;
+            try {
+                // Extract JSON if wrapped in code blocks
+                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    parsedResponse = JSON.parse(jsonMatch[0]);
+                } else {
+                    parsedResponse = JSON.parse(aiResponse);
+                }
+            } catch (e) {
+                console.error('JSON Parse Error:', e);
+                console.log('Raw Response:', aiResponse);
+                throw new Error('Failed to parse AI response. Please try again.');
+            }
+
+            setArticleTitle(parsedResponse.title);
+
+            const newCards = parsedResponse.sections.map(section => {
+                // Convert markdown content to HTML
+                let htmlContent = convertToHtml(section.content);
+
+                // Prepend the title as an H2 if it's not already there (simple check)
+                if (!htmlContent.includes(`<h2`)) {
+                    htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${section.title}</h2>` + htmlContent;
+                }
+
+                // Add edit link
+                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${section.id}">EDIT</a></div>`;
+
+                return {
+                    id: section.id || `card-${Date.now()}-${Math.random()}`,
+                    content: htmlContent
+                };
+            });
+
+            setCards(newCards);
+
+            // Save to ArticleManager
+            ArticleManager.saveArticle(activeId, {
+                title: parsedResponse.title,
+                cards: newCards
+            });
+
+            setView('editor');
+            showNotificationMessage('Article generated successfully!', 'success');
+
+        } catch (error) {
+            console.error('Generation Error:', error);
+            showNotificationMessage(`Generation failed: ${error.message}`, 'error');
+            // If generation failed on a new article, maybe we should stay in generator view?
+            // But we already created the ID. Let's leave it for now.
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    // Initialization & Routing
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const urlId = params.get('id');
+        const urlTopic = params.get('topic');
+        const urlTemplate = params.get('template');
+
+        if (urlId) {
+            // Case 1: Load existing article by ID
+            const article = ArticleManager.getArticle(urlId);
+            if (article) {
+                setCurrentArticleId(urlId);
+                setArticleTitle(article.title);
+                setCards(article.cards || []);
+                setView('editor');
+            } else {
+                console.error('Article not found');
+                showNotificationMessage('Article not found. Redirecting to generator.', 'error');
+                window.history.replaceState(null, '', '/');
+                setView('generator');
+            }
+        } else if (urlTopic) {
+            // Case 2: AI Link Trigger (New Article from Topic)
+            // Create the article immediately
+            const newId = ArticleManager.createArticle(urlTopic, urlTemplate || 'guide');
+            setCurrentArticleId(newId);
+            setArticleTitle(urlTopic);
+
+            // Update URL so we don't regenerate on reload
+            window.history.replaceState(null, '', `?id=${newId}`);
+
+            // Trigger generation
+            handleGenerate(urlTopic, null, newId);
         } else {
-          parsedResponse = JSON.parse(aiResponse);
+            // Case 3: No ID, No Topic. Check for legacy data migration or show generator.
+            const migratedId = ArticleManager.migrateOldData();
+            if (migratedId) {
+                const article = ArticleManager.getArticle(migratedId);
+                setCurrentArticleId(migratedId);
+                setArticleTitle(article.title);
+                setCards(article.cards || []);
+                setView('editor');
+                window.history.replaceState(null, '', `?id=${migratedId}`);
+                showNotificationMessage('Restored your previous session.', 'info');
+            } else {
+                setView('generator');
+            }
         }
-      } catch (e) {
-        console.error('JSON Parse Error:', e);
-        console.log('Raw Response:', aiResponse);
-        throw new Error('Failed to parse AI response. Please try again.');
-      }
+    }, []);
 
-      setArticleTitle(parsedResponse.title);
+    // Handle edit link clicks
+    const handleEditCard = (card) => {
+        const event = new CustomEvent('openEditModal', { detail: card });
+        window.dispatchEvent(event);
+    };
 
-      const newCards = parsedResponse.sections.map(section => {
-        // Convert markdown content to HTML
-        let htmlContent = convertToHtml(section.content);
-
-        // Prepend the title as an H2 if it's not already there (simple check)
-        if (!htmlContent.includes(`<h2`)) {
-          htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${section.title}</h2>` + htmlContent;
+    const saveAllData = () => {
+        if (!currentArticleId) {
+            // Should not happen in editor view, but safety check
+            const newId = ArticleManager.createArticle(articleTitle || 'Untitled');
+            setCurrentArticleId(newId);
+            window.history.pushState(null, '', `?id=${newId}`);
         }
 
-        // Add edit link
-        htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${section.id}">EDIT</a></div>`;
+        ArticleManager.saveArticle(currentArticleId, {
+            title: articleTitle,
+            cards: cards
+        });
 
-        return {
-          id: section.id || `card-${Date.now()}-${Math.random()}`,
-          content: htmlContent
+        showNotificationMessage('All edits saved to Library!', 'success');
+    };
+
+    const reloadPage = () => {
+        if (window.confirm('Are you sure you want to start over? You will return to the generator.')) {
+            window.location.href = '/';
+        }
+    };
+
+    const addNewCard = () => {
+        const newCard = {
+            id: 'card-' + Date.now(),
+            content: ''
         };
-      });
+        const event = new CustomEvent('openEditModal', { detail: newCard });
+        window.dispatchEvent(event);
+    };
 
-      setCards(newCards);
+    // Callback function to open the edit modal
+    const handleOpenEditModal = (card) => {
+        if (cardEditorRef.current && cardEditorRef.current.openEditModal) {
+            cardEditorRef.current.openEditModal(card);
+        }
+    };
 
-      // Save immediately
-      const cardsData = {};
-      newCards.forEach(card => {
-        cardsData[card.id] = card.content;
-      });
-      optimizedLocalStorage.setItem('cardEditorData', cardsData);
-      optimizedLocalStorage.setItem('articleTitle', parsedResponse.title);
+    // Preload the editor when the app loads
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsEditorLoaded(true);
+        }, 100);
+        return () => clearTimeout(timer);
+    }, []);
 
-      setView('editor');
-      showNotificationMessage('Article generated successfully!', 'success');
-
-    } catch (error) {
-      console.error('Generation Error:', error);
-      showNotificationMessage(`Generation failed: ${error.message}`, 'error');
-    } finally {
-      setIsGenerating(false);
+    if (view === 'loading') {
+        return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
     }
-  };
 
-  // Callback function to open the edit modal
-  const handleOpenEditModal = (card) => {
-    if (cardEditorRef.current && cardEditorRef.current.openEditModal) {
-      cardEditorRef.current.openEditModal(card);
+    if (view === 'generator') {
+        return <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />;
     }
-  };
 
-  // Preload the editor when the app loads
-  useEffect(() => {
-    // Set a timeout to simulate loading
-    const timer = setTimeout(() => {
-      setIsEditorLoaded(true);
-    }, 100);
+    return (
+        <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
+            <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+                <div className="flex justify-end mb-2">
+                    <button
+                        onClick={reloadPage}
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        title="Start Over"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <h1 className="text-4xl font-bold mb-8 text-gray-900">{articleTitle}</h1>
 
-    return () => clearTimeout(timer);
-  }, []);
+                {cards.map((card) => (
+                    <Card
+                        key={card.id}
+                        card={card}
+                        onEdit={handleEditCard}
+                    />
+                ))}
 
-  if (view === 'loading') {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
+                <ActionButtons
+                    onSave={saveAllData}
+                    onAddCard={addNewCard}
+                    onClean={reloadPage}
+                />
+            </div>
 
-  if (view === 'generator') {
-    return <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />;
-  }
+            {/* Notification */}
+            {showNotification.show && (
+                <div className={`notification notification-${showNotification.type}`}>
+                    {showNotification.message}
+                </div>
+            )}
 
-  return (
-    <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8">
-      <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900">{articleTitle}</h1>
-          <button onClick={reloadPage} className="text-gray-500 hover:text-red-500 text-sm">Start Over</button>
+            {/* Edit Modal - Lazy loaded */}
+            {isEditorLoaded && (
+                <Suspense fallback={<div>Loading editor...</div>}>
+                    <CardEditor
+                        ref={cardEditorRef}
+                        cards={cards}
+                        setCards={setCards}
+                        showNotification={showNotificationMessage}
+                    />
+                </Suspense>
+            )}
         </div>
-
-        {cards.map((card) => (
-          <Card
-            key={card.id}
-            card={card}
-            onEdit={handleEditCard}
-          />
-        ))}
-
-        <ActionButtons
-          onSave={saveAllData}
-          onAddCard={addNewCard}
-          onClean={reloadPage}
-        />
-      </div>
-
-      {/* Notification */}
-      {showNotification.show && (
-        <div className={`notification notification-${showNotification.type}`}>
-          {showNotification.message}
-        </div>
-      )}
-
-      {/* Edit Modal - Lazy loaded */}
-      {isEditorLoaded && (
-        <Suspense fallback={<div>Loading editor...</div>}>
-          <CardEditor
-            ref={cardEditorRef}
-            cards={cards}
-            setCards={setCards}
-            showNotification={showNotificationMessage}
-          />
-        </Suspense>
-      )}
-    </div>
-  );
+    );
 }
 
 export default App;
