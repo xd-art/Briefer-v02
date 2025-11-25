@@ -145,18 +145,14 @@ body {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
     list-style: disc;
-    /* Add explicit list style */
     padding-left: 1.5rem;
-    /* Add padding to show markers */
 }
 
 .card-content ol {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
     list-style: decimal;
-    /* Add explicit list style */
     padding-left: 1.5rem;
-    /* Add padding to show markers */
 }
 
 .card-content li {
@@ -208,17 +204,14 @@ body {
     margin-left: 1.5rem;
     margin-bottom: 1rem;
     padding-left: 1.5rem;
-    /* Add padding to show markers */
 }
 
 .rich-text-content ul {
     list-style: disc;
-    /* Add explicit list style for unordered lists */
 }
 
 .rich-text-content ol {
     list-style: decimal;
-    /* Add explicit list style for ordered lists */
 }
 
 .rich-text-content li {
@@ -280,7 +273,6 @@ body {
     display: flex;
     gap: 0.5rem;
 }
-
 
 /* Modal Styles */
 .modal {
@@ -570,12 +562,9 @@ a.edit-link,
 .edit-link,
 div.flex.justify-end a.edit-link,
 div.flex.justify-end .edit-link {
-    color: #4299e1 !important;
-    /* Changed from #4f46e5 to #4299e1 */
+    color: #3d82f6 !important;
     font-weight: 500 !important;
-    /* font-medium equivalent */
     font-size: 0.875rem !important;
-    /* text-sm equivalent */
     text-decoration: none !important;
 }
 
@@ -589,7 +578,6 @@ div.flex.justify-end .edit-link:hover {
 }
 
 /* Quill Editor Border Overrides */
-/* White borders (almost invisible on white background) */
 .ql-toolbar {
     border: 1px solid white !important;
     border-bottom: 1px solid white !important;
@@ -605,48 +593,14 @@ div.flex.justify-end .edit-link:hover {
     background: white;
 }
 
-/* If you need to completely hide borders, uncomment the following: */
-/*
-.ql-toolbar, .ql-container {
-  border: none !important;
-}
-*/
-
-/* Additional responsive edit link adjustments */
-@media (max-width: 768px) {
-
-    a.edit-link,
-    .rich-text-content a.edit-link,
-    .rich-text-content .edit-link,
-    .edit-link,
-    div.flex.justify-end a.edit-link,
-    div.flex.justify-end .edit-link {
-        font-size: 0.875rem !important;
-    }
-}
-
 /* AI Link Styles */
 ai-link {
-    color: #7c3aed;
-    /* Violet-600 */
+    color: #3b82f6;
+    /* primary button color */
     text-decoration: none;
-    border-bottom: 1px dashed #7c3aed;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    position: relative;
-    display: inline-block;
 }
 
 ai-link:hover {
-    background-color: rgba(124, 58, 237, 0.1);
-    border-bottom-style: solid;
-}
-
-ai-link::after {
-    content: '✨';
-    font-size: 0.7em;
-    margin-left: 2px;
-    vertical-align: super;
-    opacity: 0.7;
+    opacity: 0.8;
 }
