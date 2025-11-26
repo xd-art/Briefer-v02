@@ -30,12 +30,12 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               onKeyDown={handleKeyDown}
               disabled={isGenerating}
               placeholder="Write what you need to create"
-              className="w-full py-3 text-lg border-t-0 border-l-0 border-r-0 border-b-2 border-gray-200 focus:outline-none focus:border-indigo-500 transition-colors placeholder-gray-400 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 text-lg border-t-0 border-l-0 border-r-0 border-b-2 border-gray-200 focus:outline-none focus:border-[#3d82f6] transition-colors placeholder-gray-400 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               onClick={handleGenerate}
               disabled={!topic.trim() || isGenerating}
-              className="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 rounded-full bg-[#3d82f6] text-white shadow-md hover:bg-[#3d82f6] transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               title="Generate Article"
             >
               {isGenerating ? (

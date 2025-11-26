@@ -18,11 +18,11 @@ const RefinementBar = ({
     return (
         <div className="refinement-bar">
             <button
-                className={`filter-toggle-btn ${hasFilters ? 'active' : ''}`}
+                className={`p-2 rounded-full transition-all duration-300 flex items-center justify-center shadow-md ${hasFilters ? 'bg-[#3d82f6] text-white hover:bg-[#2563eb]' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
                 onClick={onFilterClick}
                 title="Detailed Filters"
             >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                 </svg>
             </button>
@@ -30,7 +30,7 @@ const RefinementBar = ({
             <input
                 type="text"
                 className="refinement-input"
-                placeholder="how to..."
+                placeholder="Add a new change"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -38,7 +38,7 @@ const RefinementBar = ({
             />
 
             <button
-                className="send-btn"
+                className="p-2 rounded-full bg-[#3d82f6] text-white shadow-md hover:bg-[#3d82f6] transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={onSend}
                 disabled={isGenerating || (!value.trim() && !hasFilters)}
                 title="Regenerate Article"
@@ -50,7 +50,7 @@ const RefinementBar = ({
                     </svg>
                 ) : (
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                     </svg>
                 )}
             </button>
