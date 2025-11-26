@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Card from './components/Card';
 import ActionButtons from './components/ActionButtons';
 import ArticleGenerator from './components/ArticleGenerator';
+import RefinementBar from './components/RefinementBar';
+import FilterModal from './components/FilterModal';
 import { optimizedLocalStorage } from './utils/performance';
 import { convertToHtml } from './utils/markdown';
 import { ArticleManager } from './utils/ArticleManager';
@@ -18,6 +20,10 @@ function App() {
     const [currentArticleId, setCurrentArticleId] = useState(null);
     const cardEditorRef = useRef();
     const [isEditorLoaded, setIsEditorLoaded] = useState(false);
+    const [refinementPrompt, setRefinementPrompt] = useState('');
+    const [showFilterModal, setShowFilterModal] = useState(false);
+    const [filters, setFilters] = useState([]);
+    const [selectedFilters, setSelectedFilters] = useState({});
 
     // Helper for notifications
     const showNotificationMessage = (message, type = 'info') => {
@@ -164,6 +170,122 @@ function App() {
         }
     };
 
+    // Generate dynamic filters based on article topic
+    const generateFilters = () => {
+        return [
+            {
+                id: 'style',
+                label: 'Style',
+                type: 'segmented',
+                options: [
+                    { value: 'casual', label: 'Casual' },
+                    { value: 'professional', label: 'Professional' },
+                    { value: 'technical', label: 'Technical' }
+                ]
+            },
+            {
+                id: 'length',
+                label: 'Length',
+                type: 'segmented',
+                options: [
+                    { value: 'brief', label: 'Brief' },
+                    { value: 'detailed', label: 'Detailed' },
+                    { value: 'comprehensive', label: 'Comprehensive' }
+                ]
+            },
+            {
+                id: 'audience',
+                label: 'Target Audience',
+                type: 'chips',
+                options: [
+                    { value: 'beginners', label: 'Beginners' },
+                    { value: 'intermediate', label: 'Intermediate' },
+                    { value: 'experts', label: 'Experts' },
+                    { value: 'general', label: 'General Public' }
+                ]
+            },
+            {
+                id: 'format',
+                label: 'Format',
+                type: 'chips',
+                options: [
+                    { value: 'step-by-step', label: 'Step-by-Step' },
+                    { value: 'checklist', label: 'Checklist' },
+                    { value: 'overview', label: 'Overview' },
+                    { value: 'comparison', label: 'Comparison' }
+                ]
+            },
+            {
+                id: 'extras',
+                label: 'Additional Sections',
+                type: 'chips',
+                options: [
+                    { value: 'tips', label: 'Tips & Tricks' },
+                    { value: 'mistakes', label: 'Common Mistakes' },
+                    { value: 'faq', label: 'FAQ' },
+                    { value: 'resources', label: 'Resources' }
+                ]
+            }
+        ];
+    };
+
+    // Handle filter changes
+    const handleFilterChange = (filterId, value, isMulti = false) => {
+        setSelectedFilters(prev => {
+            if (isMulti) {
+                const currentValues = prev[filterId] || [];
+                const newValues = currentValues.includes(value)
+                    ? currentValues.filter(v => v !== value)
+                    : [...currentValues, value];
+                return { ...prev, [filterId]: newValues };
+            }
+            return { ...prev, [filterId]: value };
+        });
+    };
+
+    // Clean all filters
+    const handleCleanFilters = () => {
+        setSelectedFilters({});
+    };
+
+    // Regenerate with filters
+    const handleRegenerateWithFilters = () => {
+        setShowFilterModal(false);
+
+        // Build detailed prompt from filters
+        let detailedPrompt = '';
+
+        if (selectedFilters.style) {
+            detailedPrompt += `Style: ${selectedFilters.style}. `;
+        }
+        if (selectedFilters.length) {
+            detailedPrompt += `Length: ${selectedFilters.length}. `;
+        }
+        if (selectedFilters.audience && selectedFilters.audience.length > 0) {
+            detailedPrompt += `Target audience: ${selectedFilters.audience.join(', ')}. `;
+        }
+        if (selectedFilters.format && selectedFilters.format.length > 0) {
+            detailedPrompt += `Format: ${selectedFilters.format.join(', ')}. `;
+        }
+        if (selectedFilters.extras && selectedFilters.extras.length > 0) {
+            detailedPrompt += `Include: ${selectedFilters.extras.join(', ')}. `;
+        }
+
+        const fullPrompt = refinementPrompt.trim()
+            ? `How to ${refinementPrompt}`
+            : articleTitle;
+
+        handleGenerate(fullPrompt, detailedPrompt, currentArticleId);
+        setRefinementPrompt('');
+    };
+
+    // Load filters when modal opens
+    useEffect(() => {
+        if (showFilterModal && filters.length === 0) {
+            setFilters(generateFilters());
+        }
+    }, [showFilterModal]);
+
     // Initialization & Routing
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -304,6 +426,32 @@ function App() {
                     onClean={reloadPage}
                 />
             </div>
+
+            {/* Refinement Bar - Fixed Bottom */}
+            <RefinementBar
+                value={refinementPrompt}
+                onChange={setRefinementPrompt}
+                onFilterClick={() => setShowFilterModal(true)}
+                onSend={() => {
+                    if (refinementPrompt.trim() || Object.keys(selectedFilters).length > 0) {
+                        handleRegenerateWithFilters();
+                    }
+                }}
+                isGenerating={isGenerating}
+                hasFilters={Object.keys(selectedFilters).length > 0}
+            />
+
+            {/* Filter Modal */}
+            <FilterModal
+                isOpen={showFilterModal}
+                onClose={() => setShowFilterModal(false)}
+                filters={filters}
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+                onClean={handleCleanFilters}
+                onRegenerate={handleRegenerateWithFilters}
+                isLoading={false}
+            />
 
             {/* Notification */}
             {showNotification.show && (
