@@ -24,6 +24,8 @@ function App() {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [filters, setFilters] = useState([]);
     const [selectedFilters, setSelectedFilters] = useState({});
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const titleInputRef = useRef(null);
 
     // Helper for notifications
     const showNotificationMessage = (message, type = 'info') => {
@@ -380,6 +382,32 @@ function App() {
         }
     };
 
+    // Title Editing Handlers
+    const handleTitleClick = () => {
+        setIsEditingTitle(true);
+        setTimeout(() => {
+            if (titleInputRef.current) {
+                titleInputRef.current.focus();
+            }
+        }, 100);
+    };
+
+    const handleTitleChange = (e) => {
+        setArticleTitle(e.target.value);
+    };
+
+    const handleTitleBlur = () => {
+        setIsEditingTitle(false);
+        saveAllData(); // Auto-save on blur
+    };
+
+    const handleTitleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            titleInputRef.current.blur(); // This will trigger handleTitleBlur and save
+        }
+    };
+
     // Preload the editor when the app loads
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -410,7 +438,26 @@ function App() {
                         </svg>
                     </button>
                 </div>
-                <h1 className="text-4xl font-bold mb-8 text-gray-900">{articleTitle}</h1>
+
+                {isEditingTitle ? (
+                    <input
+                        ref={titleInputRef}
+                        type="text"
+                        className="text-4xl font-bold mb-8 text-gray-900 w-full border-b-2 border-blue-500 focus:outline-none"
+                        value={articleTitle}
+                        onChange={handleTitleChange}
+                        onBlur={handleTitleBlur}
+                        onKeyDown={handleTitleKeyDown}
+                    />
+                ) : (
+                    <h1
+                        className="text-4xl font-bold mb-8 text-gray-900 cursor-pointer hover:bg-gray-50 rounded px-2 -ml-2 transition-colors duration-200"
+                        onClick={handleTitleClick}
+                        title="Click to edit title"
+                    >
+                        {articleTitle}
+                    </h1>
+                )}
 
                 {cards.map((card) => (
                     <Card
@@ -454,24 +501,28 @@ function App() {
             />
 
             {/* Notification */}
-            {showNotification.show && (
-                <div className={`notification notification-${showNotification.type}`}>
-                    {showNotification.message}
-                </div>
-            )}
+            {
+                showNotification.show && (
+                    <div className={`notification notification-${showNotification.type}`}>
+                        {showNotification.message}
+                    </div>
+                )
+            }
 
             {/* Edit Modal - Lazy loaded */}
-            {isEditorLoaded && (
-                <Suspense fallback={<div>Loading editor...</div>}>
-                    <CardEditor
-                        ref={cardEditorRef}
-                        cards={cards}
-                        setCards={setCards}
-                        showNotification={showNotificationMessage}
-                    />
-                </Suspense>
-            )}
-        </div>
+            {
+                isEditorLoaded && (
+                    <Suspense fallback={<div>Loading editor...</div>}>
+                        <CardEditor
+                            ref={cardEditorRef}
+                            cards={cards}
+                            setCards={setCards}
+                            showNotification={showNotificationMessage}
+                        />
+                    </Suspense>
+                )
+            }
+        </div >
     );
 }
 
