@@ -320,19 +320,19 @@ Return improved content in JSON format:
   "content": "improved content"
 }`;
 
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
+          'x-goog-api-key': API_KEY
         },
         body: JSON.stringify({
-          model: 'sonar-pro',
-          messages: [
-            { role: 'user', content: systemPrompt }
-          ],
-          temperature: 0.7,
-          max_tokens: 1000
+          contents: [{
+            parts: [{
+              text: systemPrompt
+            }]
+          }]
         })
       });
 
@@ -341,7 +341,7 @@ Return improved content in JSON format:
       }
 
       const data = await response.json();
-      const aiResponse = data.choices[0].message.content;
+      const aiResponse = data.candidates[0].content.parts[0].text;
 
       // Check if response is an error
       if (aiResponse.startsWith('ERROR:')) {
