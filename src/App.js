@@ -92,19 +92,18 @@ function App() {
       
       Use these links generously to create a network of knowledge.`;
 
-            const response = await fetch('https://api.perplexity.ai/chat/completions', {
+            const API_KEY = 'AIzaSyBlx4gjERN7s2mBzWAJO_5GxhOK73ynpI4';
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer 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'
                 },
                 body: JSON.stringify({
-                    model: 'sonar-pro',
-                    messages: [
-                        { role: 'user', content: systemPrompt }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 3000
+                    contents: [{
+                        parts: [{
+                            text: systemPrompt
+                        }]
+                    }]
                 })
             });
 
@@ -113,7 +112,7 @@ function App() {
             }
 
             const data = await response.json();
-            const aiResponse = data.choices[0].message.content;
+            const aiResponse = data.candidates[0].content.parts[0].text;
 
             // Parse JSON response
             let parsedResponse;
