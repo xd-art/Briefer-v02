@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import Card from './components/Card';
-import ActionButtons from './components/ActionButtons';
 import ArticleGenerator from './components/ArticleGenerator';
+import CardEditor from './components/CardEditor';
+import ActionButtons from './components/ActionButtons';
 import RefinementBar from './components/RefinementBar';
 import FilterModal from './components/FilterModal';
-import { optimizedLocalStorage } from './utils/performance';
 import { convertToHtml } from './utils/markdown';
 import { ArticleManager } from './utils/ArticleManager';
-
-// Lazy load the CardEditor component
-const CardEditor = lazy(() => import('./components/CardEditor'));
 
 function App() {
     const [cards, setCards] = useState([]);
@@ -49,48 +46,26 @@ function App() {
         }
 
         try {
-            const systemPrompt = `You are an expert technical writer and content creator.
-      Create a comprehensive, detailed guide on the topic: "${topic}".
-      
-      ${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
-      
-      Return a JSON object with the following structure:
-      {
-        "title": "The Article Title",
-        "sections": [
-          {
-            "id": "intro",
-            "title": "Introduction",
-            "content": "Detailed introduction content..."
-          },
-          {
-            "id": "step1",
-            "title": "Step 1 Title",
-            "content": "Detailed content for step 1..."
-          },
-          ... more steps ...
-          {
-            "id": "conclusion",
-            "title": "Conclusion",
-            "content": "Conclusion content..."
-          }
-        ]
-      }
-      
-      IMPORTANT RULES:
-      1. The content MUST be in Markdown format.
-      2. Make the content detailed, practical, and high-quality.
-      3. Use bolding, lists, and clear structure.
-      4. Return ONLY the JSON object, no markdown code blocks around it.
-      
-      CRITICAL - AI LINKS:
-      If you mention a complex sub-topic that deserves its own separate guide (e.g., "Setting up Nginx", "Configuring DNS", "Installing Node.js"), you MUST wrap that phrase in a special <ai-link> tag.
-      Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
-      
-      Example:
-      "First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server."
-      
-      Use these links generously to create a network of knowledge.`;
+            const systemPrompt = `You are an expert technical writer.
+Create a comprehensive, detailed guide on the topic: "${topic}".
+
+${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
+
+FORMAT RULES:
+1. Use standard Markdown.
+2. The first line MUST be the main title, starting with "# ".
+3. Use "## " for section titles.
+4. Write detailed content for each section.
+
+CRITICAL - AI LINKS:
+If you mention a complex sub-topic that deserves its own separate guide (e.g., "Setting up Nginx", "Configuring DNS"), you MUST wrap that phrase in a special <ai-link> tag.
+Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
+
+Example:
+# How to Host a Website
+## Introduction
+First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server.
+...`;
 
             const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
             const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
@@ -104,7 +79,11 @@ function App() {
                         parts: [{
                             text: systemPrompt
                         }]
-                    }]
+                    }],
+                    generationConfig: {
+                        maxOutputTokens: 8192,
+                        temperature: 0.7
+                    }
                 })
             });
 
@@ -115,47 +94,69 @@ function App() {
             const data = await response.json();
             const aiResponse = data.candidates[0].content.parts[0].text;
 
-            // Parse JSON response
-            let parsedResponse;
-            try {
-                // Extract JSON if wrapped in code blocks
-                const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    parsedResponse = JSON.parse(jsonMatch[0]);
-                } else {
-                    parsedResponse = JSON.parse(aiResponse);
+            // --- Markdown Parsing Logic ---
+
+            // 1. Extract Title
+            const lines = aiResponse.split('\n');
+            let title = topic; // Fallback
+            let contentStartIndex = 0;
+
+            // Find the first line starting with #
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim().startsWith('# ')) {
+                    title = lines[i].trim().substring(2).trim();
+                    contentStartIndex = i + 1;
+                    break;
                 }
-            } catch (e) {
-                console.error('JSON Parse Error:', e);
-                console.log('Raw Response:', aiResponse);
-                throw new Error('Failed to parse AI response. Please try again.');
             }
 
-            setArticleTitle(parsedResponse.title);
+            setArticleTitle(title);
 
-            const newCards = parsedResponse.sections.map(section => {
-                // Convert markdown content to HTML
-                let htmlContent = convertToHtml(section.content);
+            // 2. Split into Sections
+            // We join the rest of the lines back together, then split by "## "
+            const fullContent = lines.slice(contentStartIndex).join('\n');
+            const sectionParts = fullContent.split(/\n##\s+/);
 
-                // Prepend the title as an H2 if it's not already there (simple check)
-                if (!htmlContent.includes(`<h2`)) {
-                    htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${section.title}</h2>` + htmlContent;
+            const newCards = [];
+
+            sectionParts.forEach((part, index) => {
+                if (!part.trim()) return;
+
+                let sectionTitle = "Introduction";
+                let sectionContentMarkdown = part;
+
+                if (index > 0 || fullContent.trim().startsWith('##')) {
+                    // Extract first line as title
+                    const partLines = part.split('\n');
+                    sectionTitle = partLines[0].trim();
+                    sectionContentMarkdown = partLines.slice(1).join('\n');
+                } else {
+                    // It's the intro before any H2
+                    sectionTitle = "Introduction";
+                    sectionContentMarkdown = part;
                 }
 
-                // Add edit link
-                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${section.id}">EDIT</a></div>`;
+                // Convert markdown content to HTML
+                let htmlContent = convertToHtml(sectionContentMarkdown);
 
-                return {
-                    id: section.id || `card-${Date.now()}-${Math.random()}`,
+                // Prepend the title as an H2
+                htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${sectionTitle}</h2>` + htmlContent;
+
+                // Add edit link
+                const sectionId = `section-${index}-${Date.now()}`;
+                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
+
+                newCards.push({
+                    id: sectionId,
                     content: htmlContent
-                };
+                });
             });
 
             setCards(newCards);
 
             // Save to ArticleManager
             ArticleManager.saveArticle(activeId, {
-                title: parsedResponse.title,
+                title: title,
                 cards: newCards
             });
 
@@ -165,8 +166,6 @@ function App() {
         } catch (error) {
             console.error('Generation Error:', error);
             showNotificationMessage(`Generation failed: ${error.message}`, 'error');
-            // If generation failed on a new article, maybe we should stay in generator view?
-            // But we already created the ID. Let's leave it for now.
         } finally {
             setIsGenerating(false);
         }
@@ -258,23 +257,23 @@ function App() {
         let detailedPrompt = '';
 
         if (selectedFilters.style) {
-            detailedPrompt += `Style: ${selectedFilters.style}. `;
+            detailedPrompt += `Style: ${selectedFilters.style}.`;
         }
         if (selectedFilters.length) {
-            detailedPrompt += `Length: ${selectedFilters.length}. `;
+            detailedPrompt += `Length: ${selectedFilters.length}.`;
         }
         if (selectedFilters.audience && selectedFilters.audience.length > 0) {
-            detailedPrompt += `Target audience: ${selectedFilters.audience.join(', ')}. `;
+            detailedPrompt += `Target audience: ${selectedFilters.audience.join(', ')}.`;
         }
         if (selectedFilters.format && selectedFilters.format.length > 0) {
-            detailedPrompt += `Format: ${selectedFilters.format.join(', ')}. `;
+            detailedPrompt += `Format: ${selectedFilters.format.join(', ')}.`;
         }
         if (selectedFilters.extras && selectedFilters.extras.length > 0) {
-            detailedPrompt += `Include: ${selectedFilters.extras.join(', ')}. `;
+            detailedPrompt += `Include: ${selectedFilters.extras.join(', ')}.`;
         }
 
         const fullPrompt = refinementPrompt.trim()
-            ? `How to ${refinementPrompt}`
+            ? `How to ${refinementPrompt} `
             : articleTitle;
 
         handleGenerate(fullPrompt, detailedPrompt, currentArticleId);
@@ -317,7 +316,7 @@ function App() {
             setArticleTitle(urlTopic);
 
             // Update URL so we don't regenerate on reload
-            window.history.replaceState(null, '', `?id=${newId}`);
+            window.history.replaceState(null, '', `? id = ${newId} `);
 
             // Trigger generation
             handleGenerate(urlTopic, null, newId);
@@ -330,7 +329,7 @@ function App() {
                 setArticleTitle(article.title);
                 setCards(article.cards || []);
                 setView('editor');
-                window.history.replaceState(null, '', `?id=${migratedId}`);
+                window.history.replaceState(null, '', `? id = ${migratedId} `);
                 showNotificationMessage('Restored your previous session.', 'info');
             } else {
                 setView('generator');
@@ -349,7 +348,7 @@ function App() {
             // Should not happen in editor view, but safety check
             const newId = ArticleManager.createArticle(articleTitle || 'Untitled');
             setCurrentArticleId(newId);
-            window.history.pushState(null, '', `?id=${newId}`);
+            window.history.pushState(null, '', `? id = ${newId} `);
         }
 
         ArticleManager.saveArticle(currentArticleId, {
@@ -503,7 +502,7 @@ function App() {
             {/* Notification */}
             {
                 showNotification.show && (
-                    <div className={`notification notification-${showNotification.type}`}>
+                    <div className={`notification notification - ${showNotification.type} `}>
                         {showNotification.message}
                     </div>
                 )

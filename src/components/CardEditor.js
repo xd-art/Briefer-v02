@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useImperativeHandle, memo } from 'r
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { convertToHtml } from '../utils/markdown'; // Import the markdown utility
+import { jsonRepair } from '../utils/jsonRepair';
 
 // Function to remove citations like [1], [2], [123] from text
 export function removeCitations(text) {
@@ -307,18 +308,7 @@ AI LINKS INSTRUCTION:
 If you mention a complex sub-topic that deserves its own separate guide, wrap it in an <ai-link> tag.
 Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
 
-If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."
-
-Current title: "${title}"
-Current content: "${content.replace(/<[^>]*>/g, '')}"
-
-User requests: ${aiPrompt}
-
-Return improved content in JSON format:
-{
-  "title": "improved title",
-  "content": "improved content"
-}`;
+If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."`;
 
       const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
@@ -330,9 +320,13 @@ Return improved content in JSON format:
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: systemPrompt
+              text: `${systemPrompt}\n\nUser Request: ${aiPrompt}\n\nCurrent Content:\n${content}`
             }]
-          }]
+          }],
+          generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.7
+          }
         })
       });
 
@@ -343,43 +337,12 @@ Return improved content in JSON format:
       const data = await response.json();
       const aiResponse = data.candidates[0].content.parts[0].text;
 
-      // Check if response is an error
       if (aiResponse.startsWith('ERROR:')) {
         showNotification(aiResponse, 'error');
-        return;
-      }
+      } else {
 
-      // Try to parse JSON response
-      let parsedResponse;
-      try {
-        // Extract JSON from response if it's wrapped in quotes or other text
-        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          parsedResponse = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('No JSON found in response');
-        }
-      } catch (e) {
-        // If not JSON, treat as plain text improvement
-        parsedResponse = {
-          title: title,
-          content: aiResponse
-        };
-      }
-
-      // Remove citations from the AI response content
-      if (parsedResponse.content) {
-        parsedResponse.content = removeCitations(parsedResponse.content);
-      }
-
-      // Update the form fields with AI suggestions
-      if (parsedResponse.title) {
-        setTitle(parsedResponse.title);
-      }
-
-      if (parsedResponse.content) {
         // Convert AI-generated content from markdown/plain text to HTML
-        const htmlContent = convertToHtml(parsedResponse.content);
+        const htmlContent = convertToHtml(aiResponse);
         setContent(htmlContent);
       }
 
