@@ -1,33 +1,44 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '../assets/briefer-logo.svg';
 
-const Header = ({ user, onLoginClick, onLogoutClick, onNavigate, currentView }) => {
+const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
+    const location = useLocation();
+    const isHome = location.pathname === '/';
+    const isBlog = location.pathname.startsWith('/blog');
+
     return (
         <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Left Section: Logo */}
-                    <div className="flex-shrink-0 cursor-pointer" onClick={() => onNavigate('generator')}>
+                    <Link to="/" className="flex-shrink-0 cursor-pointer">
                         <img src={Logo} alt="Briefer Logo" className="h-4 inline-block" />
-                    </div>
+                    </Link>
 
                     {/* Center Section: Navigation */}
                     <nav className="hidden md:flex space-x-8">
-                        <button
-                            onClick={() => onNavigate('generator')}
-                            className={`text-sm font-medium transition-colors duration-200 ${currentView === 'generator' || currentView === 'editor'
+                        <Link
+                            to="/"
+                            className={`text-sm font-medium transition-colors duration-200 ${isHome && currentView !== 'profile'
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             Home
-                        </button>
+                        </Link>
                         <button className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
                             Categories
                         </button>
-                        <button className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
+                        <Link
+                            to="/blog"
+                            className={`text-sm font-medium transition-colors duration-200 ${isBlog
+                                ? 'text-blue-600'
+                                : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                        >
                             Blog
-                        </button>
+                        </Link>
                         <button className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
                             About
                         </button>

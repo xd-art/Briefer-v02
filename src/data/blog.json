@@ -1,0 +1,106 @@
+{
+    "title": "Collection of Articles About Human Action",
+    "metaDescription": "Blog about successful business stories",
+    "metaKeywords": "project management articles, project stories, digital work, articles collection, examples, free tools, successful outcomes, problem-solving, innovative approaches, technical requirements, gig, freelance, video, audio, marketing, writing, graphic",
+    "ogTitle": "Briefer: Pro Work Stories",
+    "ogDescription": "Blog about successful business stories",
+    "canonicalUrl": "/blog",
+    "articles": [
+        {
+            "title": "Tesla's Mind-Bending Entry Into the Pickup Design Market",
+            "slug": "tesla-cybertruck-design",
+            "author": "Danylo Khorzhevskyi",
+            "date": "2023-11-29",
+            "excerpt": "Elon Musk's radically angular Cybertruck pickup shocked audiences in 2019 with its geometric stainless steel body evoking sci-fi movies and 80s cars. Its unconventional form draws criticism along with praise for its boldly futuristic look. Behind the origami-esque styling lies a highly capable electric truck with armored doors, adaptive air suspension, and up to 500km range. But with pickup buyers traditionally loyal to brands like Ford and RAM, does the Cybertruck's divisive design represent an innovation that will disrupt and transform the market or an alienating bust?",
+            "image": "/images/pictures/blog/tesla-cybertruck-design-elon-musk-1.png"
+        },
+        {
+            "title": "Pleasure vs Suffering: What Influences Purchase Decisions from a Neuromarketing Perspective",
+            "slug": "pleasure-vs-suffering",
+            "author": "Danylo Khorzhevskyi",
+            "date": "2023-02-27",
+            "excerpt": "Explore how neuromarketing reveals the brain's role in purchase decisions based on pleasure and suffering. Learn about the endowment effect and its intriguing parallels, as well as the diminishing marginal utility of wealth. Uncover key factors influencing buying choices and their implications for marketing.",
+            "image": "/images/pictures/blog/Pleasure-vs-Sufferin.png"
+        },
+        {
+            "title": "Charting a Course to Blue Ocean Strategy",
+            "slug": "blue-ocean",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-12-29",
+            "excerpt": "This article explores the concept of \"blue oceans\" - untapped market spaces ripe for growth and profits. It argues that companies can break out of crowded, fiercely competitive \"red oceans\" of existing market space by pursuing blue ocean strategies centered on creating new value and making rivals obsolete. By studying numerous examples spanning industries and time, the authors identify recurring strategic principles for creating new markets with expanding demand and opportunities for highly profitable expansion.",
+            "image": "/images/pictures/blog/blue-ocean.png"
+        },
+        {
+            "title": "The History of YouTube Creation",
+            "slug": "youtube-story",
+            "author": "Zachary Lukasiewicz",
+            "date": "2022-05-12",
+            "excerpt": "YouTube's origin traces back to three individuals from the PayPal mafia: Chad Hurley, Jawed Karim, and Steve Chen. After eBay acquired PayPal, they sought a new venture. Chad, an artist turned IT enthusiast, designed PayPal's logo. Steven, a Taiwanese math graduate, owned his tech company. Jawed, born in GDR, created an autonomous messaging system. Inspired by the 2004 tsunami's lack of online footage, Jawed proposed a video hosting idea. Initially conceived as a dating site, YouTube emerged in 2005. Despite various versions of the creation story, the trio's collaboration birthed the beloved platform.",
+            "image": "/images/pictures/blog/youtube-story.png"
+        },
+        {
+            "title": "Max Tegmark: The Problem of Aligning Artificial Intelligence Goals with Human Ones",
+            "slug": "max-tegmark-ai-goals",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-11-29",
+            "excerpt": "In the excerpt below, the author analyzes various aspects of this problem, including an AI's understanding of human goals, adoption of these goals, and retention of them during self-learning and self-improvement. Tegmark points out the complexity of each of these components and argues that to safely create a superintelligent AI, solutions to this multifaceted problem must be found in advance, before its emergence.",
+            "image": "/images/pictures/blog/max-tegmark-6.png"
+        },
+        {
+            "title": "Max Tegmark on the Nature of Learning: How Brains Evolve to Think and How AI Follows Suit",
+            "slug": "max-tegmark",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-11-29",
+            "excerpt": "This article explores the origins and nature of intelligence, both in biological brains and in artificial systems. Tracing the evolution of learning from the first neural networks to present-day deep learning, it investigates how matter arranged to obey physics can learn, remember and compute. The author examines parallels between animal and artificial intelligence, asking whether machines can reach advanced general intelligence surpassing humans, and what the societal impacts may be as AI progresses.",
+            "image": "/images/pictures/blog/max-tegmark-1.png"
+        },
+        {
+            "title": "Marketing Case by Nike Company",
+            "slug": "marketing-case-nike_v01",
+            "author": "Excerpted from Strategic Marketing by David W. Crevens",
+            "date": "2022-05-12",
+            "excerpt": "This article examines Nike's bold 1990s push into the $40B sports equipment market, beyond its core shoes and apparel. It details Nike's plans to leverage aerospace tech to create innovative new equipment like hockey sticks and baseball gloves. However, Nike faced skepticism and early missteps, while major brands like 110-year old Rawlings geared up to defend their turf. Despite challenges, Nike aimed to use its marketing prowess to swoosh into dominating equipment as well.",
+            "image": "/images/pictures/blog/Leonardo_Vision_XL_A_Nike_baseball_glove_that_looks_like_an_al_1.jpg"
+        },
+        {
+            "title": "HTC's Meteoric Growth from PDA Maker to Apple Rival",
+            "slug": "htc-growth-story",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-02-02",
+            "excerpt": "The article tells the story of how Taiwanese company HTC grew from a small startup into a major global smartphone manufacturer and innovator. It recounts how founder Cher Wang persevered despite early struggles, forging key partnerships with Microsoft, Google and others. HTC achieved many mobile firsts, transitioning from PDAs to acclaimed smartphones. The article tracks HTC's rise as a scrappy underdog to a top Apple rival.",
+            "image": "/images/pictures/blog/htc-1.png"
+        },
+        {
+            "title": "The Incredible Rise of Victorinox: How a Small Swiss Knife Company Became an International Brand",
+            "slug": "victorinox-story",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-05-12",
+            "excerpt": "This article tells the fascinating history of Victorinox, from its beginnings in 1884 as a small Swiss knife workshop to becoming one of the most recognizable international brands. It covers how founder Karl Elsener created the original Swiss Army Knife and its later innovations, as well as Victorinox’s expanding global reach in the 20th century through marketing and diversification. The article highlights Victorinox’s focus on quality Swiss craftsmanship even as the company grew exponentially.",
+            "image": "/images/pictures/blog/victorinox-3.jpeg"
+        },
+        {
+            "title": "The Rise, Fall, and Revival of the Hilton Hotel Empire",
+            "slug": "hilton-hotels-story",
+            "author": "Zachary Lukasiewicz",
+            "date": "2023-05-22",
+            "excerpt": "The article examines the history of the Hilton hotel chain, its ups and downs over the decades, and its marketing strategies to revive the brand. It covers the expansion and near-bankruptcy of early Hilton, its separation into US and British branches, and its eventual re-merger. The article also discusses Hilton's focus on franchising and promoting sub-brands, as well as its loyalty programs and renovations to restore the flagship Hilton image.",
+            "image": "/images/pictures/blog/hilton1.png"
+        },
+        {
+            "title": "Applying Behavioral Economics to Grow Revenue: A Marketing Case Study with Richard Thaler's Help",
+            "slug": "greek-peak-marketing-case",
+            "author": "Danylo Khorzhevskyi",
+            "date": "2023-11-02",
+            "excerpt": "Dive into the marketing odyssey of \"Greek Peak,\" a ski haven sculpted by the expertise of Richard Thaler, a maestro in behavioral economics. Through calculated pricing crescendos, the resort danced with gradual increments, ensuring customer harmony. Thaler's insights fueled service crescendos, with free offerings and tailored passes for locals and students. The resort's financial ascent, crowned by prepaid passes and loyalty-boosting discounts, transformed challenges into victories.",
+            "image": "/images/pictures/blog/greek-peak-1.png"
+        },
+        {
+            "title": "Marketing Insight: Kahneman's and Barden's Dual System Theories",
+            "slug": "dual-system-theory",
+            "author": "Danylo Khorzhevskyi",
+            "date": "2023-01-12",
+            "excerpt": "Article analyzes the dual system theories of Kahneman (System 1 & 2) and Barden (autopilot & pilot) and their application in marketing. Explains how instinctive System 1/autopilot and logical System 2/pilot interact in consumer decisions. Emphasizes importance of brands appealing to both impulsive and rational thinking through product presentation and facts on pricing/quality. Discusses crafting holistic marketing strategies that target emotional and analytical drivers of choice.",
+            "image": "/images/pictures/blog/Dual-System-Theories-1.png"
+        }
+    ]
+}

@@ -16,7 +16,7 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   };
 
   return (
-    <div className="bg-gray-100 flex justify-center py-4 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <div className="bg-gray-100 flex justify-center py- px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="container bg-white  p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl w-full">
         <h1 className="text-4xl font-bold mb-8 text-gray-900"> How To Article Generator</h1>
 
