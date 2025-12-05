@@ -16,11 +16,40 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   };
 
   return (
-    <div className="bg-gray-100 flex justify-center py-10 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="container bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl w-full">
+    <div className="bg-gray-100 flex justify-center py-4 px-4 sm:px-6 lg:px-8 min-h-screen">
+      <div className="container bg-white  p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl w-full">
         <h1 className="text-4xl font-bold mb-8 text-gray-900"> How To Article Generator</h1>
 
-        <div className="mb-8 p-6 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+          {/* Текст‑колонка */}
+          <div className="md:w-1/2">
+            <p className="text-gray-800">
+              Our goal is not just to create another database of articles. We are building a
+              <strong> "Living Library of Practical Instructions"</strong>, where every gap in
+              knowledge becomes a point of growth.
+
+            </p>
+
+            <p className="mt-4 text-gray-800">
+              Try the <em>How To</em> Article Master Generator and become an architect of global
+              knowledge! Join today and start shaping the future of shared knowledge!
+            </p>
+          </div>
+
+          {/* Видео‑колонка */}
+          <div className="md:w-1/2 w-full flex justify-center">
+            <video
+              src="/videos/intro.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-64 h-auto rounded"
+            ></video>
+          </div>
+        </div>
+
+        <div className="mb-8 mt-8 p-6 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
           <h2 className="text-4xl font-semibold mb-4 text-gray-800">How To</h2>
           <div className="flex flex-col items-end">
             <input
@@ -50,7 +79,9 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               )}
             </button>
           </div>
+
         </div>
+
       </div>
     </div>
   );

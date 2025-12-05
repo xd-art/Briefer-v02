@@ -10,18 +10,11 @@ const ProfilePage = ({ onNavigate, onEditArticle, onLogout }) => {
     useEffect(() => {
         const fetchArticles = async () => {
             if (!user || !token) return;
-
             try {
                 const response = await fetch(`http://localhost:3002/api/articles/user/${user.id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` },
                 });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch articles');
-                }
-
+                if (!response.ok) throw new Error('Failed to fetch articles');
                 const data = await response.json();
                 setArticles(data.drafts || []);
             } catch (err) {
@@ -31,25 +24,17 @@ const ProfilePage = ({ onNavigate, onEditArticle, onLogout }) => {
                 setLoading(false);
             }
         };
-
         fetchArticles();
     }, [user, token]);
 
     const handleDelete = async (articleId) => {
         if (!window.confirm('Are you sure you want to delete this article?')) return;
-
         try {
             const response = await fetch(`http://localhost:3002/api/articles/${articleId}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { Authorization: `Bearer ${token}` },
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to delete article');
-            }
-
+            if (!response.ok) throw new Error('Failed to delete article');
             setArticles(articles.filter(a => a.id !== articleId));
         } catch (err) {
             console.error('Error deleting article:', err);
@@ -66,11 +51,7 @@ const ProfilePage = ({ onNavigate, onEditArticle, onLogout }) => {
     }
 
     if (error) {
-        return (
-            <div className="text-center py-20 text-red-600">
-                {error}
-            </div>
-        );
+        return <div className="text-center py-20 text-red-600">{error}</div>;
     }
 
     return (
@@ -99,25 +80,23 @@ const ProfilePage = ({ onNavigate, onEditArticle, onLogout }) => {
                 <div className="bg-white shadow overflow-hidden sm:rounded-md">
                     <ul className="divide-y divide-gray-200">
                         {articles.map((article) => (
-                            <li key={article.id}>
-                                <div className="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-center justify-between transition-colors duration-150">
-                                    <div className="flex-1 min-w-0 pr-4">
+                            <li key={article.id} className="border-b border-gray-200 last:border-0">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-4 hover:bg-gray-50 transition-colors">
+                                    <div>
                                         <button
                                             onClick={() => onEditArticle(article)}
-                                            className="text-lg font-medium text-blue-600 truncate hover:underline text-left focus:outline-none"
+                                            className="text-lg font-medium text-blue-600 hover:underline focus:outline-none w-full text-left"
                                         >
                                             {article.title || 'Untitled Article'}
                                         </button>
-                                        <div className="mt-1 flex items-center">
-                                            <p className="text-sm text-gray-500">
-                                                (Modified: {new Date(article.updated_at || article.updatedAt).toLocaleDateString()})
-                                            </p>
-                                        </div>
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            (Modified: {new Date(article.updated_at || article.updatedAt).toLocaleDateString()})
+                                        </p>
                                     </div>
-                                    <div className="flex-shrink-0">
+                                    <div className="flex items-center justify-end ">
                                         <button
                                             onClick={() => handleDelete(article.id)}
-                                            className="text-sm font-medium text-red-600 hover:text-red-800 focus:outline-none px-3 py-1 rounded hover:bg-red-50 transition-colors duration-150"
+                                            className="  text-sm font-medium text-red-600 hover:text-red-800 focus:outline-none px-3 py-1 rounded hover:bg-red-50 transition-colors"
                                         >
                                             Delete
                                         </button>

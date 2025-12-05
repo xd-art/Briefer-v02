@@ -1,13 +1,14 @@
 import React from 'react';
+import Logo from '../assets/briefer-logo.svg';
 
 const Header = ({ user, onLoginClick, onLogoutClick, onNavigate, currentView }) => {
     return (
-        <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
+        <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     {/* Left Section: Logo */}
                     <div className="flex-shrink-0 cursor-pointer" onClick={() => onNavigate('generator')}>
-                        <span className="text-2xl font-bold text-blue-600 tracking-tight">ArticleAI</span>
+                        <img src={Logo} alt="Briefer Logo" className="h-4 inline-block" />
                     </div>
 
                     {/* Center Section: Navigation */}
@@ -15,8 +16,8 @@ const Header = ({ user, onLoginClick, onLogoutClick, onNavigate, currentView }) 
                         <button
                             onClick={() => onNavigate('generator')}
                             className={`text-sm font-medium transition-colors duration-200 ${currentView === 'generator' || currentView === 'editor'
-                                    ? 'text-blue-600'
-                                    : 'text-gray-500 hover:text-gray-900'
+                                ? 'text-blue-600'
+                                : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             Home
@@ -38,8 +39,8 @@ const Header = ({ user, onLoginClick, onLogoutClick, onNavigate, currentView }) 
                             <button
                                 onClick={() => onNavigate('profile')}
                                 className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${currentView === 'profile'
-                                        ? 'bg-blue-50 text-blue-600'
-                                        : 'hover:bg-gray-50 text-gray-700'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'hover:bg-gray-50 text-gray-700'
                                     }`}
                             >
                                 <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
