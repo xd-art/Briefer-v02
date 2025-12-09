@@ -6,6 +6,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
     const location = useLocation();
     const isHome = location.pathname === '/';
     const isBlog = location.pathname.startsWith('/blog');
+    const isCategories = location.pathname === '/categories';
 
     return (
         <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-100">
@@ -28,9 +29,16 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                         >
                             Home
                         </Link>
-                        <button className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
+                        <Link
+                            to="/categories"
+                            className={`text-sm font-medium transition-colors duration-200 ${
+                                isCategories
+                                    ? 'text-blue-600'
+                                    : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                        >
                             Categories
-                        </button>
+                        </Link>
                         <Link
                             to="/blog"
                             className={`text-sm font-medium transition-colors duration-200 ${isBlog

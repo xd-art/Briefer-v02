@@ -4,12 +4,14 @@ import ArticleEditorApp from '../components/ArticleEditorApp';
 import ProfilePage from '../components/ProfilePage';
 import BlogList from '../components/BlogList';
 import BlogPost from '../components/BlogPost';
+import CategoriesPage from '../components/CategoriesPage';
 
 const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/" element={<ArticleEditorApp />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             {/* Add more routes here as needed */}
