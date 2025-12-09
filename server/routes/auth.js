@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
-const requireAuth = require('../middleware/requireAuth');
+const passport = require('passport');
+const { User } = require('../models'); // Add this import back
+require('../config/passport'); // Initialize passport strategies
 
-// Register
-router.post('/register', async (req, res) => {
+// Register/Login with Email and Password
+router.post('/register', async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -30,58 +30,70 @@ router.post('/register', async (req, res) => {
             password_hash
         });
 
-        // Generate token
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-        res.status(201).json({ token, user: { id: user.id, email: user.email } });
+        // Log in the user automatically after registration
+        req.login(user, (err) => {
+            if (err) {
+                return next(err);
+            }
+            return res.status(201).json({ user: { id: user.id, email: user.email } });
+        });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
 
-// Login
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({ error: 'Email and password are required' });
+// Login with Email and Password using Passport
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            return next(err);
         }
-
-        // Find user
-        const user = await User.findOne({ where: { email } });
         if (!user) {
-            return res.status(400).json({ error: 'Invalid credentials' });
+            return res.status(400).json({ error: info.message || 'Invalid credentials' });
         }
+        req.logIn(user, (err) => {
+            if (err) {
+                return next(err);
+            }
+            return res.json({ user: { id: user.id, email: user.email } });
+        });
+    })(req, res, next);
+});
 
-        // Check password
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(400).json({ error: 'Invalid credentials' });
-        }
+// Google OAuth routes
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-        // Generate token
-        const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-        res.json({ token, user: { id: user.id, email: user.email } });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ error: 'Server error' });
+router.get('/google/callback', 
+    passport.authenticate('google', { failureRedirect: '/' }),
+    (req, res) => {
+        // Successful authentication, redirect to frontend
+        res.redirect('http://localhost:3000/profile');
     }
+);
+
+// Logout
+router.post('/logout', (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Could not log out' });
+        }
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Could not destroy session' });
+            }
+            res.clearCookie('connect.sid'); // Clear session cookie
+            return res.json({ message: 'Logged out successfully' });
+        });
+    });
 });
 
 // Get Current User
-router.get('/me', requireAuth, async (req, res) => {
-    try {
-        const user = await User.findByPk(req.userId, { attributes: ['id', 'email'] });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-        res.json({ user });
-    } catch (error) {
-        console.error('Auth check error:', error);
-        res.status(500).json({ error: 'Server error' });
+router.get('/me', (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ user: { id: req.user.id, email: req.user.email } });
+    } else {
+        res.status(401).json({ error: 'Not authenticated' });
     }
 });
 

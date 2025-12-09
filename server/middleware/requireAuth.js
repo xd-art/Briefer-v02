@@ -1,24 +1,12 @@
 const jwt = require('jsonwebtoken');
 
 const requireAuth = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-        return res.status(401).json({ error: 'Authorization header missing' });
-    }
-
-    const token = authHeader.split(' ')[1]; // Bearer <token>
-
-    if (!token) {
-        return res.status(401).json({ error: 'Token missing' });
-    }
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.userId = decoded.userId;
+    // Check if user is authenticated via Passport session
+    if (req.isAuthenticated && req.isAuthenticated()) {
+        req.userId = req.user.id;
         next();
-    } catch (error) {
-        return res.status(401).json({ error: 'Invalid token' });
+    } else {
+        return res.status(401).json({ error: 'Not authenticated' });
     }
 };
 

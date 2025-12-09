@@ -17,13 +17,18 @@ const User = sequelize.define('User', {
     },
     password_hash: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true // Allow null for Google-authenticated users
+    },
+    googleId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
     }
 }, {
     tableName: 'users',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: false // We only need created_at for now, or we can enable both
+    updatedAt: false
 });
 
 module.exports = User;

@@ -12,11 +12,11 @@ import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import ProfilePage from './ProfilePage';
 
-function ArticleEditorApp() {
-    const { user, token, loading, logout } = useAuth();
+function ArticleEditorApp({ initialView }) {
+    const { user, loading, logout } = useAuth();
     const [cards, setCards] = useState([]);
     const [articleTitle, setArticleTitle] = useState('');
-    const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
+    const [view, setView] = useState(initialView || 'loading'); // 'loading', 'generator', 'editor', 'profile'
     const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(null);
@@ -295,6 +295,12 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     // Initialization & Routing
     useEffect(() => {
+        // If initialView is 'profile', set it directly and return
+        if (initialView === 'profile') {
+            setView('profile');
+            return;
+        }
+
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
         const urlTopic = params.get('topic');
@@ -341,7 +347,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 setView('generator');
             }
         }
-    }, []);
+    }, [initialView]);
 
     // Handle edit link clicks
     const handleEditCard = (card) => {
@@ -372,11 +378,12 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         // Save to backend
         try {
             // First, create the article as a guest draft if it doesn't exist on backend
-            const createResponse = await fetch('http://localhost:3002/api/articles', {
+            const createResponse = await fetch('http://localhost:3003/api/articles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include', // Include cookies for authentication
                 body: JSON.stringify({
                     title: articleTitle,
                     content: cards
@@ -391,12 +398,12 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             const backendArticleId = article.id;
 
             // Now attach it to the authenticated user
-            const attachResponse = await fetch(`http://localhost:3002/api/articles/${backendArticleId}/attach`, {
+            const attachResponse = await fetch(`http://localhost:3003/api/articles/${backendArticleId}/attach`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                credentials: 'include' // Include cookies for authentication
             });
 
             if (!attachResponse.ok) {
@@ -563,14 +570,18 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         );
     };
 
+    const handleLoginClick = () => {
+        setShowRegistrationModal(true);
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
             <Header
                 user={user}
-                onLoginClick={() => setShowRegistrationModal(true)}
+                onLoginClick={handleLoginClick}
                 onLogoutClick={logout}
                 onNavigate={handleNavigate}
-                currentView={view}
+                currentView={view === 'profile' ? 'profile' : 'home'}
             />
 
             <main className="py-10 px-4 sm:px-6 lg:px-8">
@@ -634,11 +645,9 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 onClose={() => setShowRegistrationModal(false)}
                 onSuccess={async () => {
                     setShowRegistrationModal(false);
-                    // If we are in editor, save. If in profile, maybe reload?
+                    // If we are in editor, save the article after successful authentication
                     if (view === 'editor') {
                         await saveAllData();
-                    } else if (view === 'profile') {
-                        // Profile page will auto-refresh due to user change
                     }
                 }}
             />

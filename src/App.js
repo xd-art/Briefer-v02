@@ -8,11 +8,11 @@ import './styles.css';
 function App() {
     return (
         <HelmetProvider>
-            <AuthProvider>
-                <Router>
+            <Router>
+                <AuthProvider>
                     <AppRoutes />
-                </Router>
-            </AuthProvider>
+                </AuthProvider>
+            </Router>
         </HelmetProvider>
     );
 }
