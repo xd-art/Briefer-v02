@@ -12,11 +12,11 @@ import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import ProfilePage from './ProfilePage';
 
-function ArticleEditorApp({ initialView }) {
+function ArticleEditorApp() {
     const { user, loading, logout } = useAuth();
     const [cards, setCards] = useState([]);
     const [articleTitle, setArticleTitle] = useState('');
-    const [view, setView] = useState(initialView || 'loading'); // 'loading', 'generator', 'editor', 'profile'
+    const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
     const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(null);
@@ -295,12 +295,6 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     // Initialization & Routing
     useEffect(() => {
-        // If initialView is 'profile', set it directly and return
-        if (initialView === 'profile') {
-            setView('profile');
-            return;
-        }
-
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
         const urlTopic = params.get('topic');
@@ -347,7 +341,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 setView('generator');
             }
         }
-    }, [initialView]);
+    }, []);
 
     // Handle edit link clicks
     const handleEditCard = (card) => {
@@ -514,10 +508,6 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             return <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />;
         }
 
-        if (view === 'profile') {
-            return <ProfilePage onNavigate={handleNavigate} onEditArticle={handleEditArticle} onLogout={logout} />;
-        }
-
         // Editor View
         return (
             <div className="container mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl">
@@ -581,7 +571,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 onLoginClick={handleLoginClick}
                 onLogoutClick={logout}
                 onNavigate={handleNavigate}
-                currentView={view === 'profile' ? 'profile' : 'home'}
+                currentView="home"
             />
 
             <main className="py-10 px-4 sm:px-6 lg:px-8">

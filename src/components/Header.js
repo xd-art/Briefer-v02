@@ -20,10 +20,11 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                     <nav className="hidden md:flex space-x-8">
                         <Link
                             to="/"
-                            className={`text-sm font-medium transition-colors duration-200 ${isHome && currentView !== 'profile'
-                                ? 'text-blue-600'
-                                : 'text-gray-500 hover:text-gray-900'
-                                }`}
+                            className={`text-sm font-medium transition-colors duration-200 ${
+                                currentView === 'home'
+                                    ? 'text-blue-600'
+                                    : 'text-gray-500 hover:text-gray-900'
+                            }`}
                         >
                             Home
                         </Link>
@@ -47,8 +48,8 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                     {/* Right Section: Account Management */}
                     <div className="flex items-center">
                         {user ? (
-                            <button
-                                onClick={() => onNavigate('profile')}
+                            <Link
+                                to="/profile"
                                 className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${currentView === 'profile'
                                     ? 'bg-blue-50 text-blue-600'
                                     : 'hover:bg-gray-50 text-gray-700'
@@ -58,7 +59,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                                     {user.email ? user.email[0].toUpperCase() : 'U'}
                                 </div>
                                 <span className="text-sm font-medium hidden sm:block">Profile</span>
-                            </button>
+                            </Link>
                         ) : (
                             <button
                                 onClick={onLoginClick}
