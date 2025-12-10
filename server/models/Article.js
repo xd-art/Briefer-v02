@@ -27,6 +27,20 @@ const Article = sequelize.define('Article', {
         type: DataTypes.CHAR(12),
         allowNull: true,
         unique: true
+    },
+    status: {
+        type: DataTypes.ENUM('draft', 'pending_review', 'approved', 'rejected'),
+        defaultValue: 'draft',
+        allowNull: false
+    },
+    is_published_in_categories: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+    },
+    moderation_comment: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     tableName: 'articles',

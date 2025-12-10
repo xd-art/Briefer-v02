@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useLocation } from 'react-router-dom';
 import Card from './Card';
 import ArticleGenerator from './ArticleGenerator';
 import CardEditor from './CardEditor';
@@ -14,12 +15,14 @@ import ProfilePage from './ProfilePage';
 
 function ArticleEditorApp() {
     const { user, loading, logout } = useAuth();
+    const location = useLocation();
     const [cards, setCards] = useState([]);
     const [articleTitle, setArticleTitle] = useState('');
     const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
     const [showNotification, setShowNotification] = useState({ show: false, message: '', type: 'info' });
     const [isGenerating, setIsGenerating] = useState(false);
     const [currentArticleId, setCurrentArticleId] = useState(null);
+    const [loadedFromNavigation, setLoadedFromNavigation] = useState(false); // Track if loaded from navigation
     const cardEditorRef = useRef();
     const [isEditorLoaded, setIsEditorLoaded] = useState(false);
     const [refinementPrompt, setRefinementPrompt] = useState('');
@@ -236,6 +239,32 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         ];
     };
 
+    // Handle incoming article data from navigation (e.g., from CategoryArticlesPage)
+    useEffect(() => {
+        console.log('🔍 ArticleEditorApp - location.state:', location.state);
+        if (location.state?.editArticle) {
+            const { id, title, cards: articleCards } = location.state.editArticle;
+            console.log('✅ Loading article:', { id, title, cardsCount: articleCards?.length });
+            
+            // Save to ArticleManager for persistence
+            ArticleManager.saveArticle(id.toString(), {
+                title: title,
+                cards: articleCards
+            });
+            
+            setCurrentArticleId(id);
+            setArticleTitle(title || 'Untitled Article');
+            setCards(Array.isArray(articleCards) ? articleCards : []);
+            setView('editor');
+            setLoadedFromNavigation(true); // Mark as loaded from navigation
+            
+            // Update URL with article ID and clear navigation state
+            window.history.replaceState({}, document.title, `?id=${id}`);
+        } else {
+            console.log('⚠️ No editArticle in location.state');
+        }
+    }, [location.state]);
+
     // Handle filter changes
     const handleFilterChange = (filterId, value, isMulti = false) => {
         setSelectedFilters(prev => {
@@ -295,6 +324,13 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     // Initialization & Routing
     useEffect(() => {
+        // Skip if article is already loaded from navigation state
+        if (loadedFromNavigation) {
+            console.log('⏩ Skipping initialization - article already loaded from navigation state');
+            return;
+        }
+        
+        console.log('🔍 Initialization useEffect - checking URL params');
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
         const urlTopic = params.get('topic');
@@ -302,14 +338,17 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
         if (urlId) {
             // Case 1: Load existing article by ID
+            console.log('📂 Loading article by ID:', urlId);
             const article = ArticleManager.getArticle(urlId);
+            console.log('📦 Article from ArticleManager:', article);
             if (article) {
+                console.log('✅ Setting cards from ArticleManager:', article.cards?.length || 0, 'cards');
                 setCurrentArticleId(urlId);
                 setArticleTitle(article.title);
                 setCards(article.cards || []);
                 setView('editor');
             } else {
-                console.error('Article not found');
+                console.error('❌ Article not found in ArticleManager');
                 showNotificationMessage('Article not found. Redirecting to generator.', 'error');
                 window.history.replaceState(null, '', '/');
                 setView('generator');
@@ -338,10 +377,11 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 window.history.replaceState(null, '', `?id=${migratedId}`);
                 showNotificationMessage('Restored your previous session.', 'info');
             } else {
+                console.log('🎸 No article to load - showing generator');
                 setView('generator');
             }
         }
-    }, []);
+    }, [loadedFromNavigation]);
 
     // Handle edit link clicks
     const handleEditCard = (card) => {

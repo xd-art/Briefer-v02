@@ -34,6 +34,8 @@ require('./config/passport');
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/articles', require('./routes/articles'));
+app.use('/api/facets', require('./routes/facets'));
+app.use('/api/moderation', require('./routes/moderation'));
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -46,11 +48,21 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log('✅ Database connected.');
 
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
+        });
+
+        // Keep the process alive
+        process.on('SIGINT', () => {
+            console.log('\n⚠️  Shutting down server...');
+            server.close(() => {
+                console.log('✅ Server closed.');
+                process.exit(0);
+            });
         });
     } catch (error) {
         console.error('❌ Server failed to start:', error);
+        process.exit(1);
     }
 };
 
