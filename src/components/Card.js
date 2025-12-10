@@ -20,12 +20,28 @@ const Card = ({ card, onEdit }) => {
         }
     };
 
+    const handleEditClick = (e) => {
+        e.stopPropagation();
+        onEdit(card);
+    };
+
     return (
         <div
-            className="mb-8"
+            className="mb-8 border-b border-gray-200 pb-6"
             data-card-id={card.id}
             onClick={handleClick}
         >
+            {card.heading && (
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold text-gray-900">{card.heading}</h2>
+                    <button
+                        onClick={handleEditClick}
+                        className="ml-4 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                    >
+                        Edit
+                    </button>
+                </div>
+            )}
             <RichTextDisplay content={card.content} />
         </div>
     );
