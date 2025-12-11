@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Header from './Header';
+import RegistrationModal from './RegistrationModal';
 
 const CategoriesPage = () => {
+    const { user } = useAuth();
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+
     const categories = [
         {
             title: 'Programming & Development',
@@ -38,7 +43,11 @@ const CategoriesPage = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            <Header />
+            <Header 
+                user={user}
+                onLoginClick={() => setShowRegistrationModal(true)}
+                currentView="categories"
+            />
             
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -72,6 +81,11 @@ const CategoriesPage = () => {
                     ))}
                 </div>
             </div>
+
+            <RegistrationModal 
+                isOpen={showRegistrationModal}
+                onClose={() => setShowRegistrationModal(false)}
+            />
         </div>
     );
 };
