@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
 import { useAuth } from '../context/AuthContext';
 
@@ -82,10 +82,15 @@ const CategoryArticlesPage = () => {
         });
     };
 
+    const handleLogin = () => {
+        // Redirect to home page which has login functionality
+        navigate('/');
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-white">
-                <Header user={user} onLogoutClick={logout} />
+                <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -99,7 +104,7 @@ const CategoryArticlesPage = () => {
     if (error) {
         return (
             <div className="min-h-screen bg-white">
-                <Header user={user} onLogoutClick={logout} />
+                <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                     <div className="text-center py-12">
                         <div className="text-red-500 text-xl font-medium">{error}</div>
@@ -117,7 +122,7 @@ const CategoryArticlesPage = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            <Header user={user} onLogoutClick={logout} />
+            <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -141,14 +146,14 @@ const CategoryArticlesPage = () => {
                                 <li key={article.id} className="border-b border-gray-200 last:border-0">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-4 hover:bg-gray-50 transition-colors">
                                         <div>
-                                            <button
-                                                onClick={() => handleEditArticle(article)}
-                                                className="text-lg font-medium text-blue-600 hover:underline focus:outline-none w-full text-left"
+                                            <Link
+                                                to={`/article/${subcategory}/${article.id}`}
+                                                className="text-lg font-medium text-blue-600 hover:underline focus:outline-none w-full text-left block"
                                             >
                                                 {article.title || 'Untitled Article'}
-                                            </button>
+                                            </Link>
                                             <p className="text-sm text-gray-500 mt-1">
-                                                By {article.author?.email || 'Unknown Author'} • {article.updated_at ? new Date(article.updated_at).toLocaleDateString() : ''}
+                                                By {article.author?.name || article.author?.email?.split('@')[0] || 'Unknown Author'} • {article.updated_at ? new Date(article.updated_at).toLocaleDateString() : ''}
                                             </p>
                                             <div className="flex flex-wrap gap-1 mt-2">
                                                 {article.facetAssignments?.slice(0, 3).map((assignment) => (
@@ -159,6 +164,14 @@ const CategoryArticlesPage = () => {
                                                         {assignment.value?.label}
                                                     </span>
                                                 ))}
+                                            </div>
+                                            <div className="mt-3">
+                                                <button
+                                                    onClick={() => handleEditArticle(article)}
+                                                    className="text-sm font-medium text-blue-600 hover:text-blue-800 focus:outline-none"
+                                                >
+                                                    Edit &amp; save to profile
+                                                </button>
                                             </div>
                                         </div>
                                     </div>

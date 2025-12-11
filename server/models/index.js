@@ -4,10 +4,19 @@ const Article = require('./Article');
 const Facet = require('./Facet');
 const FacetValue = require('./FacetValue');
 const ArticleFacet = require('./ArticleFacet');
+const Contributor = require('./Contributor');
 
 // User <-> Article associations
 User.hasMany(Article, { foreignKey: 'user_id', as: 'drafts' });
 Article.belongsTo(User, { foreignKey: 'user_id', as: 'author' });
+
+// User <-> Contributor associations
+User.hasMany(Contributor, { foreignKey: 'user_id', as: 'contributions' });
+Contributor.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+// Article <-> Contributor associations
+Article.hasMany(Contributor, { foreignKey: 'article_id', as: 'contributors' });
+Contributor.belongsTo(Article, { foreignKey: 'article_id', as: 'article' });
 
 // Facet <-> FacetValue associations
 Facet.hasMany(FacetValue, { foreignKey: 'facet_id', as: 'values', onDelete: 'CASCADE' });
@@ -44,5 +53,6 @@ module.exports = {
     Article,
     Facet,
     FacetValue,
-    ArticleFacet
+    ArticleFacet,
+    Contributor
 };

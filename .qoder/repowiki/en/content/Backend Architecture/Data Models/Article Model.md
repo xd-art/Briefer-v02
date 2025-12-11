@@ -290,6 +290,7 @@ RoutesA --> Auth
 - [database.js](file://server/config/database.js#L1-L16)
 - [Article.js](file://server/models/Article.js#L1-L52)
 - [index.js](file://server/models/index.js#L1-L48)
+- [schema.sql](file://server/schema.sql#L1-L33)
 - [articles.js](file://server/routes/articles.js#L1-L228)
 - [moderation.js](file://server/routes/moderation.js#L1-L214)
 - [requireAuth.js](file://server/middleware/requireAuth.js#L1-L14)

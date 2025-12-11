@@ -1,11 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from './Header';
-import { useAuth } from '../context/AuthContext';
 
 const CategoriesPage = () => {
-    const { user, logout } = useAuth();
-    
     const categories = [
         {
             title: 'Programming & Development',
@@ -41,10 +38,7 @@ const CategoriesPage = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            <Header 
-                user={user}
-                onLogoutClick={logout}
-            />
+            <Header />
             
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">

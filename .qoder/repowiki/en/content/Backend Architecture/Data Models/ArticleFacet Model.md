@@ -7,9 +7,15 @@
 - [FACETS_API.md](file://server/FACETS_API.md)
 - [articles.js](file://server/routes/articles.js)
 - [moderation.js](file://server/routes/moderation.js)
-- [Facet.js](file://server/models/Facet.js)
-- [FacetValue.js](file://server/models/FacetValue.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated documentation to reflect new source and confidence fields in ArticleFacet model
+- Enhanced explanation of AI auto-tagging workflow with confidence scoring
+- Added details on tag source tracking and moderation review processes
+- Clarified confidence value assignment logic in moderation routes
+- Updated field descriptions to include source and confidence semantics
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -112,8 +118,8 @@ Articles-->>Client : Category + articles
   - article_id: references articles with CASCADE delete
   - facet_id: denormalized facet reference for fast filtering
   - facet_value_id: specific classification value
-  - source: ENUM('manual', 'auto_suggested')
-  - confidence: FLOAT bounded 0–1 with default 1.0
+  - source: ENUM('manual', 'auto_suggested') indicating assignment origin
+  - confidence: FLOAT bounded 0–1 with default 1.0, representing AI suggestion reliability
 - Indexes:
   - article_id
   - facet_value_id
@@ -144,7 +150,7 @@ Denormalization rationale:
   - Bulk inserts new assignments with source and confidence.
 - Confidence semantics:
   - source='manual': confidence=1.0
-  - source='auto_suggested': confidence set to a default value (e.g., 0.8) by the route.
+  - source='auto_suggested': confidence set to 0.8 by default in the route
 
 ```mermaid
 sequenceDiagram
@@ -206,6 +212,7 @@ Articles-->>Client : {category, articles}
 - Implementation note:
   - The model supports source and confidence fields.
   - The moderation route demonstrates how to set source and confidence during bulk assignment.
+  - Default confidence for auto-suggested tags is 0.8 when assigned through moderation interface.
 
 **Section sources**
 - [FACETS_API.md](file://server/FACETS_API.md#L249-L255)
@@ -316,4 +323,4 @@ Common issues and resolutions:
 - [moderation.js](file://server/routes/moderation.js#L83-L119)
 
 ## Conclusion
-The ArticleFacet model is central to the classification system, enabling flexible filtering, robust moderation, and scalable performance through strategic denormalization and indexing. Its design supports both manual curation and future AI auto-tagging workflows, while maintaining data integrity via foreign keys and validations.
+The ArticleFacet model is central to the classification system, enabling flexible filtering, robust moderation, and scalable performance through strategic denormalization and indexing. Its design supports both manual curation and future AI auto-tagging workflows, while maintaining data integrity via foreign keys and validations. The addition of source and confidence fields enhances traceability and quality control in content classification.

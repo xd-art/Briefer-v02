@@ -89,11 +89,56 @@ router.post('/logout', (req, res) => {
 });
 
 // Get Current User
-router.get('/me', (req, res) => {
+router.get('/me', async (req, res) => {
     if (req.isAuthenticated()) {
-        res.json({ user: { id: req.user.id, email: req.user.email } });
+        try {
+            const user = await User.findByPk(req.user.id, {
+                attributes: ['id', 'email', 'name', 'bio', 'website', 'role']
+            });
+            res.json({ user });
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            res.status(500).json({ error: 'Server error' });
+        }
     } else {
         res.status(401).json({ error: 'Not authenticated' });
+    }
+});
+
+// Update user profile
+router.put('/profile', async (req, res) => {
+    try {
+        if (!req.isAuthenticated()) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        const { name, bio, website } = req.body;
+        const user = await User.findByPk(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Update user profile fields
+        if (name !== undefined) user.name = name;
+        if (bio !== undefined) user.bio = bio;
+        if (website !== undefined) user.website = website;
+
+        await user.save();
+
+        res.json({
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                bio: user.bio,
+                website: user.website,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

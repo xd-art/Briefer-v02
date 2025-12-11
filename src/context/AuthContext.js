@@ -100,8 +100,23 @@ export const AuthProvider = ({ children }) => {
         window.location.href = 'http://localhost:3003/api/auth/google';
     };
 
+    const refreshUser = async () => {
+        try {
+            const response = await fetch('http://localhost:3003/api/auth/me', {
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data.user);
+            }
+        } catch (error) {
+            console.error('Failed to refresh user:', error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loginWithGoogle, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, loginWithGoogle, refreshUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

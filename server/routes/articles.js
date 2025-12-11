@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Article, User, ArticleFacet, FacetValue, Facet } = require('../models');
+const { Article, User, ArticleFacet, FacetValue, Facet, Contributor } = require('../models');
 const requireAuth = require('../middleware/requireAuth');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require('sequelize');
@@ -52,74 +52,52 @@ router.put('/:id/attach', requireAuth, async (req, res) => {
     }
 });
 
-// Save/Update Article (Protected)
-router.put('/:id', requireAuth, async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { title, content } = req.body;
-
-        const article = await Article.findByPk(id);
-
-        if (!article) {
-            return res.status(404).json({ error: 'Article not found' });
-        }
-
-        // Check ownership
-        if (article.user_id !== req.userId) {
-            return res.status(403).json({ error: 'Not authorized' });
-        }
-
-        article.title = title;
-        article.content = JSON.stringify(content);
-        await article.save();
-
-        res.json({ article });
-    } catch (error) {
-        console.error('Update article error:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
 /**
  * GET /api/articles/categories/:facetValue
  * Get published articles by facet value
  * Example: /api/articles/categories/web_development
+ * IMPORTANT: This route must come before /:id to avoid conflicts
  */
 router.get('/categories/:facetValue', async (req, res) => {
     try {
         const { facetValue } = req.params;
-        console.log('📂 Category request for:', facetValue);
-        
-        // Find the facet value
+
+        // Find the FacetValue by value
         const fv = await FacetValue.findOne({
             where: { value: facetValue },
-            include: [
-                {
-                    model: FacetValue,
-                    as: 'parent'
-                },
-                {
-                    model: Facet,
-                    as: 'facet'
-                }
-            ]
+            include: [{
+                model: Facet,
+                as: 'facet'
+            }]
         });
 
         if (!fv) {
             return res.status(404).json({ error: 'Category not found' });
         }
 
-        // Get articles with this facet value
+        // Find all articles that:
+        // 1. Are approved
+        // 2. Are published in categories
+        // 3. Have this facet value assigned
         const articles = await Article.findAll({
             where: {
-                is_published_in_categories: true,
-                status: 'approved'
+                status: 'approved',
+                is_published_in_categories: true
             },
             include: [
                 {
                     model: User,
                     as: 'author',
-                    attributes: ['id', 'email']
+                    attributes: ['id', 'email', 'name', 'bio', 'website']
+                },
+                {
+                    model: Contributor,
+                    as: 'contributors',
+                    include: [{
+                        model: User,
+                        as: 'user',
+                        attributes: ['id', 'email', 'name', 'bio', 'website']
+                    }]
                 },
                 {
                     model: ArticleFacet,
@@ -166,6 +144,56 @@ router.get('/user/:userId', requireAuth, async (req, res) => {
         res.json({ drafts });
     } catch (error) {
         console.error('Get drafts error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Save/Update Article (Protected)
+router.put('/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, content } = req.body;
+
+        const article = await Article.findByPk(id);
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        // Check ownership
+        if (article.user_id !== req.userId) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+
+        article.title = title;
+        article.content = JSON.stringify(content);
+        await article.save();
+
+        res.json({ article });
+    } catch (error) {
+        console.error('Update article error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get Single Article by ID (Protected)
+router.get('/:id', requireAuth, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const article = await Article.findByPk(id);
+
+        if (!article) {
+            return res.status(404).json({ error: 'Article not found' });
+        }
+
+        // Check ownership
+        if (article.user_id !== req.userId) {
+            return res.status(403).json({ error: 'Not authorized' });
+        }
+
+        res.json({ article });
+    } catch (error) {
+        console.error('Get article error:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });

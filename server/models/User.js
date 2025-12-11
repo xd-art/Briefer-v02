@@ -28,6 +28,29 @@ const User = sequelize.define('User', {
         type: DataTypes.ENUM('user', 'moderator', 'admin'),
         defaultValue: 'user',
         allowNull: false
+    },
+    name: {
+        type: DataTypes.STRING(100),
+        allowNull: true
+    },
+    bio: {
+        type: DataTypes.STRING(160),
+        allowNull: true,
+        validate: {
+            len: {
+                args: [0, 160],
+                msg: "Bio must be less than 160 characters"
+            }
+        }
+    },
+    website: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isUrl: {
+                msg: "Website must be a valid URL"
+            }
+        }
     }
 }, {
     tableName: 'users',

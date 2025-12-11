@@ -6,10 +6,15 @@
 - [ArticleEditorApp.js](file://src/components/ArticleEditorApp.js)
 - [RichTextDisplay.js](file://src/components/RichTextDisplay.js)
 - [CardEditor.js](file://src/components/CardEditor.js)
-- [ai-links-spec.md](file://docs/ai-links-spec.md)
-- [ai-links-prompt.md](file://docs/ai-links-prompt.md)
-- [ArticleManager.js](file://src/utils/ArticleManager.js)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated documentation to reflect the new 'Edit' button functionality in the Card component
+- Added details about the new button-based editing interaction alongside the existing edit-link functionality
+- Updated component analysis to include both click handlers for editing
+- Enhanced usage examples to show the new editing pattern
+- Updated accessibility guidelines to include button interaction considerations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -27,6 +32,7 @@
 The Card component is a focused container for individual article sections. It renders rich text content via RichTextDisplay and orchestrates user interactions through click handlers. Cards support:
 - Inline editing via an edit-link that opens the CardEditor modal
 - AI-driven content generation via ai-link tags that trigger contextual article generation in a new tab
+- Direct editing through a dedicated 'Edit' button positioned alongside section headings
 
 The component exposes a minimal API: a card prop containing id and content, and an onEdit callback to open the editor. It is rendered within ArticleEditorApp, which manages the full article lifecycle and state.
 
@@ -85,6 +91,7 @@ Key props and responsibilities:
 - Interactions:
   - Click handler inspects target class or tag to route to edit or AI generation
   - AI links open a new tab with a generation action URL
+  - Edit button triggers the onEdit callback for in-card editing
 
 **Section sources**
 - [Card.js](file://src/components/Card.js#L1-L34)
@@ -107,8 +114,8 @@ participant App as "ArticleEditorApp"
 participant Editor as "CardEditor"
 participant RTD as "RichTextDisplay"
 User->>Card : Click section
-Card->>Card : Inspect target (edit-link or ai-link)
-alt edit-link
+Card->>Card : Inspect target (edit-link, Edit button, or ai-link)
+alt edit-link or Edit button
 Card->>App : onEdit(card)
 App->>Editor : openEditModal(card)
 Editor-->>User : Edit UI
@@ -130,39 +137,45 @@ Card->>RTD : Render content
 ### Card Component
 Responsibilities:
 - Render a single article section
-- Handle click events for edit-link and ai-link
+- Handle click events for edit-link, Edit button, and ai-link
 - Delegate content rendering to RichTextDisplay
 - Pass card to onEdit callback for editor integration
 
 Behavior highlights:
 - Edit-link detection uses class matching and prevents default navigation
+- Edit button click triggers the onEdit callback directly
 - ai-link detection checks tag name or class and extracts topic and template attributes
 - Opens a new tab with a generation URL constructed from topic and template
 - Uses React.memo to minimize re-renders
 
 Props:
 - card: object with id and content
-- onEdit: function(card) invoked when edit-link is clicked
+- onEdit: function(card) invoked when edit-link or Edit button is clicked
 
 Rendering:
 - Wraps RichTextDisplay to render sanitized HTML content
+- Displays section heading with an adjacent Edit button when card.heading exists
 
 Integration points:
 - onEdit callback is wired from ArticleEditorApp’s handleEditCard
 - ai-link tags are allowed by RichTextDisplay and handled by Card’s click logic
+- Edit button provides an alternative, more prominent way to trigger editing
 
 ```mermaid
 flowchart TD
-Start(["Card.handleClick"]) --> Target["Inspect event target"]
+Start["Card.handleClick"] --> Target["Inspect event target"]
 Target --> IsEdit{"Is edit-link?"}
 IsEdit --> |Yes| Prevent["Prevent default"]
 Prevent --> CallOnEdit["Call onEdit(card)"]
-IsEdit --> |No| IsAi{"Is ai-link tag/class?"}
+IsEdit --> |No| IsEditButton{"Is Edit button?"}
+IsEditButton --> |Yes| CallOnEditButton["Call onEdit(card)"]
+IsEditButton --> |No| IsAi{"Is ai-link tag/class?"}
 IsAi --> |Yes| Extract["Extract topic and template"]
 Extract --> BuildUrl["Build generation URL"]
 BuildUrl --> OpenTab["Open new tab"]
-IsAi --> |No| End(["Ignore"])
+IsAi --> |No| End["Ignore"]
 CallOnEdit --> End
+CallOnEditButton --> End
 OpenTab --> End
 ```
 
@@ -334,7 +347,7 @@ Guidance:
 
 ## Accessibility Guidelines
 - Keyboard navigation:
-  - Ensure edit-link and ai-link are focusable and operable via Enter/Space
+  - Ensure edit-link, Edit button, and ai-link are focusable and operable via Enter/Space
   - Provide clear focus indicators and skip links for long articles
 - ARIA labeling:
   - Add aria-label or aria-labelledby to interactive elements inside cards
@@ -348,7 +361,7 @@ Guidance:
 
 Implementation tips:
 - Wrap interactive anchors with explicit roles and labels where appropriate
-- Announce state changes (e.g., “New tab opened for AI generation”) to assistive technologies
+- Announce state changes (e.g., "New tab opened for AI generation") to assistive technologies
 - Test with screen readers and keyboard-only navigation
 
 [No sources needed since this section provides general guidance]
@@ -358,7 +371,7 @@ Common issues and resolutions:
 - ai-link not triggering generation:
   - Verify topic and template attributes are present and correctly encoded
   - Confirm click handler is attached and default is prevented
-- Edit-link not opening modal:
+- Edit-link or Edit button not opening modal:
   - Ensure onEdit callback is passed and handleEditCard dispatches the expected event
   - Check that CardEditor is mounted and openEditModal is callable
 - Rich text not rendering:
@@ -374,4 +387,4 @@ Common issues and resolutions:
 - [RichTextDisplay.js](file://src/components/RichTextDisplay.js#L1-L51)
 
 ## Conclusion
-The Card component serves as a focused, secure, and interactive container for article sections. It integrates seamlessly with RichTextDisplay for safe rendering, with CardEditor for editing and AI refinement, and with ArticleEditorApp for orchestration. By leveraging React.memo and careful event handling, it balances usability with performance. The ai-link specification enables contextual content generation, while the documented accessibility guidelines help ensure inclusive interactions.
+The Card component serves as a focused, secure, and interactive container for article sections. It integrates seamlessly with RichTextDisplay for safe rendering, with CardEditor for editing and AI refinement, and with ArticleEditorApp for orchestration. By leveraging React.memo and careful event handling, it balances usability with performance. The ai-link specification enables contextual content generation, while the documented accessibility guidelines help ensure inclusive interactions. The addition of the dedicated Edit button provides users with a more intuitive way to initiate editing while maintaining backward compatibility with the existing edit-link functionality.

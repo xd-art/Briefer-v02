@@ -322,6 +322,46 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         }
     }, [showFilterModal]);
 
+    // Fetch article from backend if not in localStorage
+    const fetchArticleFromBackend = async (articleId) => {
+        try {
+            const response = await fetch(`http://localhost:3003/api/articles/${articleId}`, {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('Article not found');
+            }
+
+            const { article } = await response.json();
+            
+            // Parse content if it's a string
+            let parsedCards = [];
+            try {
+                parsedCards = typeof article.content === 'string' ? JSON.parse(article.content) : article.content;
+            } catch (e) {
+                console.error('Failed to parse article content', e);
+                parsedCards = [];
+            }
+
+            // Save to ArticleManager for future access
+            ArticleManager.saveArticle(articleId.toString(), {
+                title: article.title,
+                cards: parsedCards
+            });
+
+            setCurrentArticleId(articleId);
+            setArticleTitle(article.title || 'Untitled Article');
+            setCards(parsedCards || []);
+            setView('editor');
+        } catch (error) {
+            console.error('Error fetching article from backend:', error);
+            showNotificationMessage('Article not found. Redirecting to generator.', 'error');
+            window.history.replaceState(null, '', '/');
+            setView('generator');
+        }
+    };
+
     // Initialization & Routing
     useEffect(() => {
         // Skip if article is already loaded from navigation state
@@ -348,10 +388,9 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 setCards(article.cards || []);
                 setView('editor');
             } else {
-                console.error('❌ Article not found in ArticleManager');
-                showNotificationMessage('Article not found. Redirecting to generator.', 'error');
-                window.history.replaceState(null, '', '/');
-                setView('generator');
+                // Article not in localStorage, try to fetch from backend
+                console.log('🔍 Article not in localStorage, fetching from backend...');
+                fetchArticleFromBackend(urlId);
             }
         } else if (urlTopic) {
             // Case 2: AI Link Trigger (New Article from Topic)
@@ -402,22 +441,21 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             return;
         }
 
-        if (!currentArticleId) {
-            // Should not happen in editor view, but safety check
-            const newId = ArticleManager.createArticle(articleTitle || 'Untitled');
-            setCurrentArticleId(newId);
-            window.history.pushState(null, '', `?id=${newId}`);
-        }
-
         // Save to backend
         try {
-            // First, create the article as a guest draft if it doesn't exist on backend
+            console.log('💾 Starting save process...');
+            console.log('💾 Current article ID:', currentArticleId);
+            console.log('💾 Title:', articleTitle);
+            console.log('💾 Cards count:', cards?.length);
+            
+            // Always create a new draft for category articles (they're copies)
+            // For user's own articles, we could add update logic later
             const createResponse = await fetch('http://localhost:3003/api/articles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include', // Include cookies for authentication
+                credentials: 'include',
                 body: JSON.stringify({
                     title: articleTitle,
                     content: cards
@@ -430,29 +468,40 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
             const { article } = await createResponse.json();
             const backendArticleId = article.id;
+            console.log('✅ Article created with ID:', backendArticleId);
 
-            // Now attach it to the authenticated user
+            // Attach it to the authenticated user
             const attachResponse = await fetch(`http://localhost:3003/api/articles/${backendArticleId}/attach`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                credentials: 'include' // Include cookies for authentication
+                credentials: 'include'
             });
 
             if (!attachResponse.ok) {
                 throw new Error('Failed to attach article to user');
             }
+            console.log('✅ Article attached to user');
 
-            // Also save locally
-            ArticleManager.saveArticle(currentArticleId, {
+            // Update local state with the new backend ID
+            setCurrentArticleId(backendArticleId);
+            console.log('✅ Updated currentArticleId to:', backendArticleId);
+            
+            // Save to ArticleManager with the backend ID
+            ArticleManager.saveArticle(backendArticleId.toString(), {
                 title: articleTitle,
                 cards: cards
             });
 
-            showNotificationMessage('All edits saved to Library!', 'success');
+            // Update URL to reflect the new backend ID
+            window.history.replaceState(null, '', `?id=${backendArticleId}`);
+            console.log('✅ URL updated to:', `?id=${backendArticleId}`);
+
+            showNotificationMessage('Article saved to your profile!', 'success');
+            console.log('✅ Save complete!');
         } catch (error) {
-            console.error('Save error:', error);
+            console.error('❌ Save error:', error);
             showNotificationMessage('Failed to save article', 'error');
         }
     };

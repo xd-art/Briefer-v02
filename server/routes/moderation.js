@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Article, User, ArticleFacet, FacetValue, Facet } = require('../models');
+const { Article, User, ArticleFacet, FacetValue, Facet, Contributor } = require('../models');
 const { Op } = require('sequelize');
 
 /**
@@ -161,6 +161,24 @@ router.patch('/articles/:id/approve', async (req, res) => {
             }));
 
             await ArticleFacet.bulkCreate(assignments);
+        }
+
+        // Record the author as a contributor if not already recorded
+        if (article.user_id) {
+            const existingContributor = await Contributor.findOne({
+                where: {
+                    article_id: id,
+                    user_id: article.user_id
+                }
+            });
+
+            if (!existingContributor) {
+                await Contributor.create({
+                    article_id: id,
+                    user_id: article.user_id,
+                    contribution_type: 'author'
+                });
+            }
         }
 
         // Update article status

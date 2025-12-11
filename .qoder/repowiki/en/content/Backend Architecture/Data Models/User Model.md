@@ -15,6 +15,13 @@
 - [schema.sql](file://server/schema.sql)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Updated documentation to reflect the new role-based permission system with user, moderator, and admin roles in the User model
+- Enhanced security considerations section to detail role-based access control implementation
+- Added specific references to moderation routes that enforce role checks
+- Clarified role field constraints and default values in the model definition
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
@@ -289,7 +296,7 @@ Article "many" --> "1" User : "author (user_id)"
   - References: [User.js](file://server/models/User.js#L1-L39), [passport.js](file://server/config/passport.js#L1-L91)
 - Access control:
   - role field enables role-based access control
-  - Moderation endpoints currently indicate moderator/admin requirement
+  - Moderation endpoints enforce moderator/admin requirements through route-level checks
   - References: [User.js](file://server/models/User.js#L1-L39), [moderation.js](file://server/routes/moderation.js#L1-L213)
 - Session security:
   - express-session configured with cookie options

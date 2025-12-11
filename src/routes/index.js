@@ -6,6 +6,7 @@ import BlogList from '../components/BlogList';
 import BlogPost from '../components/BlogPost';
 import CategoriesPage from '../components/CategoriesPage';
 import CategoryArticlesPage from '../components/CategoryArticlesPage';
+import PublishedArticle from '../components/PublishedArticle';
 
 const AppRoutes = () => {
     return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/categories/:category/:subcategory" element={<CategoryArticlesPage />} />
+            <Route path="/article/:subcategory/:articleId" element={<PublishedArticle />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             {/* Add more routes here as needed */}

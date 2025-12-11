@@ -7,6 +7,12 @@
 ALTER TABLE users 
 ADD COLUMN role ENUM('user', 'moderator', 'admin') NOT NULL DEFAULT 'user';
 
+-- Add profile fields to users table
+ALTER TABLE users
+ADD COLUMN name VARCHAR(100) NULL,
+ADD COLUMN bio VARCHAR(160) NULL,
+ADD COLUMN website VARCHAR(255) NULL;
+
 -- ============================================
 -- 2. Articles Table (Extended)
 -- ============================================
@@ -74,6 +80,25 @@ CREATE TABLE article_facets (
 CREATE INDEX idx_article_facets_article_id ON article_facets(article_id);
 CREATE INDEX idx_article_facets_facet_value_id ON article_facets(facet_value_id);
 CREATE INDEX idx_article_facets_facet_id ON article_facets(facet_id);
+
+-- ============================================
+-- 6. Contributors Table (New)
+-- ============================================
+CREATE TABLE contributors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    article_id INT NOT NULL,
+    user_id INT NOT NULL,
+    contribution_type ENUM('author', 'editor', 'reviewer') NOT NULL DEFAULT 'editor',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    
+    UNIQUE KEY unique_article_user (article_id, user_id)
+);
+
+CREATE INDEX idx_contributors_article_id ON contributors(article_id);
+CREATE INDEX idx_contributors_user_id ON contributors(user_id);
 
 -- ============================================
 -- Sample Data Structure
