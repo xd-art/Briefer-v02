@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -11,6 +11,8 @@ const ProfilePage = () => {
     const [editingProfile, setEditingProfile] = useState(false);
     const [profileData, setProfileData] = useState({ name: '', bio: '', website: '' });
     const [saveMessage, setSaveMessage] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+    const [hasChanges, setHasChanges] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -72,6 +74,7 @@ const ProfilePage = () => {
 
     const handleSaveProfile = async (data) => {
         try {
+            setIsSaving(true);
             const response = await fetch('http://localhost:3003/api/auth/profile', {
                 method: 'PUT',
                 headers: {
@@ -81,13 +84,55 @@ const ProfilePage = () => {
                 body: JSON.stringify(data)
             });
 
-            if (!response.ok) throw new Error('Failed to update profile');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update profile');
+            }
             
             // Refresh user data in context
             await refreshUser();
+            
+            // Show success message
+            setSaveMessage('Profile updated successfully!');
+            setTimeout(() => setSaveMessage(''), 3000);
         } catch (err) {
             console.error('Error updating profile:', err);
+            setSaveMessage(`Error: ${err.message}`);
+            setTimeout(() => setSaveMessage(''), 5000);
+        } finally {
+            setIsSaving(false);
         }
+    };
+
+    const debouncedSave = (data) => {
+        // Clear previous timeout
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        
+        // Set new timeout to save after 1 second of no typing
+        saveTimeoutRef.current = setTimeout(() => {
+            handleSaveProfile(data);
+        }, 1000);
+    };
+
+    const handleCloseEdit = async () => {
+        if (hasChanges) {
+            await handleSaveProfile(profileData);
+        }
+        setEditingProfile(false);
+        setHasChanges(false);
+    };
+
+    // Ensure URL has protocol to prevent localhost prefix
+    const formatExternalUrl = (url) => {
+        if (!url) return url;
+        const trimmedUrl = url.trim();
+        // If URL doesn't start with http:// or https://, add https://
+        if (!trimmedUrl.match(/^https?:\/\//i)) {
+            return `https://${trimmedUrl}`;
+        }
+        return trimmedUrl;
     };
 
     if (loading) {
@@ -130,8 +175,18 @@ const ProfilePage = () => {
                 </div>
 
                 {saveMessage && (
-                    <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                    <div className={`mb-4 p-4 rounded ${
+                        saveMessage.startsWith('Error') 
+                            ? 'bg-red-100 border border-red-400 text-red-700' 
+                            : 'bg-green-100 border border-green-400 text-green-700'
+                    }`}>
                         {saveMessage}
+                    </div>
+                )}
+
+                {isSaving && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded text-sm">
+                        💾 Saving changes...
                     </div>
                 )}
 
@@ -139,12 +194,21 @@ const ProfilePage = () => {
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
-                        <button
-                            onClick={() => setEditingProfile(!editingProfile)}
-                            className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                            {editingProfile ? 'Close' : 'Edit'}
-                        </button>
+                        {editingProfile ? (
+                            <button
+                                onClick={handleCloseEdit}
+                                className="text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                                Close
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => setEditingProfile(true)}
+                                className="text-blue-600 hover:text-blue-800 font-medium"
+                            >
+                                Edit
+                            </button>
+                        )}
                     </div>
                     
                     {editingProfile ? (
@@ -159,7 +223,7 @@ const ProfilePage = () => {
                                     onChange={(e) => {
                                         const newName = e.target.value;
                                         setProfileData({...profileData, name: newName});
-                                        handleSaveProfile({...profileData, name: newName});
+                                        setHasChanges(true);
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Your name"
@@ -174,7 +238,7 @@ const ProfilePage = () => {
                                     onChange={(e) => {
                                         const newBio = e.target.value;
                                         setProfileData({...profileData, bio: newBio});
-                                        handleSaveProfile({...profileData, bio: newBio});
+                                        setHasChanges(true);
                                     }}
                                     maxLength={160}
                                     rows={3}
@@ -195,11 +259,14 @@ const ProfilePage = () => {
                                     onChange={(e) => {
                                         const newWebsite = e.target.value;
                                         setProfileData({...profileData, website: newWebsite});
-                                        handleSaveProfile({...profileData, website: newWebsite});
+                                        setHasChanges(true);
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="https://yourwebsite.com"
                                 />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Include https:// or http:// at the beginning
+                                </p>
                             </div>
                         </div>
                     ) : (
@@ -220,10 +287,10 @@ const ProfilePage = () => {
                                 <p className="text-sm font-medium text-gray-700">Website</p>
                                 {(user?.website || profileData.website) ? (
                                     <a 
-                                        href={user?.website || profileData.website} 
+                                        href={formatExternalUrl(user?.website || profileData.website)}
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-blue-600 hover:underline"
+                                        className="text-blue-600 hover:underline break-all"
                                     >
                                         {user?.website || profileData.website}
                                     </a>
