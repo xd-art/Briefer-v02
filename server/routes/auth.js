@@ -112,17 +112,30 @@ router.put('/profile', async (req, res) => {
             return res.status(401).json({ error: 'Not authenticated' });
         }
 
-        const { name, bio, website } = req.body;
+        let { name, bio, website } = req.body;
         const user = await User.findByPk(req.user.id);
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        // Handle website: add protocol if missing, or set to null if empty
+        if (website !== undefined) {
+            if (website === null || website.trim() === '') {
+                user.website = null;
+            } else {
+                const trimmedWebsite = website.trim();
+                if (!trimmedWebsite.startsWith('http://') && !trimmedWebsite.startsWith('https://')) {
+                    user.website = 'https://' + trimmedWebsite;
+                } else {
+                    user.website = trimmedWebsite;
+                }
+            }
+        }
+
         // Update user profile fields
         if (name !== undefined) user.name = name;
         if (bio !== undefined) user.bio = bio;
-        if (website !== undefined) user.website = website;
 
         await user.save();
 

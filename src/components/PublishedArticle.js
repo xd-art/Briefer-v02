@@ -12,6 +12,15 @@ const PublishedArticle = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Helper to ensure URL has protocol
+    const formatUrl = (url) => {
+        if (!url) return '';
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return url;
+        }
+        return 'https://' + url;
+    };
+
     const handleEditInEditor = () => {
         if (!article) return;
 
@@ -126,7 +135,9 @@ const PublishedArticle = () => {
         ));
     };
 
-    const contributors = article.contributors?.filter(c => c.contribution_type !== 'author') || [];
+    // Separate authors and other contributors
+    const authors = article.contributors?.filter(c => c.contribution_type === 'author') || [];
+    const otherContributors = article.contributors?.filter(c => c.contribution_type !== 'author') || [];
     
     return (
         <div className="min-h-screen bg-white">
@@ -182,14 +193,59 @@ const PublishedArticle = () => {
                         {renderCardContent(articleContent)}
                     </div>
                     
-                    {contributors.length > 0 && (
+                    {authors.length > 0 && (
+                        <section className="mt-12 pt-8 border-t border-gray-200">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                {authors.length === 1 ? 'Author' : 'Authors'}
+                            </h3>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                {authors.map((author) => (
+                                    <div 
+                                        key={author.id} 
+                                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                    >
+                                        <div className="flex items-start">
+                                            <div className="flex-shrink-0 mr-3">
+                                                <div className="bg-gradient-to-br from-green-400 to-blue-500 rounded-full w-12 h-12 flex items-center justify-center text-white font-bold text-lg">
+                                                    {(author.user?.name || author.user?.email)?.charAt(0).toUpperCase() || 'A'}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-medium text-gray-900 truncate">
+                                                    {author.user?.name || author.user?.email?.split('@')[0] || 'Anonymous'}
+                                                </h4>
+                                                {author.user?.email && (
+                                                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                                                        {author.user.email}
+                                                    </p>
+                                                )}
+                                                {author.user?.website && (
+                                                    <a 
+                                                        href={formatUrl(author.user.website)}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:underline text-sm truncate block mt-1"
+                                                    >
+                                                        Visit website
+                                                    </a>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+                    
+                    {otherContributors.length > 0 && (
                         <section className="mt-12 pt-8 border-t border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                 Contributors
                             </h3>
                             
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                {contributors.map((contributor) => (
+                                {otherContributors.map((contributor) => (
                                     <div 
                                         key={contributor.id} 
                                         className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -206,7 +262,7 @@ const PublishedArticle = () => {
                                                 </h4>
                                                 {contributor.user?.website && (
                                                     <a 
-                                                        href={contributor.user.website}
+                                                        href={formatUrl(contributor.user.website)}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="text-blue-600 hover:underline text-sm truncate block"

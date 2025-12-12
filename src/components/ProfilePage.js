@@ -118,7 +118,13 @@ const ProfilePage = () => {
 
     const handleCloseEdit = async () => {
         if (hasChanges) {
-            await handleSaveProfile(profileData);
+            // Clean data: send null for empty website to delete it from DB
+            const cleanedData = {
+                name: profileData.name,
+                bio: profileData.bio,
+                website: profileData.website.trim() || null
+            };
+            await handleSaveProfile(cleanedData);
         }
         setEditingProfile(false);
         setHasChanges(false);
