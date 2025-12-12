@@ -246,15 +246,22 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             const { id, title, cards: articleCards } = location.state.editArticle;
             console.log('✅ Loading article:', { id, title, cardsCount: articleCards?.length });
             
+            // Normalize cards to ensure they all have ids
+            const rawCards = Array.isArray(articleCards) ? articleCards : [];
+            const normalizedCards = rawCards.map((card, index) => ({
+                id: card.id || `card-${index}-${Date.now()}`,
+                ...card
+            }));
+            
             // Save to ArticleManager for persistence
             ArticleManager.saveArticle(id.toString(), {
                 title: title,
-                cards: articleCards
+                cards: normalizedCards
             });
             
             setCurrentArticleId(id);
             setArticleTitle(title || 'Untitled Article');
-            setCards(Array.isArray(articleCards) ? articleCards : []);
+            setCards(normalizedCards);
             setView('editor');
             setLoadedFromNavigation(true); // Mark as loaded from navigation
             

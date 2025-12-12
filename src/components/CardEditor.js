@@ -97,6 +97,14 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setIsEditingMode(true);
     setHasUnsavedChanges(false);
 
+    // If card has explicit heading/content (e.g., category articles), use it directly
+    if (card && typeof card.heading === 'string' && card.heading.trim() !== '') {
+      setIsNewCard(false);
+      setTitle(card.heading);
+      setContent(card.content || '');
+      return;
+    }
+
     // Check if this is a new card (empty content)
     setIsNewCard(!card.content || card.content.trim() === '');
 
@@ -320,7 +328,12 @@ If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your req
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `${systemPrompt}\n\nUser Request: ${aiPrompt}\n\nCurrent Content:\n${content}`
+              text: `${systemPrompt}
+
+User Request: ${aiPrompt}
+
+Current Content:
+${content}`
             }]
           }],
           generationConfig: {
