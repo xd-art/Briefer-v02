@@ -16,40 +16,43 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   };
 
   return (
-    <div className="bg-gray-100 flex justify-center py- px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="container bg-white  p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl w-full">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900"> How To Article Generator</h1>
+    <div className="bg-white flex flex-col items-center px-4 sm:px-6 lg:px-8 min-h-screen py-8">
+      <div className="w-full max-w-3xl">
+        {/* ВЕРХНЯЯ КАРТОЧКА: заголовок + текст + видео */}
+        <div className="p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-6">
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">How To Article Generator</h1>
 
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-          {/* Текст‑колонка */}
-          <div className="md:w-1/2">
-            <p className="text-gray-800">
-              Our goal is not just to create another database of articles. We are building a
-              <strong> "Living Library of Practical Instructions"</strong>, where every gap in
-              knowledge becomes a point of growth.
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+            {/* Текст‑колонка */}
+            <div className="md:w-1/2 w-full">
+              <p className="text-gray-800">
+                Our goal is not just to create another database of articles. We are building a
+                <strong> "Living Library of Practical Instructions"</strong>, where every gap in
+                knowledge becomes a point of growth.
+              </p>
 
-            </p>
+              <p className="mt-4 text-gray-800">
+                Try the <em>How To</em> Article Master Generator and become an architect of global
+                knowledge! Join today and start shaping the future of shared knowledge!
+              </p>
+            </div>
 
-            <p className="mt-4 text-gray-800">
-              Try the <em>How To</em> Article Master Generator and become an architect of global
-              knowledge! Join today and start shaping the future of shared knowledge!
-            </p>
-          </div>
-
-          {/* Видео‑колонка */}
-          <div className="md:w-1/2 w-full flex justify-center">
-            <video
-              src="/videos/intro.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-64 h-auto rounded"
-            ></video>
+            {/* Видео‑колонка (на маленьком экране уходит вниз) */}
+            <div className="md:w-1/2 w-full flex justify-center">
+              <video
+                src="/videos/intro.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-64 h-auto rounded"
+              ></video>
+            </div>
           </div>
         </div>
 
-        <div className="mb-8 mt-8 p-6 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
+        {/* НИЖНЯЯ КАРТОЧКА: How To + поле ввода промпта */}
+        <div className="mb-8 p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
           <h2 className="text-4xl font-semibold mb-4 text-gray-800">How To</h2>
           <div className="flex flex-col items-end">
             <input
@@ -68,20 +71,45 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               title="Generate Article"
             >
               {isGenerating ? (
-                <svg className="w-5 h-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="w-5 h-5 animate-spin"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  ></path>
                 </svg>
               )}
             </button>
           </div>
-
         </div>
-
       </div>
     </div>
   );

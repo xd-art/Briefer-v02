@@ -24,7 +24,7 @@ const BlogList = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
+        <div className="min-h-screen bg-white font-sans text-gray-900">
             <Header
                 user={user}
                 onLoginClick={handleLoginClick}
@@ -45,7 +45,7 @@ const BlogList = () => {
                     />
 
                     {/* Intro Section */}
-                    <div className="bg-white rounded-xl shadow-lg p-8 md:p-12 mb-12 text-center">
+                    <div className="bg-white rounded-xl p-8 md:p-12 mb-12 text-center">
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                             Collection of Articles About Human Action
                         </h1>
@@ -58,23 +58,23 @@ const BlogList = () => {
                                 Our blog is an exciting journey into the world of work, where we explore interesting stories and learn from practical cases presented by various companies and experts.
                             </p>
 
-                            <div className="bg-blue-50 rounded-lg p-6 text-left mx-auto max-w-3xl">
-                                <p className="font-semibold text-blue-900 mb-3">What you will find with us:</p>
-                                <ul className="space-y-2 text-blue-800">
+                            <div className="bg-white rounded-lg p-6 text-left mx-auto max-w-3xl">
+                                <h3 className="font-semibold  mb-3">What you will find with us:</h3>
+                                <ul className="space-y-2 ">
                                     <li className="flex items-start">
-                                        <span className="mr-2 mt-1 text-blue-500">•</span>
+                                        <span className="mr-2 mt-1 ">•</span>
                                         <span><b>Inspirational Cases:</b> Discover how companies overcame challenges.</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="mr-2 mt-1 text-blue-500">•</span>
+                                        <span className="mr-2 mt-1 ">•</span>
                                         <span><b>Expert Insights:</b> Knowledge and experience from industry professionals.</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="mr-2 mt-1 text-blue-500">•</span>
+                                        <span className="mr-2 mt-1 ">•</span>
                                         <span><b>Lessons from Mistakes:</b> valuable lessons from failures.</span>
                                     </li>
                                     <li className="flex items-start">
-                                        <span className="mr-2 mt-1 text-blue-500">•</span>
+                                        <span className="mr-2 mt-1 ">•</span>
                                         <span><b>Technologies and Innovations:</b> The latest tools and methods.</span>
                                     </li>
                                 </ul>

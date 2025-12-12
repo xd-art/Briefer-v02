@@ -654,16 +654,22 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
-            <Header
+        <div className="min-h-screen bg-white">
+            <Header 
+                articleId={currentArticleId} 
+                articleTitle={articleTitle}
+                isEditingTitle={isEditingTitle}
+                setIsEditingTitle={setIsEditingTitle}
+                titleInputRef={titleInputRef}
                 user={user}
-                onLoginClick={handleLoginClick}
-                onLogoutClick={logout}
-                onNavigate={handleNavigate}
-                currentView="home"
+                loading={loading}
+                logout={logout}
+                view={view}
+                setView={setView}
+                showNotificationMessage={showNotificationMessage}
             />
 
-            <main className="py-10 px-4 sm:px-6 lg:px-8">
+            <main className="px-0 sm:px-0 lg:px-0">
                 {renderContent()}
             </main>
 

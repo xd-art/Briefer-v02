@@ -43,7 +43,7 @@ const BlogPost = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
+        <div className="min-h-screen bg-white font-sans text-gray-900">
             <Header
                 user={user}
                 onLoginClick={handleLoginClick}
