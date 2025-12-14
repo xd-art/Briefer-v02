@@ -7,6 +7,9 @@ import ActionButtons from './ActionButtons';
 import RefinementBar from './RefinementBar';
 import FilterModal from './FilterModal';
 import RegistrationModal from './RegistrationModal';
+import ThreeColumnLayout from './ThreeColumnLayout';
+import LeftNavigation from './LeftNavigation';
+import RightSidebar from './RightSidebar';
 import { convertToHtml } from '../utils/markdown';
 import { ArticleManager } from '../utils/ArticleManager';
 import { useAuth } from '../context/AuthContext';
@@ -597,62 +600,80 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     const renderContent = () => {
         if (view === 'loading') {
-            return <div className="flex justify-center items-center min-h-[50vh]">Loading...</div>;
+            return (
+                <ThreeColumnLayout>
+                    <div className="flex justify-center items-center min-h-[50vh]">
+                        Loading...
+                    </div>
+                </ThreeColumnLayout>
+            );
         }
 
         if (view === 'generator') {
-            return <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />;
+            return (
+                <ThreeColumnLayout 
+                    left={<LeftNavigation />}
+                    right={<RightSidebar />}
+                >
+                    <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />
+                </ThreeColumnLayout>
+            );
         }
 
         // Editor View
         return (
-            <div className="container mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-lg max-w-3xl">
-                <div className="flex justify-end mb-2">
-                    <button
-                        onClick={reloadPage}
-                        className="text-gray-400 hover:text-gray-600 focus:outline-none"
-                        title="Start Over"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
+            <ThreeColumnLayout
+                left={<LeftNavigation />}
+                right={<RightSidebar />}
+            >
+                <div className="bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+                    <div className="flex justify-end mb-2">
+                        <button
+                            onClick={reloadPage}
+                            className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                            title="Start Over"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    {isEditingTitle ? (
+                        <input
+                            ref={titleInputRef}
+                            type="text"
+                            className="text-4xl font-bold mb-8 text-gray-900 w-full border-b-2 border-blue-500 focus:outline-none"
+                            value={articleTitle}
+                            onChange={handleTitleChange}
+                            onBlur={handleTitleBlur}
+                            onKeyDown={handleTitleKeyDown}
+                        />
+                    ) : (
+                        <h1
+                            className="text-4xl font-bold mb-8 text-gray-900 cursor-pointer hover:bg-gray-50 rounded px-2 -ml-2 transition-colors duration-200"
+                            onClick={handleTitleClick}
+                            title="Click to edit title"
+                        >
+                            {articleTitle}
+                        </h1>
+                    )}
+
+                    {cards.map((card) => (
+                        <Card
+                            key={card.id}
+                            card={card}
+                            onEdit={handleEditCard}
+                        />
+                    ))}
+
+                    <ActionButtons
+                        onSave={saveAllData}
+                        onAddCard={addNewCard}
+                        onClean={reloadPage}
+                    />
                 </div>
-
-                {isEditingTitle ? (
-                    <input
-                        ref={titleInputRef}
-                        type="text"
-                        className="text-4xl font-bold mb-8 text-gray-900 w-full border-b-2 border-blue-500 focus:outline-none"
-                        value={articleTitle}
-                        onChange={handleTitleChange}
-                        onBlur={handleTitleBlur}
-                        onKeyDown={handleTitleKeyDown}
-                    />
-                ) : (
-                    <h1
-                        className="text-4xl font-bold mb-8 text-gray-900 cursor-pointer hover:bg-gray-50 rounded px-2 -ml-2 transition-colors duration-200"
-                        onClick={handleTitleClick}
-                        title="Click to edit title"
-                    >
-                        {articleTitle}
-                    </h1>
-                )}
-
-                {cards.map((card) => (
-                    <Card
-                        key={card.id}
-                        card={card}
-                        onEdit={handleEditCard}
-                    />
-                ))}
-
-                <ActionButtons
-                    onSave={saveAllData}
-                    onAddCard={addNewCard}
-                    onClean={reloadPage}
-                />
-            </div>
+            </ThreeColumnLayout>
         );
     };
 
@@ -676,9 +697,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
                 showNotificationMessage={showNotificationMessage}
             />
 
-            <main className="px-0 sm:px-0 lg:px-0">
-                {renderContent()}
-            </main>
+            {renderContent()}
 
             {/* Refinement Bar - Only show in editor */}
             {view === 'editor' && (

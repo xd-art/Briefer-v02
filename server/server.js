@@ -1,9 +1,9 @@
+require('dotenv').config({ path: '../.env' });
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const { sequelize } = require('./models');
-require('dotenv').config();
 
 // Initialize Express app
 const app = express();

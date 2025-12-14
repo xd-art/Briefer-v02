@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
 import RegistrationModal from './RegistrationModal';
+import ThreeColumnLayout from './ThreeColumnLayout';
+import LeftNavigation from './LeftNavigation';
+import RightSidebar from './RightSidebar';
 
 const CategoriesPage = () => {
     const { user } = useAuth();
@@ -49,7 +52,10 @@ const CategoriesPage = () => {
                 currentView="categories"
             />
             
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <ThreeColumnLayout
+                left={<LeftNavigation />}
+                right={<RightSidebar />}
+            >
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                     How-to Article Categories
                 </h1>
@@ -80,7 +86,7 @@ const CategoriesPage = () => {
                         </div>
                     ))}
                 </div>
-            </div>
+            </ThreeColumnLayout>
 
             <RegistrationModal 
                 isOpen={showRegistrationModal}

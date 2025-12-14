@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
+import ThreeColumnLayout from './ThreeColumnLayout';
+import LeftNavigation from './LeftNavigation';
+import RightSidebar from './RightSidebar';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../utils/seo';
 
@@ -92,12 +95,15 @@ const CategoryArticlesPage = () => {
         return (
             <div className="min-h-screen bg-white">
                 <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <ThreeColumnLayout
+                    left={<LeftNavigation />}
+                    right={<RightSidebar />}
+                >
                     <div className="text-center py-12">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                         <p className="mt-4 text-gray-600">Loading articles...</p>
                     </div>
-                </div>
+                </ThreeColumnLayout>
             </div>
         );
     }
@@ -106,7 +112,10 @@ const CategoryArticlesPage = () => {
         return (
             <div className="min-h-screen bg-white">
                 <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <ThreeColumnLayout
+                    left={<LeftNavigation />}
+                    right={<RightSidebar />}
+                >
                     <div className="text-center py-12">
                         <div className="text-red-500 text-xl font-medium">{error}</div>
                         <button
@@ -116,7 +125,7 @@ const CategoryArticlesPage = () => {
                             Retry
                         </button>
                     </div>
-                </div>
+                </ThreeColumnLayout>
             </div>
         );
     }
@@ -129,7 +138,11 @@ const CategoryArticlesPage = () => {
                 keywords={`${subcategory}, tutorials, how-to, guides, articles`}
             />
             <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            
+            <ThreeColumnLayout
+                left={<LeftNavigation />}
+                right={<RightSidebar />}
+            >
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         {categoryInfo?.label || subcategory.replace(/-/g, ' ')}
@@ -186,7 +199,7 @@ const CategoryArticlesPage = () => {
                         </ul>
                     </div>
                 )}
-            </div>
+            </ThreeColumnLayout>
         </div>
     );
 };

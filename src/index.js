@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles.css'; // Import existing styles
+import './styles/layout-animations.css'; // Import layout animations
 import { AuthProvider } from './context/AuthContext';
 
 // Create root container
