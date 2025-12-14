@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../utils/seo';
 
 const CategoryArticlesPage = () => {
     const { category, subcategory } = useParams();
@@ -122,6 +123,11 @@ const CategoryArticlesPage = () => {
 
     return (
         <div className="min-h-screen bg-white">
+            <SEO
+                title={`${categoryInfo?.label || subcategory.replace(/-/g, ' ')} - How-to Articles`}
+                description={`Browse ${categoryInfo?.label || subcategory.replace(/-/g, ' ')} articles and guides. Learn from expert tutorials and step-by-step instructions.`}
+                keywords={`${subcategory}, tutorials, how-to, guides, articles`}
+            />
             <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-8">

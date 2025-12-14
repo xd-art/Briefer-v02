@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../utils/seo';
+import RichTextDisplay from './RichTextDisplay';
 
 const PublishedArticle = () => {
     const { subcategory, articleId } = useParams();
@@ -129,7 +131,7 @@ const PublishedArticle = () => {
             <div key={index} className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">{card.heading}</h2>
                 <div className="prose max-w-none">
-                    <p className="text-gray-700 whitespace-pre-wrap">{card.content}</p>
+                    <RichTextDisplay content={card.content} />
                 </div>
             </div>
         ));
@@ -141,6 +143,15 @@ const PublishedArticle = () => {
     
     return (
         <div className="min-h-screen bg-white">
+            <SEO
+                title={article.title || 'Article'}
+                description={article.meta_description || article.content?.substring(0, 160)}
+                keywords={article.meta_keywords}
+                canonicalUrl={article.canonical_url}
+                ogTitle={article.og_title || article.title}
+                ogDescription={article.og_description || article.meta_description}
+                ogImage={article.og_image}
+            />
             <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-6 flex items-center justify-between">

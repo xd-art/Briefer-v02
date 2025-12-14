@@ -11,7 +11,17 @@
     "server": "node server/server.js",
     "server:dev": "nodemon server/server.js",
     "sync-db": "node server/sync-db.js",
-    "seed-facets": "node server/seed-facets.js"
+    "seed-facets": "node server/seed-facets.js",
+    "add-graphic-subcategories": "node server/add-graphic-subcategories.js",
+    "import-graphic-design": "node server/import-graphic-design-full.js",
+    "add-marketing-subcategories": "node server/add-marketing-subcategories.js",
+    "import-marketing": "node server/import-marketing-full.js",
+    "add-video-subcategories": "node server/add-video-subcategories.js",
+    "import-video": "node server/import-video-full.js",
+    "add-writing-subcategories": "node server/add-writing-subcategories.js",
+    "import-writing": "node server/import-writing-full.js",
+    "add-audio-subcategories": "node server/add-audio-subcategories.js",
+    "import-audio": "node server/import-audio-full.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

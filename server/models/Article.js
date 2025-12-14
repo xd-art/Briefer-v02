@@ -41,6 +41,30 @@ const Article = sequelize.define('Article', {
     moderation_comment: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    meta_description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    meta_keywords: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    canonical_url: {
+        type: DataTypes.STRING(500),
+        allowNull: true
+    },
+    og_title: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    og_description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    og_image: {
+        type: DataTypes.STRING(500),
+        allowNull: true
     }
 }, {
     tableName: 'articles',
