@@ -13,6 +13,7 @@ import RightSidebar from './RightSidebar';
 import { convertToHtml } from '../utils/markdown';
 import { ArticleManager } from '../utils/ArticleManager';
 import { useAuth } from '../context/AuthContext';
+import { ARTICLE_FILTERS, buildDetailedPrompt } from '../data/filterOptions';
 import Header from './Header';
 import ProfilePage from './ProfilePage';
 
@@ -185,61 +186,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     // Generate dynamic filters based on article topic
     const generateFilters = () => {
-        return [
-            {
-                id: 'style',
-                label: 'Style',
-                type: 'segmented',
-                options: [
-                    { value: 'casual', label: 'Casual' },
-                    { value: 'professional', label: 'Professional' },
-                    { value: 'technical', label: 'Technical' }
-                ]
-            },
-            {
-                id: 'length',
-                label: 'Length',
-                type: 'segmented',
-                options: [
-                    { value: 'brief', label: 'Brief' },
-                    { value: 'detailed', label: 'Detailed' },
-                    { value: 'comprehensive', label: 'Comprehensive' }
-                ]
-            },
-            {
-                id: 'audience',
-                label: 'Target Audience',
-                type: 'chips',
-                options: [
-                    { value: 'beginners', label: 'Beginners' },
-                    { value: 'intermediate', label: 'Intermediate' },
-                    { value: 'experts', label: 'Experts' },
-                    { value: 'general', label: 'General Public' }
-                ]
-            },
-            {
-                id: 'format',
-                label: 'Format',
-                type: 'chips',
-                options: [
-                    { value: 'step-by-step', label: 'Step-by-Step' },
-                    { value: 'checklist', label: 'Checklist' },
-                    { value: 'overview', label: 'Overview' },
-                    { value: 'comparison', label: 'Comparison' }
-                ]
-            },
-            {
-                id: 'extras',
-                label: 'Additional Sections',
-                type: 'chips',
-                options: [
-                    { value: 'tips', label: 'Tips & Tricks' },
-                    { value: 'mistakes', label: 'Common Mistakes' },
-                    { value: 'faq', label: 'FAQ' },
-                    { value: 'resources', label: 'Resources' }
-                ]
-            }
-        ];
+        return ARTICLE_FILTERS;
     };
 
     // Handle incoming article data from navigation (e.g., from CategoryArticlesPage)
@@ -248,26 +195,26 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         if (location.state?.editArticle) {
             const { id, title, cards: articleCards } = location.state.editArticle;
             console.log('✅ Loading article:', { id, title, cardsCount: articleCards?.length });
-            
+
             // Normalize cards to ensure they all have ids
             const rawCards = Array.isArray(articleCards) ? articleCards : [];
             const normalizedCards = rawCards.map((card, index) => ({
                 id: card.id || `card-${index}-${Date.now()}`,
                 ...card
             }));
-            
+
             // Save to ArticleManager for persistence
             ArticleManager.saveArticle(id.toString(), {
                 title: title,
                 cards: normalizedCards
             });
-            
+
             setCurrentArticleId(id);
             setArticleTitle(title || 'Untitled Article');
             setCards(normalizedCards);
             setView('editor');
             setLoadedFromNavigation(true); // Mark as loaded from navigation
-            
+
             // Update URL with article ID and clear navigation state
             window.history.replaceState({}, document.title, `?id=${id}`);
         } else {
@@ -299,23 +246,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
         setShowFilterModal(false);
 
         // Build detailed prompt from filters
-        let detailedPrompt = '';
-
-        if (selectedFilters.style) {
-            detailedPrompt += `Style: ${selectedFilters.style}.`;
-        }
-        if (selectedFilters.length) {
-            detailedPrompt += `Length: ${selectedFilters.length}.`;
-        }
-        if (selectedFilters.audience && selectedFilters.audience.length > 0) {
-            detailedPrompt += `Target audience: ${selectedFilters.audience.join(', ')}.`;
-        }
-        if (selectedFilters.format && selectedFilters.format.length > 0) {
-            detailedPrompt += `Format: ${selectedFilters.format.join(', ')}.`;
-        }
-        if (selectedFilters.extras && selectedFilters.extras.length > 0) {
-            detailedPrompt += `Include: ${selectedFilters.extras.join(', ')}.`;
-        }
+        let detailedPrompt = buildDetailedPrompt(selectedFilters);
 
         const fullPrompt = refinementPrompt.trim()
             ? `How to ${refinementPrompt} `
@@ -344,7 +275,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             }
 
             const { article } = await response.json();
-            
+
             // Parse content if it's a string
             let parsedCards = [];
             try {
@@ -379,7 +310,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             console.log('⏩ Skipping initialization - article already loaded from navigation state');
             return;
         }
-        
+
         console.log('🔍 Initialization useEffect - checking URL params');
         const params = new URLSearchParams(window.location.search);
         const urlId = params.get('id');
@@ -457,7 +388,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             console.log('💾 Current article ID:', currentArticleId);
             console.log('💾 Title:', articleTitle);
             console.log('💾 Cards count:', cards?.length);
-            
+
             // Always create a new draft for category articles (they're copies)
             // For user's own articles, we could add update logic later
             const createResponse = await fetch('http://localhost:3003/api/articles', {
@@ -497,7 +428,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             // Update local state with the new backend ID
             setCurrentArticleId(backendArticleId);
             console.log('✅ Updated currentArticleId to:', backendArticleId);
-            
+
             // Save to ArticleManager with the backend ID
             ArticleManager.saveArticle(backendArticleId.toString(), {
                 title: articleTitle,
@@ -611,7 +542,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
         if (view === 'generator') {
             return (
-                <ThreeColumnLayout 
+                <ThreeColumnLayout
                     left={<LeftNavigation />}
                     right={<RightSidebar />}
                 >
@@ -683,8 +614,8 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
 
     return (
         <div className="min-h-screen bg-white">
-            <Header 
-                articleId={currentArticleId} 
+            <Header
+                articleId={currentArticleId}
                 articleTitle={articleTitle}
                 isEditingTitle={isEditingTitle}
                 setIsEditingTitle={setIsEditingTitle}

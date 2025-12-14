@@ -1,4 +1,5 @@
 import React from 'react';
+import FilterList from './FilterList';
 
 const FilterModal = ({
     isOpen,
@@ -18,60 +19,15 @@ const FilterModal = ({
         }
     };
 
-    const renderFilterSection = (section) => {
-        const isSegmented = section.type === 'segmented';
-        const selectedValue = selectedFilters[section.id];
-
-        return (
-            <div key={section.id} className="filter-section">
-                <label className="filter-label">{section.label}</label>
-
-                {isSegmented ? (
-                    <div className="segmented-control">
-                        {section.options.map((option) => (
-                            <button
-                                key={option.value}
-                                className={`segment-btn ${selectedValue === option.value ? 'active' : ''}`}
-                                onClick={() => onFilterChange(section.id, option.value)}
-                                title={option.tooltip}
-                            >
-                                {option.label}
-                            </button>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="chip-group">
-                        {section.options.map((option) => {
-                            const isSelected = Array.isArray(selectedValue)
-                                ? selectedValue.includes(option.value)
-                                : selectedValue === option.value;
-
-                            return (
-                                <button
-                                    key={option.value}
-                                    className={`filter-chip ${isSelected ? 'active' : ''}`}
-                                    onClick={() => onFilterChange(section.id, option.value, true)} // true for multi-select toggle
-                                    title={option.tooltip}
-                                >
-                                    {option.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
-        );
-    };
-
     const renderSkeleton = () => (
         <div className="filters-loading">
             {[1, 2, 3].map((i) => (
-                <div key={i} className="filter-section">
-                    <div className="skeleton-label"></div>
-                    <div className="skeleton-chips">
-                        <div className="skeleton-chip"></div>
-                        <div className="skeleton-chip"></div>
-                        <div className="skeleton-chip"></div>
+                <div key={i} className="filter-section mb-6">
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-3 animate-pulse"></div>
+                    <div className="flex gap-2">
+                        <div className="h-8 bg-gray-200 rounded-full w-20 animate-pulse"></div>
+                        <div className="h-8 bg-gray-200 rounded-full w-24 animate-pulse"></div>
+                        <div className="h-8 bg-gray-200 rounded-full w-16 animate-pulse"></div>
                     </div>
                 </div>
             ))}
@@ -91,7 +47,13 @@ const FilterModal = ({
                 </div>
 
                 <div className="filter-body">
-                    {isLoading ? renderSkeleton() : filters.map(renderFilterSection)}
+                    {isLoading ? renderSkeleton() : (
+                        <FilterList
+                            filters={filters}
+                            selectedFilters={selectedFilters}
+                            onFilterChange={onFilterChange}
+                        />
+                    )}
                 </div>
 
                 <div className="filter-footer">

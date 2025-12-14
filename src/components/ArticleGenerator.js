@@ -1,11 +1,36 @@
 import React, { useState } from 'react';
+import FilterList from './FilterList';
+import { ARTICLE_FILTERS, buildDetailedPrompt } from '../data/filterOptions';
 
 const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   const [topic, setTopic] = useState('');
+  const [showFilters, setShowFilters] = useState(true); // Default to true as requested: "filters should be seen immediately"
+  const [selectedFilters, setSelectedFilters] = useState({
+    style: 'professional', // Default style
+    length: 'detailed'     // Default length
+  });
+
+  const handleFilterChange = (sectionId, value, isMulti) => {
+    // console.log(`ArticleGenerator: changing filter ${sectionId} to ${value} (multi: ${isMulti})`);
+    setSelectedFilters(prev => {
+      // Safety check: ensure prev is an object
+      const safePrev = prev || {};
+
+      if (isMulti) {
+        const currentValues = safePrev[sectionId] || [];
+        const newValues = currentValues.includes(value)
+          ? currentValues.filter(v => v !== value)
+          : [...currentValues, value];
+        return { ...safePrev, [sectionId]: newValues };
+      }
+      return { ...safePrev, [sectionId]: value };
+    });
+  };
 
   const handleGenerate = () => {
     if (topic.trim() && !isGenerating) {
-      onGenerate(topic, null);
+      const detailedPrompt = buildDetailedPrompt(selectedFilters);
+      onGenerate(topic, detailedPrompt);
     }
   };
 
@@ -18,12 +43,12 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
   return (
     <div className="bg-white flex flex-col items-center px-4 sm:px-6 lg:px-8 min-h-screen py-8">
       <div className="w-full max-w-3xl">
-        {/* ВЕРХНЯЯ КАРТОЧКА: заголовок + текст + видео */}
+        {/* UPPER CARD: Title + Text + Video */}
         <div className="p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-6">
           <h1 className="text-4xl font-bold mb-6 text-gray-900">How To Article Generator</h1>
 
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            {/* Текст‑колонка */}
+            {/* Text Column */}
             <div className="md:w-1/2 w-full">
               <p className="text-gray-800">
                 Our goal is not just to create another database of articles. We are building a
@@ -37,7 +62,7 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               </p>
             </div>
 
-            {/* Видео‑колонка (на маленьком экране уходит вниз) */}
+            {/* Video Column */}
             <div className="md:w-1/2 w-full flex justify-center">
               <video
                 src="/videos/intro.mp4"
@@ -51,10 +76,12 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
           </div>
         </div>
 
-        {/* НИЖНЯЯ КАРТОЧКА: How To + поле ввода промпта */}
+        {/* LOWER CARD: How To + Input + Filters */}
         <div className="mb-8 p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_25px_rgba(0,0,0,0.12)] transition-shadow duration-300">
           <h2 className="text-4xl font-semibold mb-4 text-gray-800">How To</h2>
-          <div className="flex flex-col items-end">
+
+          {/* Input Area */}
+          <div className="flex flex-col mb-6">
             <input
               type="text"
               value={topic}
@@ -62,12 +89,35 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               onKeyDown={handleKeyDown}
               disabled={isGenerating}
               placeholder="Write what you need to create"
-              className="w-full py-3 text-lg border-t-0 border-l-0 border-r-0 border-b-2 border-gray-200 focus:outline-none focus:border-[#3d82f6] transition-colors placeholder-gray-400 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 text-lg border-t-0 border-l-0 border-r-0 border-b-2 border-gray-200 focus:outline-none focus:border-[#3d82f6] transition-colors placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
             />
+          </div>
+
+          {/* Filters Area */}
+          <div className="mb-6 border-t border-gray-100 pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm uppercase tracking-wider text-gray-500 font-semibold">Detailed Filters</h3>
+              {/* Optional toggle if user ever wants to hide them, though requirement said "visible immediately" */}
+              {/* <button onClick={() => setShowFilters(!showFilters)} className="text-sm text-blue-500">
+                    {showFilters ? 'Hide' : 'Show'}
+                </button> */}
+            </div>
+
+            {showFilters && (
+              <FilterList
+                filters={ARTICLE_FILTERS}
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+              />
+            )}
+          </div>
+
+          {/* Generate Button */}
+          <div className="flex justify-end">
             <button
               onClick={handleGenerate}
               disabled={!topic.trim() || isGenerating}
-              className="p-2 rounded-full bg-[#3d82f6] text-white shadow-md hover:bg-[#3d82f6] transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-3 rounded-full bg-[#3d82f6] text-white shadow-md hover:bg-[#2563eb] transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed min-w-[3rem] min-h-[3rem]"
               title="Generate Article"
             >
               {isGenerating ? (
@@ -93,7 +143,7 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
                 </svg>
               ) : (
                 <svg
-                  className="w-5 h-5"
+                  className="w-6 h-6"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
