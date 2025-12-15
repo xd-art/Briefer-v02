@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../utils/seo';
 import RichTextDisplay from './RichTextDisplay';
@@ -56,9 +57,9 @@ const PublishedArticle = () => {
         const fetchArticle = async () => {
             try {
                 setLoading(true);
-                
+
                 const facetValue = subcategory.replace(/-/g, '_');
-                
+
                 const response = await fetch(
                     `http://localhost:3003/api/articles/categories/${facetValue}`
                 );
@@ -70,12 +71,12 @@ const PublishedArticle = () => {
 
                 const data = await response.json();
                 const foundArticle = data.articles.find(a => a.id == articleId);
-                
+
                 if (!foundArticle) {
                     setError('Article not found');
                     return;
                 }
-                
+
                 setArticle(foundArticle);
             } catch (err) {
                 console.error('Error fetching article:', err);
@@ -126,7 +127,7 @@ const PublishedArticle = () => {
 
     const renderCardContent = (cards) => {
         if (!Array.isArray(cards)) return null;
-        
+
         return cards.map((card, index) => (
             <div key={index} className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">{card.heading}</h2>
@@ -140,9 +141,9 @@ const PublishedArticle = () => {
     // Separate authors and other contributors
     const authors = article.contributors?.filter(c => c.contribution_type === 'author') || [];
     const otherContributors = article.contributors?.filter(c => c.contribution_type !== 'author') || [];
-    
+
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white flex flex-col">
             <SEO
                 title={article.title || 'Article'}
                 description={article.meta_description || article.content?.substring(0, 160)}
@@ -155,8 +156,8 @@ const PublishedArticle = () => {
             <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="mb-6 flex items-center justify-between">
-                    <Link 
-                        to={`/categories/${subcategory.split('/')[0]}/${subcategory}`} 
+                    <Link
+                        to={`/categories/${subcategory.split('/')[0]}/${subcategory}`}
                         className="text-blue-600 hover:text-blue-800 hover:underline"
                     >
                         &larr; Back to Category
@@ -168,13 +169,13 @@ const PublishedArticle = () => {
                         Edit &amp; save to profile
                     </button>
                 </div>
-                
+
                 <article className="bg-white rounded-lg shadow-md p-6 md:p-8">
                     <header className="mb-8">
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             {article.title || 'Untitled Article'}
                         </h1>
-                        
+
                         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-6">
                             <span>
                                 By {article.author?.name || article.author?.email?.split('@')[0] || 'Unknown'}
@@ -185,7 +186,7 @@ const PublishedArticle = () => {
                                 </span>
                             )}
                         </div>
-                        
+
                         {article.facetAssignments && article.facetAssignments.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-6">
                                 {article.facetAssignments.map((assignment) => (
@@ -199,21 +200,21 @@ const PublishedArticle = () => {
                             </div>
                         )}
                     </header>
-                    
+
                     <div className="article-content">
                         {renderCardContent(articleContent)}
                     </div>
-                    
+
                     {authors.length > 0 && (
                         <section className="mt-12 pt-8 border-t border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                 {authors.length === 1 ? 'Author' : 'Authors'}
                             </h3>
-                            
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {authors.map((author) => (
-                                    <div 
-                                        key={author.id} 
+                                    <div
+                                        key={author.id}
                                         className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                                     >
                                         <div className="flex items-start">
@@ -232,7 +233,7 @@ const PublishedArticle = () => {
                                                     </p>
                                                 )}
                                                 {author.user?.website && (
-                                                    <a 
+                                                    <a
                                                         href={formatUrl(author.user.website)}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -248,17 +249,17 @@ const PublishedArticle = () => {
                             </div>
                         </section>
                     )}
-                    
+
                     {otherContributors.length > 0 && (
                         <section className="mt-12 pt-8 border-t border-gray-200">
                             <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                 Contributors
                             </h3>
-                            
+
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                                 {otherContributors.map((contributor) => (
-                                    <div 
-                                        key={contributor.id} 
+                                    <div
+                                        key={contributor.id}
                                         className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
                                     >
                                         <div className="flex items-start">
@@ -272,7 +273,7 @@ const PublishedArticle = () => {
                                                     {contributor.user?.name || contributor.user?.email?.split('@')[0] || 'Anonymous'}
                                                 </h4>
                                                 {contributor.user?.website && (
-                                                    <a 
+                                                    <a
                                                         href={formatUrl(contributor.user.website)}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
@@ -290,6 +291,7 @@ const PublishedArticle = () => {
                     )}
                 </article>
             </div>
+            <Footer />
         </div>
     );
 };

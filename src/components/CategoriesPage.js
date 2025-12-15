@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Header from './Header';
+import Footer from './Footer';
 import RegistrationModal from './RegistrationModal';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import LeftNavigation from './LeftNavigation';
@@ -45,13 +46,13 @@ const CategoriesPage = () => {
     ];
 
     return (
-        <div className="min-h-screen bg-white">
-            <Header 
+        <div className="min-h-screen bg-white flex flex-col">
+            <Header
                 user={user}
                 onLoginClick={() => setShowRegistrationModal(true)}
                 currentView="categories"
             />
-            
+
             <ThreeColumnLayout
                 left={<LeftNavigation />}
                 right={<RightSidebar />}
@@ -59,7 +60,7 @@ const CategoriesPage = () => {
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                     How-to Article Categories
                 </h1>
-                
+
                 <p className="text-gray-600 mb-12">
                     Select an area to view instructions.
                 </p>
@@ -70,7 +71,7 @@ const CategoriesPage = () => {
                             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                                 {category.title}
                             </h2>
-                            
+
                             <ul className="space-y-2">
                                 {category.subcategories.map((subcategory, subIndex) => (
                                     <li key={subIndex}>
@@ -88,7 +89,9 @@ const CategoriesPage = () => {
                 </div>
             </ThreeColumnLayout>
 
-            <RegistrationModal 
+            <Footer />
+
+            <RegistrationModal
                 isOpen={showRegistrationModal}
                 onClose={() => setShowRegistrationModal(false)}
             />

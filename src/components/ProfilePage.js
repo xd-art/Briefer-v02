@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 
 const ProfilePage = () => {
     const { user, logout, refreshUser } = useAuth();
@@ -25,7 +26,7 @@ const ProfilePage = () => {
                 if (!response.ok) throw new Error('Failed to fetch articles');
                 const data = await response.json();
                 setArticles(data.drafts || []);
-                
+
                 // Set initial profile data
                 setProfileData({
                     name: user.name || '',
@@ -88,10 +89,10 @@ const ProfilePage = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to update profile');
             }
-            
+
             // Refresh user data in context
             await refreshUser();
-            
+
             // Show success message
             setSaveMessage('Profile updated successfully!');
             setTimeout(() => setSaveMessage(''), 3000);
@@ -109,7 +110,7 @@ const ProfilePage = () => {
         if (saveTimeoutRef.current) {
             clearTimeout(saveTimeoutRef.current);
         }
-        
+
         // Set new timeout to save after 1 second of no typing
         saveTimeoutRef.current = setTimeout(() => {
             handleSaveProfile(data);
@@ -144,10 +145,11 @@ const ProfilePage = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <Header user={user} onLoginClick={() => {}} currentView="profile" />
+                <Header user={user} onLoginClick={() => { }} currentView="profile" />
                 <div className="flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                 </div>
+                <Footer />
             </div>
         );
     }
@@ -155,8 +157,9 @@ const ProfilePage = () => {
     if (error) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <Header user={user} onLoginClick={() => {}} currentView="profile" />
+                <Header user={user} onLoginClick={() => { }} currentView="profile" />
                 <div className="text-center py-20 text-red-600">{error}</div>
+                <Footer />
             </div>
         );
     }
@@ -167,8 +170,8 @@ const ProfilePage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <Header user={user} onLoginClick={() => {}} currentView="profile" />
+        <div className="min-h-screen bg-gray-100 flex flex-col">
+            <Header user={user} onLoginClick={() => { }} currentView="profile" />
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
@@ -181,11 +184,10 @@ const ProfilePage = () => {
                 </div>
 
                 {saveMessage && (
-                    <div className={`mb-4 p-4 rounded ${
-                        saveMessage.startsWith('Error') 
-                            ? 'bg-red-100 border border-red-400 text-red-700' 
+                    <div className={`mb-4 p-4 rounded ${saveMessage.startsWith('Error')
+                            ? 'bg-red-100 border border-red-400 text-red-700'
                             : 'bg-green-100 border border-green-400 text-green-700'
-                    }`}>
+                        }`}>
                         {saveMessage}
                     </div>
                 )}
@@ -216,7 +218,7 @@ const ProfilePage = () => {
                             </button>
                         )}
                     </div>
-                    
+
                     {editingProfile ? (
                         <div className="space-y-4">
                             <div>
@@ -228,7 +230,7 @@ const ProfilePage = () => {
                                     value={profileData.name}
                                     onChange={(e) => {
                                         const newName = e.target.value;
-                                        setProfileData({...profileData, name: newName});
+                                        setProfileData({ ...profileData, name: newName });
                                         setHasChanges(true);
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -243,7 +245,7 @@ const ProfilePage = () => {
                                     value={profileData.bio}
                                     onChange={(e) => {
                                         const newBio = e.target.value;
-                                        setProfileData({...profileData, bio: newBio});
+                                        setProfileData({ ...profileData, bio: newBio });
                                         setHasChanges(true);
                                     }}
                                     maxLength={160}
@@ -264,7 +266,7 @@ const ProfilePage = () => {
                                     value={profileData.website}
                                     onChange={(e) => {
                                         const newWebsite = e.target.value;
-                                        setProfileData({...profileData, website: newWebsite});
+                                        setProfileData({ ...profileData, website: newWebsite });
                                         setHasChanges(true);
                                     }}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -292,9 +294,9 @@ const ProfilePage = () => {
                             <div>
                                 <p className="text-sm font-medium text-gray-700">Website</p>
                                 {(user?.website || profileData.website) ? (
-                                    <a 
+                                    <a
                                         href={formatExternalUrl(user?.website || profileData.website)}
-                                        target="_blank" 
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-600 hover:underline break-all"
                                     >
@@ -353,6 +355,7 @@ const ProfilePage = () => {
                     </div>
                 )}
             </div>
+            <Footer />
         </div>
     );
 };

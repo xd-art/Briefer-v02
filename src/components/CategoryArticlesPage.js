@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
+import Footer from './Footer';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import LeftNavigation from './LeftNavigation';
 import RightSidebar from './RightSidebar';
@@ -56,7 +57,7 @@ const CategoryArticlesPage = () => {
         console.log('📝 Opening article:', article.title);
         console.log('📝 Article content type:', typeof article.content);
         console.log('📝 Article content:', article.content);
-        
+
         // Parse the content if it's a JSON string
         let articleContent = article.content;
         if (typeof articleContent === 'string') {
@@ -77,9 +78,9 @@ const CategoryArticlesPage = () => {
                 cards: articleContent
             }
         };
-        
+
         console.log('🚀 Navigating with state:', navigationState);
-        
+
         // Navigate to home with article data in state
         navigate('/', {
             state: navigationState
@@ -131,14 +132,14 @@ const CategoryArticlesPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white flex flex-col">
             <SEO
                 title={`${categoryInfo?.label || subcategory.replace(/-/g, ' ')} - How-to Articles`}
                 description={`Browse ${categoryInfo?.label || subcategory.replace(/-/g, ' ')} articles and guides. Learn from expert tutorials and step-by-step instructions.`}
                 keywords={`${subcategory}, tutorials, how-to, guides, articles`}
             />
             <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
-            
+
             <ThreeColumnLayout
                 left={<LeftNavigation />}
                 right={<RightSidebar />}
@@ -200,6 +201,7 @@ const CategoryArticlesPage = () => {
                     </div>
                 )}
             </ThreeColumnLayout>
+            <Footer />
         </div>
     );
 };

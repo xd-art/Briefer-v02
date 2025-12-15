@@ -15,6 +15,7 @@ import { ArticleManager } from '../utils/ArticleManager';
 import { useAuth } from '../context/AuthContext';
 import { ARTICLE_FILTERS, buildDetailedPrompt } from '../data/filterOptions';
 import Header from './Header';
+import Footer from './Footer';
 import ProfilePage from './ProfilePage';
 
 function ArticleEditorApp() {
@@ -613,7 +614,7 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
     };
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white flex flex-col">
             <Header
                 articleId={currentArticleId}
                 articleTitle={articleTitle}
@@ -629,6 +630,8 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             />
 
             {renderContent()}
+
+            <Footer />
 
             {/* Refinement Bar - Only show in editor */}
             {view === 'editor' && (

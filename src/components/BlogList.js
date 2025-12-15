@@ -3,6 +3,7 @@ import blogData from '../data/blog.json';
 import SEO from '../utils/seo';
 import BlogCard from './BlogCard';
 import Header from './Header';
+import Footer from './Footer';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import LeftNavigation from './LeftNavigation';
 import RightSidebar from './RightSidebar';
@@ -26,7 +27,7 @@ const BlogList = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans text-gray-900">
+        <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col">
             <Header
                 user={user}
                 onLoginClick={handleLoginClick}
@@ -93,6 +94,7 @@ const BlogList = () => {
                     ))}
                 </div>
             </ThreeColumnLayout>
+            <Footer />
         </div>
     );
 };

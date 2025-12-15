@@ -1,6 +1,7 @@
 import React from 'react';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import Header from './Header';
+import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 
 /**
@@ -116,7 +117,7 @@ const LayoutTestPage = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
                 Three Column Layout Test
             </h1>
-            
+
             <div className="prose prose-lg max-w-none">
                 <p className="text-gray-600 mb-4">
                     This is a test page to verify the ThreeColumnLayout component works correctly
@@ -185,8 +186,8 @@ const LayoutTestPage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-white">
-            <Header 
+        <div className="min-h-screen bg-white flex flex-col">
+            <Header
                 user={user}
                 onLogoutClick={logout}
                 currentView="home"
@@ -198,6 +199,7 @@ const LayoutTestPage = () => {
             >
                 <MainContentPlaceholder />
             </ThreeColumnLayout>
+            <Footer />
         </div>
     );
 };

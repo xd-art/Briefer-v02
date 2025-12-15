@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import blogData from '../data/blog.json';
 import SEO from '../utils/seo';
 import Header from './Header';
+import Footer from './Footer';
 import { useAuth } from '../context/AuthContext';
 
 const BlogPost = () => {
@@ -25,7 +26,7 @@ const BlogPost = () => {
 
     if (!article) {
         return (
-            <div className="min-h-screen bg-gray-100 font-sans text-gray-900">
+            <div className="min-h-screen bg-gray-100 font-sans text-gray-900 flex flex-col">
                 <Header
                     user={user}
                     onLoginClick={handleLoginClick}
@@ -38,12 +39,13 @@ const BlogPost = () => {
                         Article not found. <Link to="/blog" className="text-blue-500">Back to Blog</Link>
                     </div>
                 </main>
+                <Footer />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-white font-sans text-gray-900">
+        <div className="min-h-screen bg-white font-sans text-gray-900 flex flex-col">
             <Header
                 user={user}
                 onLoginClick={handleLoginClick}
@@ -102,6 +104,7 @@ const BlogPost = () => {
                     </article>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };
