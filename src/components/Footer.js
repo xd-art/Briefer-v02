@@ -48,8 +48,8 @@ const Footer = () => {
                     {/* Section 2: Links & Copyright */}
                     <div className="flex flex-col items-center md:items-end space-y-6">
                         <div className="flex space-x-6 text-sm font-medium">
-                            <Link to="#" className="hover:text-gray-600 transition-colors">Terms of Use</Link>
-                            <Link to="#" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
+                            <Link to="/terms-and-conditions" className="hover:text-gray-600 transition-colors">Terms of Use</Link>
+                            <Link to="/privacy-policy" className="hover:text-gray-600 transition-colors">Privacy Policy</Link>
                         </div>
                         <p className="text-sm text-gray-400">
                             © {new Date().getFullYear()} Briefer. All rights reserved.

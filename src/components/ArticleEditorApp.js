@@ -10,7 +10,7 @@ import RegistrationModal from './RegistrationModal';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import LeftNavigation from './LeftNavigation';
 import RightSidebar from './RightSidebar';
-import { convertToHtml } from '../utils/markdown';
+
 import { ArticleManager } from '../utils/ArticleManager';
 import { useAuth } from '../context/AuthContext';
 import { ARTICLE_FILTERS, buildDetailedPrompt } from '../data/filterOptions';
@@ -66,19 +66,22 @@ Create a comprehensive, detailed guide on the topic: "${topic}".
 ${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
 
 FORMAT RULES:
-1. Use standard Markdown.
-2. The first line MUST be the main title, starting with "# ".
-3. Use "## " for section titles.
-4. Write detailed content for each section.
+1. Use HTML format. Do NOT use Markdown.
+2. The output must be valid, well-structured HTML.
+3. The first element MUST be an <h1> tag containing the main article title.
+4. Use <h2> tags for section titles.
+5. Use <p>, <ul>, <li>, <strong>, <em>, <h3>, <h4>, <pre>, <code>, <blockquote>, <table>, <tr>, <td> to structure the content richly.
+6. Make sure the content is visually rich and easy to read.
 
 CRITICAL - AI LINKS:
 If you mention a complex sub-topic that deserves its own separate guide (e.g., "Setting up Nginx", "Configuring DNS"), you MUST wrap that phrase in a special <ai-link> tag.
 Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
+Note: Ensure <ai-link> tags are inside logical HTML elements like <p> or <li>.
 
 Example:
-# How to Host a Website
-## Introduction
-First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server.
+<h1>How to Host a Website</h1>
+<h2>Introduction</h2>
+<p>First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server.</p>
 ...`;
 
             const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
@@ -108,63 +111,63 @@ First, you need to <ai-link topic="How to install Node.js" template="guide">inst
             const data = await response.json();
             const aiResponse = data.candidates[0].content.parts[0].text;
 
-            // --- Markdown Parsing Logic ---
+            // --- HTML Parsing Logic ---
 
-            // 1. Extract Title
-            const lines = aiResponse.split('\n');
             let title = topic; // Fallback
-            let contentStartIndex = 0;
+            let bodyContent = aiResponse;
 
-            // Find the first line starting with #
-            for (let i = 0; i < lines.length; i++) {
-                if (lines[i].trim().startsWith('# ')) {
-                    title = lines[i].trim().substring(2).trim();
-                    contentStartIndex = i + 1;
-                    break;
-                }
+            // 1. Extract Title (<h1>)
+            const h1Match = aiResponse.match(/<h1[^>]*>(.*?)<\/h1>/i);
+            if (h1Match) {
+                title = h1Match[1].trim();
+                // Remove the H1 from the content to process the rest
+                bodyContent = aiResponse.replace(h1Match[0], '').trim();
             }
 
             setArticleTitle(title);
 
-            // 2. Split into Sections
-            // We join the rest of the lines back together, then split by "## "
-            const fullContent = lines.slice(contentStartIndex).join('\n');
-            const sectionParts = fullContent.split(/\n##\s+/);
+            // 2. Split into Sections by <h2>
+            // The regex splits by h2, capturing the inner text of the h2
+            // Result will be: [intro_content, h2_text_1, section_content_1, h2_text_2, section_content_2, ...]
+            const parts = bodyContent.split(/<h2[^>]*>(.*?)<\/h2>/i);
 
             const newCards = [];
 
-            sectionParts.forEach((part, index) => {
-                if (!part.trim()) return;
+            // Handle Introduction (content before first h2)
+            if (parts[0] && parts[0].trim()) {
+                const sectionId = `section-intro-${Date.now()}`;
+                let htmlContent = parts[0].trim();
 
-                let sectionTitle = "Introduction";
-                let sectionContentMarkdown = part;
-
-                if (index > 0 || fullContent.trim().startsWith('##')) {
-                    // Extract first line as title
-                    const partLines = part.split('\n');
-                    sectionTitle = partLines[0].trim();
-                    sectionContentMarkdown = partLines.slice(1).join('\n');
-                } else {
-                    // It's the intro before any H2
-                    sectionTitle = "Introduction";
-                    sectionContentMarkdown = part;
+                // Add title for consistency if missing, or just treat as intro
+                if (!htmlContent.includes('<h2')) {
+                    htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">Introduction</h2>` + htmlContent;
                 }
-
-                // Convert markdown content to HTML
-                let htmlContent = convertToHtml(sectionContentMarkdown);
-
-                // Prepend the title as an H2
-                htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${sectionTitle}</h2>` + htmlContent;
-
-                // Add edit link
-                const sectionId = `section-${index}-${Date.now()}`;
                 htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
 
                 newCards.push({
                     id: sectionId,
                     content: htmlContent
                 });
-            });
+            }
+
+            // Loop through the rest of the parts in pairs (Title, Content)
+            for (let i = 1; i < parts.length; i += 2) {
+                const sectionTitle = parts[i].trim();
+                let sectionContent = parts[i + 1] ? parts[i + 1].trim() : '';
+
+                if (!sectionContent && !sectionTitle) continue;
+
+                const sectionId = `section-${i}-${Date.now()}`;
+
+                // Construct the card HTML
+                let htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${sectionTitle}</h2>` + sectionContent;
+                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
+
+                newCards.push({
+                    id: sectionId,
+                    content: htmlContent
+                });
+            }
 
             setCards(newCards);
 

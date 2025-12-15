@@ -8,6 +8,9 @@ import CategoriesPage from '../components/CategoriesPage';
 import CategoryArticlesPage from '../components/CategoryArticlesPage';
 import PublishedArticle from '../components/PublishedArticle';
 import LayoutTestPage from '../components/LayoutTestPage';
+import AboutPage from '../components/AboutPage';
+import PrivacyPolicyPage from '../components/PrivacyPolicyPage';
+import TermsAndConditionsPage from '../components/TermsAndConditionsPage';
 
 const AppRoutes = () => {
     return (
@@ -20,6 +23,9 @@ const AppRoutes = () => {
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/layout-test" element={<LayoutTestPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms-and-conditions" element={<TermsAndConditionsPage />} />
             {/* Add more routes here as needed */}
         </Routes>
     );

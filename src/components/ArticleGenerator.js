@@ -93,27 +93,8 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
             />
           </div>
 
-          {/* Filters Area */}
-          <div className="mb-6 border-t border-gray-100 pt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm uppercase tracking-wider text-gray-500 font-semibold">Detailed Filters</h3>
-              {/* Optional toggle if user ever wants to hide them, though requirement said "visible immediately" */}
-              {/* <button onClick={() => setShowFilters(!showFilters)} className="text-sm text-blue-500">
-                    {showFilters ? 'Hide' : 'Show'}
-                </button> */}
-            </div>
-
-            {showFilters && (
-              <FilterList
-                filters={ARTICLE_FILTERS}
-                selectedFilters={selectedFilters}
-                onFilterChange={handleFilterChange}
-              />
-            )}
-          </div>
-
           {/* Generate Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end mb-6">
             <button
               onClick={handleGenerate}
               disabled={!topic.trim() || isGenerating}
@@ -159,6 +140,27 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
               )}
             </button>
           </div>
+
+          {/* Filters Area */}
+          <div className="mb-6 border-t border-gray-100 pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm uppercase tracking-wider text-gray-500 font-semibold">Detailed Filters</h3>
+              {/* Optional toggle if user ever wants to hide them, though requirement said "visible immediately" */}
+              {/* <button onClick={() => setShowFilters(!showFilters)} className="text-sm text-blue-500">
+                    {showFilters ? 'Hide' : 'Show'}
+                </button> */}
+            </div>
+
+            {showFilters && (
+              <FilterList
+                filters={ARTICLE_FILTERS}
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+              />
+            )}
+          </div>
+
+
         </div>
       </div>
     </div>

@@ -7,7 +7,9 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const isHome = location.pathname === '/';
     const isBlog = location.pathname.startsWith('/blog');
-    const isCategories = location.pathname === '/categories';
+    const isCategories = location.pathname.startsWith('/categories');
+    const isAbout = location.pathname === '/about';
+    const isProfile = location.pathname === '/profile';
 
     return (
         <header className="sticky top-0 z-50 bg-white shadow-lg border-b border-gray-100">
@@ -36,7 +38,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                     <nav className="hidden md:flex space-x-8">
                         <Link
                             to="/"
-                            className={`text-sm font-medium transition-colors duration-200 ${currentView === 'home'
+                            className={`text-sm font-medium transition-colors duration-200 ${isHome
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-900'
                                 }`}
@@ -61,9 +63,15 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                         >
                             Blog
                         </Link>
-                        <button className="text-gray-500 hover:text-gray-900 text-sm font-medium transition-colors duration-200">
+                        <Link
+                            to="/about"
+                            className={`text-sm font-medium transition-colors duration-200 ${isAbout
+                                ? 'text-blue-600'
+                                : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                        >
                             About
-                        </button>
+                        </Link>
                     </nav>
 
                     {/* Right Section: Account Management */}
@@ -71,7 +79,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                         {user ? (
                             <Link
                                 to="/profile"
-                                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${currentView === 'profile'
+                                className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors duration-200 ${isProfile
                                     ? 'bg-blue-50 text-blue-600'
                                     : 'hover:bg-gray-50 text-gray-700'
                                     }`}
@@ -123,7 +131,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                             <Link
                                 to="/"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className={`text-lg font-medium transition-colors duration-200 ${currentView === 'home' ? 'text-blue-600' : 'text-gray-700'
+                                className={`text-lg font-medium transition-colors duration-200 ${isHome ? 'text-blue-600' : 'text-gray-700'
                                     }`}
                             >
                                 Home
@@ -144,12 +152,14 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                             >
                                 Blog
                             </Link>
-                            <button
-                                className="text-left text-lg font-medium text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                            <Link
+                                to="/about"
                                 onClick={() => setIsMobileMenuOpen(false)}
+                                className={`text-left text-lg font-medium transition-colors duration-200 ${isAbout ? 'text-blue-600' : 'text-gray-700'
+                                    }`}
                             >
                                 About
-                            </button>
+                            </Link>
                         </nav>
                     </div>
                 </div>
