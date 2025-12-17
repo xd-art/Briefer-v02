@@ -51,15 +51,17 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
             {/* Text Column */}
             <div className="md:w-1/2 w-full">
               <p className="text-gray-800">
-                Our goal is not just to create another database of articles. We are building a
-                <strong> "Living Library of Practical Instructions"</strong>, where every gap in
-                knowledge becomes a point of growth.
+                <strong>Briefer.pro</strong> is a living library of practical How-To instructions, where AI and the community together build a network of clearly structured guides.
+
               </p>
 
               <p className="mt-4 text-gray-800">
-                Try the <em>How To</em> Article Master Generator and become an architect of global
-                knowledge! Join today and start shaping the future of shared knowledge!
+                Know how to do something in practice? Describe it in one prompt for a How-To article — AI will create a draft, you'll check and make edits based on your experience, save it, and your article will be published on the site.
+
+
               </p>
+
+
             </div>
 
             {/* Video Column */}
@@ -73,6 +75,16 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
                 className="w-64 h-auto rounded"
               ></video>
             </div>
+          </div>
+
+          <div className="mt-6 text-gray-800">
+            <p className="mb-2">
+              <strong>Minimal entry:</strong> your experience + one query = a published article!
+            </p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Choose a topic in which you are competent and enter a prompt for a How-To article — AI will create the foundation.</li>
+              <li>Generate new articles using AI, edit existing ones, publish your versions on the site.</li>
+            </ul>
           </div>
         </div>
 

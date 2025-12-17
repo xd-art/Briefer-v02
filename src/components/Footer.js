@@ -4,7 +4,7 @@ import Logo from '../assets/briefer-logo.svg';
 
 const Footer = () => {
     return (
-        <footer className="bg-white text-black shadow-[0_-4px_24px_rgba(0,0,0,0.1)] pt-12 pb-8 mt-auto z-40 relative">
+        <footer className="bg-white text-black shadow-[0_-4px_24px_rgba(0,0,0,0.1)] pt-12 pb-8 mt-auto z-50 relative">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Logo Section */}
                 <div className="flex justify-start mb-12">

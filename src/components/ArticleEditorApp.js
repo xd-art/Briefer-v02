@@ -672,7 +672,6 @@ Example:
                     <ActionButtons
                         onSave={saveAllData}
                         onAddCard={addNewCard}
-                        onClean={reloadPage}
                     />
                 </div>
             </ThreeColumnLayout>

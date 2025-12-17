@@ -164,7 +164,7 @@ const PublishedArticle = () => {
                     </Link>
                     <button
                         onClick={handleEditInEditor}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 focus:outline-none"
+                        className="bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-all duration-300 hover:bg-blue-600"
                     >
                         Edit &amp; save to profile
                     </button>

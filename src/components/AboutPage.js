@@ -40,76 +40,76 @@ const AboutPage = () => {
                 <div className="prose prose-lg prose-blue mx-auto">
                     <section id="about-briefer" className="mb-12">
                         <h1 className="text-3xl  text-gray-900 ">About Briefer.pro</h1>
+
                         <p className="mb-4">
-                            <strong>Briefer.pro</strong> is a living library of practical instructions and a dynamic database of technical
-                            documentation.
-                            We are an intelligent environment where users and editors collaboratively create and improve content using built-in
-                            AI integration.
-                            Our goal is to build a self-growing ecosystem of practical knowledge, where content is strictly structured to ensure
-                            maximum clarity.
+                            Briefer.pro is a growing collection of simple "How to" guides, built by AI and people like you to create clear, connected step-by-step instructions.
+                            Got a practical skill to share? Just type it into one quick prompt for a "How to" guide—AI drafts it, you review and tweak it with your real-world know-how, save, and it'll go live on the site. Super easy start: your expertise + one idea = your published guide!
                         </p>
-                        <p>
-                            The platform features hands-on guides in programming, design, video, marketing, and audio.
+                        <p className="mb-4">
+                            Pick a topic you're good at and type a prompt for a "How to" guide—AI builds the base.
+                            Use AI to make new guides, tweak old ones, and share your updates on the site.
                         </p>
-                    </section>
 
 
-                    <section id="how-it-works" className="mb-12">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">How It Works: Content Generation and Knowledge Divergence</h2>
+
+                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">A Bit More About Briefer.pro</h2>
                         <p className="mb-4">
-                            At the core of our platform is a unified article structure and a unique content creation mechanism, where artificial
-                            intelligence
-                            acts as an assistant in <strong>Knowledge Divergence</strong>.
+                            Briefer.pro is an active hub for easy-to-follow guides and tech docs. It's a smart space where you and others team up to make and refine content with built-in AI help. We aim to grow a collection of useful knowledge that stays clear and organized.
+                        </p>
+                        <p className="mb-4">
+                            You'll find real-world guides on programming, design, video, marketing, and audio.
                         </p>
 
-                        <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">1. Content Generation with AI Links</h3>
+                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">How AI Gathers and Improves Content Here</h2>
                         <p className="mb-4">
-                            The platform uses an <strong>Article Generator</strong> component (card-based editor, or <em>CardEditor</em>),
-                            which allows users to create, edit, and preview articles directly in the browser.
+                            AI on Briefer.pro pulls ideas and bits of text from tons of articles, blogs, and online resources—it's like scanning a massive internet library to mix and match for your draft. But the real power comes from you: when you edit or add to a guide (fixing steps, sharing tips from your experience), you make it more detailed and spot-on. This creates richer content that AI "parses" (learns from) next time, making future drafts smarter and the whole site better. Your tweaks fuel a cycle where human smarts upgrade the AI—win-win!
                         </p>
-                        <ul className="list-disc pl-6 space-y-2 mb-6">
+
+                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">How It Works: Making Content and Spreading Knowledge</h2>
+                        <p className="mb-4">
+                            Our guides follow a simple, standard format. AI helps by "diverging" knowledge—splitting big ideas into smaller, linked pieces.
+                        </p>
+
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">1. Creating Content with AI Links</h3>
+                        <p className="mb-4">
+                            We use a card-style editor (called CardEditor) to build, tweak, and preview guides right in your browser.
+                        </p>
+
+                        <ul className="list-disc pl-6 space-y-2 mb-6 text-gray-700">
                             <li>
-                                <strong>Using the AI assistant:</strong> When a user creates a new article or edits an existing section (card),
-                                they can enter a prompt into the AI assistant input field.
+                                <strong>AI Helper:</strong> Start a new guide or edit a part (a "card"), and type a prompt into the AI box.
                             </li>
                             <li>
-                                <strong>Automatic insertion of AI links:</strong> During content generation, the AI automatically inserts
-                                <code>&lt;ai-link&gt;</code> tags into the text where it identifies subtopics that are broad and complex and
-                                cannot
-                                be fully covered within the current unified guide.
+                                <strong>Smart Links:</strong> As AI writes, it adds <code className="bg-gray-100 px-1 py-0.5 rounded text-sm">&lt;ai-link&gt;</code> tags for tricky subtopics that need their own guide.
                             </li>
                             <li>
-                                <strong>Link structure:</strong> Each generated AI link is a special interactive marker that includes
-                                <code>topic</code> (the exact title of the new article) and <code>template</code>
-                                (a structure template identifier, for example <code>guide</code>).
+                                <strong>Link Setup:</strong> Each link holds the new guide's title (topic) and format type (like "guide").
                             </li>
                         </ul>
 
-                        <h3 className="text-xl font-bold text-gray-900 mt-8 mb-4">2. Knowledge Divergence</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">2. Spreading Knowledge</h3>
                         <p className="mb-4">
-                            AI links act as interactive elements that allow users to trigger AI-based generation of missing sub-articles
-                            directly from the text of the parent article.
+                            These links let anyone click to create missing side-guides from the main one.
                         </p>
-                        <ul className="list-disc pl-6 space-y-2 mb-6">
+                        <ul className="list-disc pl-6 space-y-2 mb-6 text-gray-700">
                             <li>
-                                <strong>Generation trigger:</strong> When a user (or guest) clicks an AI link within the text,
-                                this action initiates a request to generate new content.
+                                <strong>Start It:</strong> Click a link in the text to kick off new content.
                             </li>
                             <li>
-                                <strong>Draft creation:</strong> The AI automatically generates a new article using the context of the parent
-                                article and the selected structural template. This article is immediately saved as a draft in the user’s profile.
+                                <strong>Draft Made:</strong> AI uses the main guide's info and format to write a new one, saving it as your draft.
                             </li>
                             <li>
-                                <strong>Linking:</strong> After the draft is refined and approved by an administrator (moderator),
-                                it is published and linked back as a child article of the parent one. These relationships create
-                                “parent → child” article chains for navigation, forming a networked knowledge graph.
+                                <strong>Connect It:</strong> Tidy it up, get admin approval, publish, and link it as a "child" to the parent. This builds chains like parent → child for easy browsing, creating a web of connected guides.
                             </li>
                         </ul>
 
-                        <p>
-                            Through this cycle, AI helps users break down broad topics (for example, website creation, which includes
-                            programming and design) into a network of interconnected but more narrowly focused articles,
-                            while maintaining a strict unified structure for each one.
+                        <p className="mb-4 italic">
+                            In short, AI breaks down huge topics (like building a website, covering code and design) into focused, linked guides—all keeping the same clear structure.
+                        </p>
+
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Quick Note on RAG (Retrieval-Augmented Generation)</h3>
+                        <p className="mb-4">
+                            RAG is like a super-smart search buddy for AI: it first searches (retrieval) for the best facts from a knowledge base (no wild guesses!), then builds (generation) a custom answer on top. Result? Accurate, up-to-date responses every time—like asking "how to fix a bike" and getting a tailored guide pulled from real sources, not made-up stuff. We use it behind the scenes to keep your guides fresh and reliable!
                         </p>
                     </section>
 
@@ -127,7 +127,7 @@ const AboutPage = () => {
                             your contribution and experience are essential to ensure practical and relevant guidance.
                         </p>
                         <p>
-                            <Link to="/terms-and-conditions" className="text-blue-600 hover:text-blue-800 underline">
+                            <Link to="/terms-and-conditions" className="!text-blue-600 hover:text-blue-800 underline">
                                 Read the full Terms and Conditions
                             </Link>
                         </p>
@@ -145,7 +145,7 @@ const AboutPage = () => {
                             content generation is handled in accordance with applicable data protection laws.
                         </p>
                         <p>
-                            <Link to="/privacy-policy" className="text-blue-600 hover:text-blue-800 underline">
+                            <Link to="/privacy-policy" className="!text-blue-600 hover:text-blue-800 underline">
                                 Read our full Privacy Policy
                             </Link>
                         </p>
