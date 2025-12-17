@@ -26,6 +26,15 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   const modalRef = useRef(null);
   const quillRef = useRef(null);
 
+  // Keep a ref to cards to access current state inside closures (like openEditModal)
+  const cardsRef = useRef(cards);
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
+
+  // Keep a ref to cards to access current state inside closures (like openEditModal)
+  /* Removed cardsRef as we now use explicit isNew flag */
+
   // Quill modules configuration to match original styling
   const modules = {
     toolbar: [
@@ -93,20 +102,46 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   }, [isEditingMode]);
 
   const openEditModal = (card) => {
+    console.log('OpenEditModal called with:', card);
     setCurrentCard(card);
     setIsEditingMode(true);
     setHasUnsavedChanges(false);
 
+    // 1. Check if card explicitly says it is new
+    if (card.isNew) {
+      console.log('Card has isNew: true flag');
+      setIsNewCard(true);
+      setTitle('');
+      setContent('');
+      return;
+    }
+
+    // 2. Safety check: Does this card ID exist in our current cards list?
+    const existingCardIndex = cardsRef.current.findIndex(c => c.id === card.id);
+    const idExists = existingCardIndex !== -1;
+    console.log(`Card ID ${card.id} exists in list? ${idExists} (index: ${existingCardIndex})`);
+
+    if (idExists) {
+      console.log('Card exists in list -> Treating as EXISTING (isNewCard: false)');
+      setIsNewCard(false);
+    } else {
+      // It doesn't exist in our list, and doesn't have isNew flag.
+      // This is the ambiguous case. 
+      // If content is empty, maybe it's new? 
+      // But for "category articles" duplication bug, we want to err on side of "Existing" if possible, 
+      // but if we treat as existing and it's not in the list, save will do nothing.
+
+      // Let's assume if it came in with content, it's NOT new, even if we can't find ID (maybe stale ID?).
+      console.log('Card ID not found key logic fallback.');
+      setIsNewCard(false);
+    }
+
     // If card has explicit heading/content (e.g., category articles), use it directly
     if (card && typeof card.heading === 'string' && card.heading.trim() !== '') {
-      setIsNewCard(false);
       setTitle(card.heading);
       setContent(card.content || '');
       return;
     }
-
-    // Check if this is a new card (empty content)
-    setIsNewCard(!card.content || card.content.trim() === '');
 
     // Extract title and content from card HTML
     if (card.content && card.content.trim() !== '') {
@@ -133,7 +168,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
       setTitle(titleText);
       setContent(contentHTML);
     } else {
-      // For new cards, initialize with empty values
+      // Fallback for existing empty cards
       setTitle('');
       setContent('');
     }
@@ -158,6 +193,8 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   };
 
   const saveCardChanges = () => {
+    console.log('Saving card changes. isNewCard:', isNewCard, 'currentCard:', currentCard);
+
     // Validate that at least title or content is provided
     if (!title.trim() && !content.trim()) {
       showNotification('Please enter a title or content for the card.', 'warning');
@@ -176,14 +213,8 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
       newHTML += content;
     }
 
-    // Add edit link exactly as in the original
-    newHTML += `
-      <div class="flex justify-end">
-        <a href="#" class="edit-link" data-card-id="${currentCard ? currentCard.id : 'new-card'}">EDIT</a>
-      </div>
-    `;
-
     if (isNewCard) {
+      console.log('Appending NEW card');
       // Create a new card
       const newCard = {
         id: 'card-' + Date.now(),
@@ -191,10 +222,14 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
       };
       setCards([...cards, newCard]);
     } else {
+      console.log('Updating EXISTING card', currentCard.id);
       // Update existing card
       const updatedCards = cards.map(card => {
         if (card.id === currentCard.id) {
-          return { ...card, content: newHTML };
+          // Remove 'heading' property to avoid duplication (Rendered via Card.js AND content)
+          // We are baking the title into the HTML content now.
+          const { heading, ...rest } = card;
+          return { ...rest, content: newHTML };
         }
         return card;
       });

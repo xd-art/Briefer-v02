@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Card from './Card';
 import ArticleGenerator from './ArticleGenerator';
 import CardEditor from './CardEditor';
@@ -142,7 +143,7 @@ Example:
                 if (!htmlContent.includes('<h2')) {
                     htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">Introduction</h2>` + htmlContent;
                 }
-                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
+                // htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
 
                 newCards.push({
                     id: sectionId,
@@ -161,7 +162,7 @@ Example:
 
                 // Construct the card HTML
                 let htmlContent = `<h2 class="text-2xl font-semibold mb-4 text-gray-800">${sectionTitle}</h2>` + sectionContent;
-                htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
+                // htmlContent += `<div class="flex justify-end"><a href="#" class="edit-link" data-card-id="${sectionId}">EDIT</a></div>`;
 
                 newCards.push({
                     id: sectionId,
@@ -460,7 +461,8 @@ Example:
     const addNewCard = () => {
         const newCard = {
             id: 'card-' + Date.now(),
-            content: ''
+            content: '',
+            isNew: true // Explicitly mark as new
         };
         const event = new CustomEvent('openEditModal', { detail: newCard });
         window.dispatchEvent(event);
@@ -497,6 +499,43 @@ Example:
             e.preventDefault();
             titleInputRef.current.blur(); // This will trigger handleTitleBlur and save
         }
+    };
+
+    const handleMoveUp = (index) => {
+        if (index === 0) return;
+        const newCards = [...cards];
+        const [item] = newCards.splice(index, 1);
+        newCards.splice(index - 1, 0, item);
+        setCards(newCards);
+        // We should probably save here too, but dragging expects manual save usually. 
+        // For buttons, user might expect auto-update or manual save. 
+        // Let's rely on the explicit Save button for now to avoid too many writes, 
+        // or we could add a debounced save.
+    };
+
+    const handleMoveDown = (index) => {
+        if (index === cards.length - 1) return;
+        const newCards = [...cards];
+        const [item] = newCards.splice(index, 1);
+        newCards.splice(index + 1, 0, item);
+        setCards(newCards);
+    };
+
+    const handleDeleteCard = (cardId) => {
+        if (window.confirm('Are you sure you want to delete this card?')) {
+            const newCards = cards.filter(card => card.id !== cardId);
+            setCards(newCards);
+        }
+    };
+
+    const handleDragEnd = (result) => {
+        if (!result.destination) return;
+
+        const items = Array.from(cards);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setCards(items);
     };
 
     const handleNavigate = (newView) => {
@@ -594,13 +633,41 @@ Example:
                         </h1>
                     )}
 
-                    {cards.map((card) => (
-                        <Card
-                            key={card.id}
-                            card={card}
-                            onEdit={handleEditCard}
-                        />
-                    ))}
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="article-cards">
+                            {(provided) => (
+                                <div {...provided.droppableProps} ref={provided.innerRef}>
+                                    {cards.map((card, index) => (
+                                        <Draggable key={card.id} draggableId={card.id} index={index}>
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    className={`flex flex-row items-stretch gap-2 mb-4 group transition-colors ${snapshot.isDragging ? 'opacity-70' : ''}`}
+                                                >
+
+
+                                                    {/* Card Content */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <Card
+                                                            card={card}
+                                                            onEdit={handleEditCard}
+                                                            onMoveUp={() => handleMoveUp(index)}
+                                                            onMoveDown={() => handleMoveDown(index)}
+                                                            onDelete={() => handleDeleteCard(card.id)}
+                                                            isFirst={index === 0}
+                                                            isLast={index === cards.length - 1}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                </div>
+                            )}
+                        </Droppable>
+                    </DragDropContext>
 
                     <ActionButtons
                         onSave={saveAllData}
