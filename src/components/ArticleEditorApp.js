@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Card from './Card';
 import ArticleGenerator from './ArticleGenerator';
@@ -22,6 +22,7 @@ import ProfilePage from './ProfilePage';
 function ArticleEditorApp() {
     const { user, loading, logout } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
     const [cards, setCards] = useState([]);
     const [articleTitle, setArticleTitle] = useState('');
     const [view, setView] = useState('loading'); // 'loading', 'generator', 'editor'
@@ -453,6 +454,11 @@ Example:
     };
 
     const reloadPage = () => {
+        if (loadedFromNavigation) {
+            navigate(-1);
+            return;
+        }
+
         if (window.confirm('Are you sure you want to start over? You will return to the generator.')) {
             window.location.href = '/';
         }
