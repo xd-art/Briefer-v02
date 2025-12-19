@@ -634,3 +634,24 @@ a.edit-link {
     border-color: #e5e7eb;
     border-top-width: 1px;
 }
+
+/* Quill Editor Styles - Robust White Border Fix */
+.ql-toolbar.ql-snow,
+.ql-container.ql-snow {
+    border-color: white !important;
+    background: white !important;
+}
+
+/* Remove default blue/gray borders on hover/focus using focus-within */
+.ql-container.ql-snow:focus-within,
+.ql-container.ql-snow:hover,
+.ql-toolbar.ql-snow:hover,
+.ql-toolbar.ql-snow:focus-within {
+    border-color: white !important;
+    box-shadow: none !important;
+}
+
+/* Specific targeted overrides to ensure deep elements don't show color */
+.ql-container.ql-snow.ql-focused {
+    border-color: white !important;
+}

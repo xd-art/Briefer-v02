@@ -511,6 +511,7 @@ ${content}`
               modules={quillModules}
               formats={quillFormats}
               className="h-full"
+              style={{ border: 'none', outline: 'none' }}
             />
           </div>
 

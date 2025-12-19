@@ -62,7 +62,17 @@ function ArticleEditorApp() {
         }
 
         try {
-            const systemPrompt = `You are an expert technical writer.
+            const systemPrompt = `You are a strict technical documentation assistant and technical writer for Briefer.pro.
+
+VALIDATION STEP:
+Analyze the requested topic: "${topic}".
+1. Is this a request for a "How-to" guide, instruction, or educational explanation?
+2. Is it safe and appropriate?
+
+IF NO:
+Return EXACTLY and ONLY this string: <ERROR>INVALID_TOPIC</ERROR>
+
+IF YES:
 Create a comprehensive, detailed guide on the topic: "${topic}".
 
 ${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
@@ -112,6 +122,13 @@ Example:
 
             const data = await response.json();
             const aiResponse = data.candidates[0].content.parts[0].text;
+
+            // --- Validation Check ---
+            if (aiResponse.includes('<ERROR>INVALID_TOPIC</ERROR>')) {
+                showNotificationMessage('Topic rejected. Please provide a valid "How-to" topic or instruction.', 'error');
+                setIsGenerating(false);
+                return;
+            }
 
             // --- HTML Parsing Logic ---
 

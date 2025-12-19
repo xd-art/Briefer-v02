@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './styles.css'; // Import existing styles
+import 'react-quill/dist/quill.snow.css';
+import './styles.css'; // Import existing styles after Quill CSS
 import './styles/layout-animations.css'; // Import layout animations
 import { AuthProvider } from './context/AuthContext';
 

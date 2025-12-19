@@ -66,6 +66,7 @@ const InlineCardEditor = ({ card, onUpdate, onDelete }) => {
                     formats={formats}
                     placeholder="Enter card content..."
                     className="min-h-[150px]"
+                    style={{ border: 'none', outline: 'none' }}
                 />
             </div>
 
