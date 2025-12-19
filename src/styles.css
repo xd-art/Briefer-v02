@@ -656,12 +656,17 @@ a.edit-link {
     background: white;
 }
 
-.card-editor:focus {
-    outline: none;
-    border-color: #ffffff;
-    /* синяя рамка только при фокусе */
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+/* White focus style for Quill editor */
+.ql-container:focus,
+.ql-editor:focus {
+    border-color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
+
+
+
+
 
 
 

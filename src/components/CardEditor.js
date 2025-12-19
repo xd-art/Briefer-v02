@@ -466,7 +466,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
           <input
             type="text"
             id="cardTitle"
-            className="text-xl font-bold text-gray-800 border-none outline-none focus:outline-none bg-transparent w-full"
+            className="text-xl font-bold text-gray-800 border-none outline-none focus:outline-none bg-transparent w-full pl-4"
             placeholder="Enter section title"
             value={title}
             onChange={handleTitleChange}
@@ -481,11 +481,12 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
             <ReactQuill
               ref={quillRef}
               theme="snow"
+              placeholder="Write your experience..."
               value={content}
               onChange={handleContentChange}
               modules={quillModules}
               formats={quillFormats}
-              className="h-full"
+              className="h-full quill-focus-white"
               tabIndex={-1}
               style={{ border: 'none', outline: 'none' }}
             />
