@@ -642,19 +642,31 @@ a.edit-link {
     background: white !important;
 }
 
-/* Remove default blue/gray borders on hover/focus using focus-within */
-.ql-container.ql-snow:focus-within,
-.ql-container.ql-snow:hover,
-.ql-toolbar.ql-snow:hover,
-.ql-toolbar.ql-snow:focus-within {
-    border-color: white !important;
-    box-shadow: none !important;
+.ql-toolbar {
+    border: 1px solid white !important;
+    /* скрывает обычную серую/синюю рамку */
+    border-bottom: 1px solid white !important;
+    /* та же идея для нижней части */
+    background: white;
 }
 
-/* Specific targeted overrides to ensure deep elements don't show color */
-.ql-container.ql-snow.ql-focused {
-    border-color: white !important;
+.ql-container {
+    border: 1px solid white !important;
+    /* убирает видимую границу вокруг области ввода */
+    background: white;
 }
+
+.card-editor:focus {
+    outline: none;
+    border-color: #ffffff;
+    /* синяя рамка только при фокусе */
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+}
+
+
+
+
+
 
 /* Restore list styles for Quill Editor and RichTextDisplay */
 .ql-editor ul,

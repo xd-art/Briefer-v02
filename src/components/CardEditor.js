@@ -173,6 +173,8 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   }, []);
 
   // Focus title input when modal opens
+  // Focus title input when modal opens - REMOVED per user request
+  /* 
   useEffect(() => {
     if (isEditingMode && titleInputRef.current) {
       setTimeout(() => {
@@ -180,6 +182,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
       }, 100);
     }
   }, [isEditingMode]);
+  */
 
   const openEditModal = (card) => {
     console.log('OpenEditModal called with:', card);
@@ -442,6 +445,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
                 id="saveCardEdit"
                 className="text-blue-500 font-semibold text-sm hover:underline focus:outline-none"
                 onClick={saveCardChanges}
+                tabIndex={-1}
               >
                 SAVE
               </button>
@@ -449,6 +453,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
                 id="closeModal"
                 className="text-gray-400 hover:text-gray-600 focus:outline-none"
                 onClick={closeModal}
+                tabIndex={-1}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -461,11 +466,13 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
           <input
             type="text"
             id="cardTitle"
-            className="text-xl font-bold text-gray-800 border-none outline-none bg-transparent w-full"
+            className="text-xl font-bold text-gray-800 border-none outline-none focus:outline-none bg-transparent w-full"
             placeholder="Enter section title"
             value={title}
             onChange={handleTitleChange}
             ref={titleInputRef}
+            tabIndex={-1}
+            autoFocus={false}
           />
         </div>
 
@@ -479,6 +486,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
               modules={quillModules}
               formats={quillFormats}
               className="h-full"
+              tabIndex={-1}
               style={{ border: 'none', outline: 'none' }}
             />
           </div>
@@ -487,12 +495,13 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
             <div className="flex flex-col items-end">
               <textarea
                 id="aiPrompt"
-                className="w-full p-3 rounded-lg outline-none text-gray-600 resize-none transition-colors focus:border-blue-300"
+                className="w-full p-3 rounded-lg outline-none text-gray-600 resize-none transition-colors focus:outline-none"
                 placeholder="Write prompt for AI assistance..."
                 rows="2"
                 value={aiPrompt}
                 onChange={handleAiPromptChange}
                 onKeyDown={handleAiPromptKeyDown}
+                tabIndex={-1}
               />
               <div className="mt-2 flex items-center justify-between w-full">
                 <div className="text-xs text-gray-400">
@@ -504,6 +513,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
                   className="p-2 rounded-full bg-blue-500 text-white shadow-md hover:bg-blue-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={sendAIPrompt}
                   disabled={aiStatus === '• Processing...'}
+                  tabIndex={-1}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
