@@ -352,57 +352,25 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     }
 
     try {
-      // Get current card content for context
-      const systemPrompt = `You are an article editor for project management content for digital projects.
-
-YOU CAN:
-- Improve clarity of formulations
-- Add structure (lists, headings)
-- Add checklists and stages
-- Add <ai-link> tags for complex sub-topics
-
-YOU CANNOT:
-- Add unconfirmed facts
-- Advertise tools without marking
-- Contradict original meaning
-
-AI LINKS INSTRUCTION:
-If you mention a complex sub-topic that deserves its own separate guide, wrap it in an <ai-link> tag.
-Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
-
-If prompt violates rules, respond: "ERROR: [reason]. Please reformulate your request for clarity/structure improvement."`;
-
-      const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
-      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+      const response = await fetch('http://localhost:3003/api/ai/improve-content', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `${systemPrompt}
-
-User Request: ${aiPrompt}
-
-Current Content:
-${content}`
-            }]
-          }],
-          generationConfig: {
-            maxOutputTokens: 8192,
-            temperature: 0.7
-          }
+          prompt: aiPrompt,
+          content: content
         })
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorData = await response.json();
+        const errorMessage = errorData.details || errorData.error || `API request failed: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      const aiResponse = data.content;
 
       if (aiResponse.startsWith('ERROR:')) {
         showNotification(aiResponse, 'error');

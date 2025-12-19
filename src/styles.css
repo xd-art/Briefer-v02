@@ -655,3 +655,23 @@ a.edit-link {
 .ql-container.ql-snow.ql-focused {
     border-color: white !important;
 }
+
+/* Restore list styles for Quill Editor and RichTextDisplay */
+.ql-editor ul,
+.rich-text-content ul {
+    list-style-type: disc !important;
+    padding-left: 1.5rem !important;
+    margin: 1rem 0 !important;
+}
+
+.ql-editor ol,
+.rich-text-content ol {
+    list-style-type: decimal !important;
+    padding-left: 1.5rem !important;
+    margin: 1rem 0 !important;
+}
+
+.ql-editor li,
+.rich-text-content li {
+    margin-bottom: 0.5rem !important;
+}

@@ -62,70 +62,29 @@ function ArticleEditorApp() {
         }
 
         try {
-            const systemPrompt = `You are a strict technical documentation assistant and technical writer for Briefer.pro.
-
-VALIDATION STEP:
-Analyze the requested topic: "${topic}".
-1. Is this a request for a "How-to" guide, instruction, or educational explanation?
-2. Is it safe and appropriate?
-
-IF NO:
-Return EXACTLY and ONLY this string: <ERROR>INVALID_TOPIC</ERROR>
-
-IF YES:
-Create a comprehensive, detailed guide on the topic: "${topic}".
-
-${detailedPrompt ? `Additional instructions: ${detailedPrompt}` : ''}
-
-FORMAT RULES:
-1. Use HTML format. Do NOT use Markdown.
-2. The output must be valid, well-structured HTML.
-3. The first element MUST be an <h1> tag containing the main article title.
-4. Use <h2> tags for section titles.
-5. Use <p>, <ul>, <li>, <strong>, <em>, <h3>, <h4>, <pre>, <code>, <blockquote>, <table>, <tr>, <td> to structure the content richly.
-6. Make sure the content is visually rich and easy to read.
-
-CRITICAL - AI LINKS:
-If you mention a complex sub-topic that deserves its own separate guide (e.g., "Setting up Nginx", "Configuring DNS"), you MUST wrap that phrase in a special <ai-link> tag.
-Format: <ai-link topic="Exact Topic Title" template="guide">visible text</ai-link>
-Note: Ensure <ai-link> tags are inside logical HTML elements like <p> or <li>.
-
-Example:
-<h1>How to Host a Website</h1>
-<h2>Introduction</h2>
-<p>First, you need to <ai-link topic="How to install Node.js" template="guide">install Node.js</ai-link> on your server.</p>
-...`;
-
-            const API_KEY = 'AIzaSyDsl5dvLeH3WtsfQ93RnZ01UePo_pAQsBE';
-            const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', {
+            const response = await fetch('http://localhost:3003/api/ai/generate-article', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'x-goog-api-key': API_KEY
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: systemPrompt
-                        }]
-                    }],
-                    generationConfig: {
-                        maxOutputTokens: 8192,
-                        temperature: 0.7
-                    }
+                    topic: topic,
+                    detailedPrompt: detailedPrompt
                 })
             });
 
             if (!response.ok) {
-                throw new Error(`API request failed: ${response.status}`);
+                const errorData = await response.json();
+                const errorMessage = errorData.details || errorData.error || `API request failed: ${response.status}`;
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            const aiResponse = data.candidates[0].content.parts[0].text;
+            const aiResponse = data.content;
 
-            // --- Validation Check ---
-            if (aiResponse.includes('<ERROR>INVALID_TOPIC</ERROR>')) {
-                showNotificationMessage('Topic rejected. Please provide a valid "How-to" topic or instruction.', 'error');
+            // --- Validation Check (Backend handles this now, or we skip it) ---
+            if (aiResponse.startsWith('ERROR:')) {
+                showNotificationMessage(aiResponse, 'error');
                 setIsGenerating(false);
                 return;
             }
