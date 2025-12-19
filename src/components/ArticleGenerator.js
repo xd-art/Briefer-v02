@@ -45,7 +45,7 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
       <div className="w-full max-w-3xl">
         {/* UPPER CARD: Title + Text + Video */}
         <div className="p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-6">
-          <h1 className="text-4xl font-bold mb-6 text-gray-900">How To Article Generator</h1>
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">How-To Article Generator</h1>
 
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Text Column */}

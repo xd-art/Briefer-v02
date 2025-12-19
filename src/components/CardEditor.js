@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useImperativeHandle, memo } from 'react';
+import React, { useState, useEffect, useRef, useImperativeHandle, memo, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { convertToHtml } from '../utils/markdown'; // Import the markdown utility
@@ -25,6 +25,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
   const titleInputRef = useRef(null);
   const modalRef = useRef(null);
   const quillRef = useRef(null);
+  const isLoadingContentRef = useRef(false);
 
   // Keep a ref to cards to access current state inside closures (like openEditModal)
   const cardsRef = useRef(cards);
@@ -34,6 +35,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
 
   // Keep a ref to cards to access current state inside closures (like openEditModal)
   /* Removed cardsRef as we now use explicit isNew flag */
+
 
   // Quill modules configuration to match original styling
   const modules = {
@@ -53,129 +55,16 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     'link'
   ];
 
-  // Expose methods to parent component
-  useImperativeHandle(ref, () => ({
-    openEditModal: (card) => {
-      openEditModal(card);
-    }
-  }), []);
-
-  // Setup keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (isEditingMode) {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          closeModal();
-        } else if (e.ctrlKey && e.key === 'Enter') {
-          e.preventDefault();
-          saveCardChanges();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isEditingMode]);
-
-  // Handle custom event for opening modal
-  useEffect(() => {
-    const handleOpenEditModal = (e) => {
-      openEditModal(e.detail);
-    };
-
-    window.addEventListener('openEditModal', handleOpenEditModal);
-    return () => {
-      window.removeEventListener('openEditModal', handleOpenEditModal);
-    };
-  }, []);
-
-  // Focus title input when modal opens
-  useEffect(() => {
-    if (isEditingMode && titleInputRef.current) {
-      setTimeout(() => {
-        titleInputRef.current.focus();
-      }, 100);
-    }
-  }, [isEditingMode]);
-
-  const openEditModal = (card) => {
-    console.log('OpenEditModal called with:', card);
-    setCurrentCard(card);
-    setIsEditingMode(true);
-    setHasUnsavedChanges(false);
-
-    // 1. Check if card explicitly says it is new
-    if (card.isNew) {
-      console.log('Card has isNew: true flag');
-      setIsNewCard(true);
-      setTitle('');
-      setContent('');
-      return;
-    }
-
-    // 2. Safety check: Does this card ID exist in our current cards list?
-    const existingCardIndex = cardsRef.current.findIndex(c => c.id === card.id);
-    const idExists = existingCardIndex !== -1;
-    console.log(`Card ID ${card.id} exists in list? ${idExists} (index: ${existingCardIndex})`);
-
-    if (idExists) {
-      console.log('Card exists in list -> Treating as EXISTING (isNewCard: false)');
-      setIsNewCard(false);
-    } else {
-      // It doesn't exist in our list, and doesn't have isNew flag.
-      // This is the ambiguous case. 
-      // If content is empty, maybe it's new? 
-      // But for "category articles" duplication bug, we want to err on side of "Existing" if possible, 
-      // but if we treat as existing and it's not in the list, save will do nothing.
-
-      // Let's assume if it came in with content, it's NOT new, even if we can't find ID (maybe stale ID?).
-      console.log('Card ID not found key logic fallback.');
-      setIsNewCard(false);
-    }
-
-    // If card has explicit heading/content (e.g., category articles), use it directly
-    if (card && typeof card.heading === 'string' && card.heading.trim() !== '') {
-      setTitle(card.heading);
-      setContent(card.content || '');
-      return;
-    }
-
-    // Extract title and content from card HTML
-    if (card.content && card.content.trim() !== '') {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(card.content, 'text/html');
-
-      const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
-      const titleText = titleElement ? titleElement.textContent : '';
-
-      // Remove title element to get content
-      if (titleElement) {
-        titleElement.remove();
-      }
-
-      // Get remaining content
-      const contentElements = Array.from(doc.body.children);
-      let contentHTML = '';
-      contentElements.forEach(element => {
-        if (element.classList && !element.classList.contains('flex')) {
-          contentHTML += element.outerHTML;
-        }
-      });
-
-      setTitle(titleText);
-      setContent(contentHTML);
-    } else {
-      // Fallback for existing empty cards
-      setTitle('');
-      setContent('');
-    }
+  // Helper function for escaping HTML
+  const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   };
 
-  const closeModal = () => {
-    if (hasUnsavedChanges) {
+  // Define closeModal and saveCardChanges BEFORE useEffect hooks
+  const closeModal = useCallback((force = false) => {
+    if (!force && hasUnsavedChanges) {
       if (!window.confirm('You have unsaved changes. Are you sure you want to close without saving?')) {
         return;
       }
@@ -189,10 +78,10 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     setContent('');
     setAiPrompt('');
     setPromptCounter(0);
-    setAiStatus('• AI Ready');
-  };
+    setAiStatus('\u2022 AI Ready');
+  }, [hasUnsavedChanges]);
 
-  const saveCardChanges = () => {
+  const saveCardChanges = useCallback(() => {
     console.log('Saving card changes. isNewCard:', isNewCard, 'currentCard:', currentCard);
 
     // Validate that at least title or content is provided
@@ -241,13 +130,143 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     showNotification(message, 'success');
 
     // Close modal
-    closeModal();
-  };
+    closeModal(true);
+  }, [isNewCard, currentCard, title, content, showNotification, cards, setCards, closeModal]);
 
-  const escapeHtml = (text) => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    openEditModal: (card) => {
+      openEditModal(card);
+    }
+  }), []);
+
+  // Setup keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isEditingMode) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeModal();
+        } else if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          saveCardChanges();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isEditingMode, closeModal, saveCardChanges]);
+
+  // Handle custom event for opening modal
+  useEffect(() => {
+    const handleOpenEditModal = (e) => {
+      openEditModal(e.detail);
+    };
+
+    window.addEventListener('openEditModal', handleOpenEditModal);
+    return () => {
+      window.removeEventListener('openEditModal', handleOpenEditModal);
+    };
+  }, []);
+
+  // Focus title input when modal opens
+  useEffect(() => {
+    if (isEditingMode && titleInputRef.current) {
+      setTimeout(() => {
+        titleInputRef.current.focus();
+      }, 100);
+    }
+  }, [isEditingMode]);
+
+  const openEditModal = (card) => {
+    console.log('OpenEditModal called with:', card);
+    isLoadingContentRef.current = true; // Prevent onChange from marking as unsaved
+
+    setCurrentCard(card);
+    setIsEditingMode(true);
+    setHasUnsavedChanges(false);
+
+    // 1. Check if card explicitly says it is new
+    if (card.isNew) {
+      console.log('Card has isNew: true flag');
+      setIsNewCard(true);
+      setTitle('');
+      setContent('');
+      // Delay to allow onChange events to settle
+      setTimeout(() => {
+        isLoadingContentRef.current = false;
+      }, 100);
+      return;
+    }
+
+    // 2. Safety check: Does this card ID exist in our current cards list?
+    const existingCardIndex = cardsRef.current.findIndex(c => c.id === card.id);
+    const idExists = existingCardIndex !== -1;
+    console.log(`Card ID ${card.id} exists in list? ${idExists} (index: ${existingCardIndex})`);
+
+    if (idExists) {
+      console.log('Card exists in list -> Treating as EXISTING (isNewCard: false)');
+      setIsNewCard(false);
+    } else {
+      // It doesn't exist in our list, and doesn't have isNew flag.
+      // This is the ambiguous case.
+      // If content is empty, maybe it's new?
+      // But for "category articles" duplication bug, we want to err on side of "Existing" if possible,
+      // but if we treat as existing and it's not in the list, save will do nothing.
+
+      // Let's assume if it came in with content, it's NOT new, even if we can't find ID (maybe stale ID?).
+      console.log('Card ID not found key logic fallback.');
+      setIsNewCard(false);
+    }
+
+    // If card has explicit heading/content (e.g., category articles), use it directly
+    if (card && typeof card.heading === 'string' && card.heading.trim() !== '') {
+      setTitle(card.heading);
+      setContent(card.content || '');
+      // Delay to allow onChange events to settle
+      setTimeout(() => {
+        isLoadingContentRef.current = false;
+      }, 100);
+      return;
+    }
+
+    // Extract title and content from card HTML
+    if (card.content && card.content.trim() !== '') {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(card.content, 'text/html');
+
+      const titleElement = doc.querySelector('h1, h2, h3, h4, h5, h6');
+      const titleText = titleElement ? titleElement.textContent : '';
+
+      // Remove title element to get content
+      if (titleElement) {
+        titleElement.remove();
+      }
+
+      // Get remaining content
+      const contentElements = Array.from(doc.body.children);
+      let contentHTML = '';
+      contentElements.forEach(element => {
+        if (element.classList && !element.classList.contains('flex')) {
+          contentHTML += element.outerHTML;
+        }
+      });
+
+      setTitle(titleText);
+      setContent(contentHTML);
+    } else {
+      // Fallback for existing empty cards
+      setTitle('');
+      setContent('');
+    }
+
+    // Delay to allow onChange events to settle
+    setTimeout(() => {
+      isLoadingContentRef.current = false;
+    }, 100);
   };
 
   const handleAiPromptChange = (e) => {
@@ -415,12 +434,16 @@ ${content}`
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
-    setHasUnsavedChanges(true);
+    if (!isLoadingContentRef.current) {
+      setHasUnsavedChanges(true);
+    }
   };
 
   const handleContentChange = (value) => {
     setContent(value);
-    setHasUnsavedChanges(true);
+    if (!isLoadingContentRef.current) {
+      setHasUnsavedChanges(true);
+    }
   };
 
   // Handle Enter key in AI prompt (matching original behavior)
@@ -438,8 +461,8 @@ ${content}`
   return (
     <div
       id="editModal"
-      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-0 hidden z-50"
-      style={{ display: isEditingMode ? 'flex' : 'none' }}
+      className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-0 hidden"
+      style={{ display: isEditingMode ? 'flex' : 'none', zIndex: 'var(--z-modal-content)' }}
       ref={modalRef}
     >
       <div className="bg-white rounded-none w-full h-full shadow-xl transition-all duration-300 flex flex-col">

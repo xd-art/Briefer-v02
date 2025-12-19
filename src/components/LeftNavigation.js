@@ -24,16 +24,16 @@ const LeftNavigation = () => {
         try {
             setLoading(true);
             const response = await fetch('http://localhost:3003/api/facets');
-            
+
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');
             }
 
             const facets = await response.json();
-            
+
             // Find the "domain" facet which contains main categories
             const domainFacet = facets.find(f => f.name === 'domain');
-            
+
             if (domainFacet && domainFacet.values) {
                 // Sort and organize categories
                 const organizedCategories = domainFacet.values.map(category => ({
@@ -79,12 +79,14 @@ const LeftNavigation = () => {
     // Icon mapping for main categories using Material Symbols
     const getCategoryIcon = (categoryValue) => {
         const icons = {
-            'graphic_design': 'palette',
-            'content_creation': 'edit_note',
-            'motion_graphics': 'movie',
-            'audio_production': 'headphones',
-            'digital_marketing': 'campaign',
-            'programming_development': 'code'
+            graphic_design: 'palette',
+            content_creation: 'edit_note',
+            motion_graphics: 'movie',
+            audio_production: 'headphones',
+            digital_marketing: 'campaign',
+            programming_development: 'code',
+            business_management: 'handshake',
+            design_creative: 'brush'
         };
         return icons[categoryValue] || 'folder';
     };
@@ -132,7 +134,7 @@ const LeftNavigation = () => {
             {/* Header */}
             <div className="bg-white px-4 py-3 border-b border-gray-200">
                 <h2 className="text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                    <span className="material-symbols-outlined text-base">explore</span>
+                    <span className="material-symbols-outlined text-2x1">explore</span>
                     Explore Categories
                 </h2>
             </div>
@@ -148,35 +150,34 @@ const LeftNavigation = () => {
                         {categories.map((category) => (
                             <li key={category.id}>
                                 {/* Parent Category */}
-                                <div className="flex items-center justify-between group">
+                                <div className="flex items-center gap-1 group">
+                                    {/* Expand/Collapse Button (Left) */}
+                                    <div className="w-6 shrink-0 flex justify-center">
+                                        {category.children && category.children.length > 0 && (
+                                            <button
+                                                onClick={() => toggleCategory(category.value)}
+                                                className={`p-0.5 transition-all duration-200 rounded hover:bg-gray-200 ${isActiveCategory(category.value) ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                                                    }`}
+                                                aria-label={expandedCategories[category.value] ? 'Collapse' : 'Expand'}
+                                            >
+                                                <span className={`material-symbols-outlined text-base transition-transform duration-300 ${expandedCategories[category.value] ? 'rotate-90' : ''
+                                                    }`}>
+                                                    chevron_right
+                                                </span>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {/* Label & Icon (Text Left, Icon Right) */}
                                     <Link
                                         to={getCategoryPath(category.value)}
-                                        className={`flex items-center gap-2 text-sm rounded px-2 py-1.5 flex-1 transition-all duration-200 ${
-                                            isActiveCategory(category.value)
-                                                ? 'bg-blue-600 text-white shadow-sm'
-                                                : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
-                                        }`}
+                                        className={`flex items-center gap-2 text-sm rounded px-2 py-1.5 flex-1 transition-all duration-200 ${isActiveCategory(category.value)
+                                            ? 'bg-blue-600 text-white shadow-sm'
+                                            : 'text-gray-700 hover:text-blue-600 hover:bg-blue-50'
+                                            }`}
                                     >
-                                        <span className="material-symbols-outlined text-lg">{getCategoryIcon(category.value)}</span>
                                         <span className="font-medium">{category.label}</span>
                                     </Link>
-                                    
-                                    {/* Expand/Collapse Button (if has children) */}
-                                    {category.children && category.children.length > 0 && (
-                                        <button
-                                            onClick={() => toggleCategory(category.value)}
-                                            className={`p-1 transition-all duration-200 rounded hover:bg-gray-200 ${
-                                                isActiveCategory(category.value) ? 'text-white hover:bg-blue-700' : 'text-gray-400 hover:text-gray-600'
-                                            }`}
-                                            aria-label={expandedCategories[category.value] ? 'Collapse' : 'Expand'}
-                                        >
-                                            <span className={`material-symbols-outlined text-base transition-transform duration-300 ${
-                                                expandedCategories[category.value] ? 'rotate-90' : ''
-                                            }`}>
-                                                chevron_right
-                                            </span>
-                                        </button>
-                                    )}
                                 </div>
 
                                 {/* Subcategories */}
@@ -186,11 +187,10 @@ const LeftNavigation = () => {
                                             <li key={subcategory.id}>
                                                 <Link
                                                     to={getCategoryPath(category.value, subcategory.value)}
-                                                    className={`block text-sm rounded px-2 py-1 transition-all duration-200 ${
-                                                        isActiveSubcategory(category.value, subcategory.value)
-                                                            ? 'bg-blue-100 text-blue-700 font-medium shadow-sm'
-                                                            : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-                                                    }`}
+                                                    className={`block text-sm rounded px-2 py-1 transition-all duration-200 ${isActiveSubcategory(category.value, subcategory.value)
+                                                        ? 'bg-blue-100 text-blue-700 font-medium shadow-sm'
+                                                        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                                                        }`}
                                                 >
                                                     {subcategory.label}
                                                 </Link>

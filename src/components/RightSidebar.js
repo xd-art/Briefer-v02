@@ -24,7 +24,7 @@ const RightSidebar = () => {
     const fetchSidebarContent = async () => {
         try {
             setLoading(true);
-            
+
             // Fetch multiple category articles in parallel
             const categoryPromises = [
                 fetchCategoryArticle('graphic_design'),
@@ -36,18 +36,21 @@ const RightSidebar = () => {
             ];
 
             const results = await Promise.allSettled(categoryPromises);
-            
+
             // Filter successful results and extract articles
             const articles = results
                 .filter(result => result.status === 'fulfilled' && result.value)
                 .map(result => result.value)
                 .filter(Boolean);
 
+            // Deduplicate articles by ID
+            const uniqueArticles = Array.from(new Map(articles.map(article => [article.id, article])).values());
+
             // Take first 3-4 for featured section
-            setFeaturedArticles(articles.slice(0, 4));
+            setFeaturedArticles(uniqueArticles.slice(0, 4));
 
             // Pick a random one for inspiration (different from featured)
-            const remainingArticles = articles.slice(4);
+            const remainingArticles = uniqueArticles.slice(4);
             if (remainingArticles.length > 0) {
                 const randomIndex = Math.floor(Math.random() * remainingArticles.length);
                 setRandomArticle(remainingArticles[randomIndex]);
@@ -77,7 +80,7 @@ const RightSidebar = () => {
             }
 
             const data = await response.json();
-            
+
             if (data.articles && data.articles.length > 0) {
                 const article = data.articles[0];
                 return {
@@ -157,18 +160,18 @@ const RightSidebar = () => {
                 <div className="bg-white rounded-lg border border-white overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-100">
                         <h2 className="text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                            <span className="material-symbols-outlined text-base">stars</span>
+                            <span className="material-symbols-outlined text-2x1">stars</span>
                             <span>Featured from Categories</span>
                         </h2>
                     </div>
                     <div className="p-4 space-y-4">
                         {featuredArticles.map((article, index) => (
-                            <article 
-                                key={article.id} 
+                            <article
+                                key={article.id}
                                 className="pb-4 border-b border-gray-100 last:border-b-0 last:pb-0 group"
                                 style={{ animationDelay: `${index * 100}ms` }}
                             >
-                                <Link 
+                                <Link
                                     to={getArticlePath(article)}
                                     className="block transform transition-transform duration-200 hover:translate-x-1"
                                 >
@@ -205,7 +208,7 @@ const RightSidebar = () => {
                         <p className="text-xs text-blue-700 mb-3 font-medium">
                             Don't know where to start? Try this:
                         </p>
-                        <Link 
+                        <Link
                             to={getArticlePath(randomArticle)}
                             className="block bg-white rounded-lg p-3 shadow-sm hover:shadow-lg transition-all duration-300 group hover:scale-105"
                         >
@@ -234,7 +237,7 @@ const RightSidebar = () => {
                     <p className="text-sm text-gray-500 mb-2">
                         No articles available yet.
                     </p>
-                    <Link 
+                    <Link
                         to="/categories"
                         className="mt-3 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition-all duration-200 hover:translate-x-1"
                     >

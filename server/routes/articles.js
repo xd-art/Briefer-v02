@@ -65,20 +65,30 @@ router.get('/categories/:facetValue', async (req, res) => {
         // Find the FacetValue by value
         const fv = await FacetValue.findOne({
             where: { value: facetValue },
-            include: [{
-                model: Facet,
-                as: 'facet'
-            }]
+            include: [
+                {
+                    model: Facet,
+                    as: 'facet'
+                },
+                {
+                    model: FacetValue,
+                    as: 'children'
+                }
+            ]
         });
 
         if (!fv) {
             return res.status(404).json({ error: 'Category not found' });
         }
 
+        // Collect all relevant facet value IDs (parent + children)
+        // This ensures we get articles in "Web Development" when viewing "Programming"
+        const categoryIds = [fv.id, ...(fv.children || []).map(c => c.id)];
+
         // Find all articles that:
         // 1. Are approved
         // 2. Are published in categories
-        // 3. Have this facet value assigned
+        // 3. Have this facet value OR any of its children assigned
         const articles = await Article.findAll({
             where: {
                 status: 'approved',
@@ -102,7 +112,11 @@ router.get('/categories/:facetValue', async (req, res) => {
                 {
                     model: ArticleFacet,
                     as: 'facetAssignments',
-                    where: { facet_value_id: fv.id },
+                    where: {
+                        facet_value_id: {
+                            [Op.in]: categoryIds
+                        }
+                    },
                     include: [
                         {
                             model: FacetValue,
@@ -118,9 +132,9 @@ router.get('/categories/:facetValue', async (req, res) => {
             order: [['created_at', 'DESC']]
         });
 
-        res.json({ 
+        res.json({
             category: fv,
-            articles 
+            articles
         });
     } catch (error) {
         console.error('Error fetching articles by category:', error);
@@ -243,9 +257,9 @@ router.post('/:id/submit-for-review', requireAuth, async (req, res) => {
 
         await article.update({ status: 'pending_review' });
 
-        res.json({ 
+        res.json({
             message: 'Article submitted for review',
-            article 
+            article
         });
     } catch (error) {
         console.error('Error submitting article:', error);

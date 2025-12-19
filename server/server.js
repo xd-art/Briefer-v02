@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
@@ -11,17 +11,17 @@ const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
+    origin: 'http://localhost:3000',
+    credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your_session_secret_here',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+    secret: process.env.SESSION_SECRET || 'your_session_secret_here',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 } // 24 hours
 }));
 
 // Passport initialization

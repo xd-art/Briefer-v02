@@ -522,10 +522,32 @@ Example:
     };
 
     const handleDeleteCard = (cardId) => {
-        if (window.confirm('Are you sure you want to delete this card?')) {
-            const newCards = cards.filter(card => card.id !== cardId);
-            setCards(newCards);
-        }
+        // Temporary removal of confirm for debugging
+        // if (window.confirm('Are you sure you want to delete this card?')) {
+        console.log(`[DELETE] Request for ID: "${cardId}" (Type: ${typeof cardId})`);
+
+        setCards(prevCards => {
+            console.log(`[DELETE] Current card count: ${prevCards.length}`);
+
+            // Check if ID exists before filtering
+            const exists = prevCards.some(c => c.id === cardId);
+            if (!exists) {
+                console.warn(`[DELETE] Warning: Card ID "${cardId}" not found in current state!`);
+                console.log('[DELETE] Available IDs:', prevCards.map(c => c.id));
+            }
+
+            const newCards = prevCards.filter(card => {
+                const isMatch = card.id === cardId;
+                if (isMatch) {
+                    console.log(`[DELETE] Matching card found and removed: "${card.id}"`);
+                }
+                return !isMatch;
+            });
+
+            console.log(`[DELETE] New card count: ${newCards.length}`);
+            return newCards;
+        });
+        // }
     };
 
     const handleDragEnd = (result) => {
