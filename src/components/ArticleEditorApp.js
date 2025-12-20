@@ -678,6 +678,20 @@ function ArticleEditorApp() {
                         onAddCard={addNewCard}
                     />
                 </div>
+
+                {/* Refinement Bar - Moved into flow for sticky positioning */}
+                <RefinementBar
+                    value={refinementPrompt}
+                    onChange={setRefinementPrompt}
+                    onFilterClick={() => setShowFilterModal(true)}
+                    onSend={() => {
+                        if (refinementPrompt.trim() || Object.keys(selectedFilters).length > 0) {
+                            handleRegenerateWithFilters();
+                        }
+                    }}
+                    isGenerating={isGenerating}
+                    hasFilters={Object.keys(selectedFilters).length > 0}
+                />
             </ThreeColumnLayout>
         );
     };
@@ -706,21 +720,7 @@ function ArticleEditorApp() {
 
             <Footer />
 
-            {/* Refinement Bar - Only show in editor */}
-            {view === 'editor' && (
-                <RefinementBar
-                    value={refinementPrompt}
-                    onChange={setRefinementPrompt}
-                    onFilterClick={() => setShowFilterModal(true)}
-                    onSend={() => {
-                        if (refinementPrompt.trim() || Object.keys(selectedFilters).length > 0) {
-                            handleRegenerateWithFilters();
-                        }
-                    }}
-                    isGenerating={isGenerating}
-                    hasFilters={Object.keys(selectedFilters).length > 0}
-                />
-            )}
+
 
             {/* Filter Modal */}
             <FilterModal
