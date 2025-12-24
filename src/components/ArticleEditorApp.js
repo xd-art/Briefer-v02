@@ -199,8 +199,16 @@ function ArticleEditorApp() {
 
             // Update URL with article ID and clear navigation state
             window.history.replaceState({}, document.title, `?id=${id}`);
+        } else if (location.state?.generateRequest) {
+            const { topic, detailedPrompt } = location.state.generateRequest;
+            console.log('✨ Handling generation request from navigation:', { topic });
+
+            // Clear the state so it doesn't re-trigger on reload
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+            handleGenerate(topic, detailedPrompt);
         } else {
-            console.log('⚠️ No editArticle in location.state');
+            console.log('⚠️ No editArticle or generateRequest in location.state');
         }
     }, [location.state]);
 
@@ -593,7 +601,7 @@ function ArticleEditorApp() {
                     left={<LeftNavigation />}
                     right={<RightSidebar />}
                 >
-                    <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} />
+                    <ArticleGenerator onGenerate={handleGenerate} isGenerating={isGenerating} showInfo={false} />
                 </ThreeColumnLayout>
             );
         }

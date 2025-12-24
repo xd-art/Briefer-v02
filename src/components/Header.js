@@ -5,7 +5,8 @@ import Logo from '../assets/briefer-logo.svg';
 const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const isHome = location.pathname === '/';
+    const isHome = location.pathname === '/home';
+    const isCreate = location.pathname === '/';
     const isBlog = location.pathname.startsWith('/blog');
     const isCategories = location.pathname.startsWith('/categories');
     const isAbout = location.pathname === '/about';
@@ -37,13 +38,22 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                     {/* Center Section: Navigation (Desktop) */}
                     <nav className="hidden md:flex space-x-8">
                         <Link
-                            to="/"
+                            to="/home"
                             className={`text-sm font-medium transition-colors duration-200 ${isHome
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-900'
                                 }`}
                         >
                             Home
+                        </Link>
+                        <Link
+                            to="/"
+                            className={`text-sm font-medium transition-colors duration-200 ${isCreate
+                                ? 'text-blue-600'
+                                : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                        >
+                            Create
                         </Link>
                         <Link
                             to="/categories"
@@ -129,12 +139,20 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                         {/* Drawer Links */}
                         <nav className="flex flex-col space-y-6">
                             <Link
-                                to="/"
+                                to="/home"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`text-lg font-medium transition-colors duration-200 ${isHome ? 'text-blue-600' : 'text-gray-700'
                                     }`}
                             >
                                 Home
+                            </Link>
+                            <Link
+                                to="/"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`text-lg font-medium transition-colors duration-200 ${isCreate ? 'text-blue-600' : 'text-gray-700'
+                                    }`}
+                            >
+                                Create
                             </Link>
                             <Link
                                 to="/categories"
