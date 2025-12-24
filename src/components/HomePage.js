@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import ThreeColumnLayout from './ThreeColumnLayout';
@@ -120,6 +120,20 @@ const HomePage = () => {
                                     <strong>Briefer.pro</strong> is a living library of practical How-To instructions, where AI and the community together build a network of clearly structured guides.
 
                                 </p>
+                                <div className="flex flex-wrap gap-4 mt-6">
+                                    <Link
+                                        to="/"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow"
+                                    >
+                                        Create new article
+                                    </Link>
+                                    <Link
+                                        to="/categories"
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow"
+                                    >
+                                        Revise articles
+                                    </Link>
+                                </div>
                                 <h3 className='text-2xl mt-4 font-bold mb-4 text-gray-900'>  Know how to do something in practice?</h3>
                                 <p className="mt-4 text-gray-800">
                                     Whether creating a new article or improving an existing one, simply describe your insight in a single prompt. The AI Agent will instantly generate a draft for you to review, refine with your real-world experience, and publish. Your contribution updates the site, making you a co-author of the global knowledge base
