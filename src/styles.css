@@ -106,7 +106,7 @@ a.edit-link {
 /* Refinement Bar */
 .refinement-bar {
     position: sticky;
-    bottom: 0rem;
+    bottom: 0.3rem;
     /* Sticks to bottom of viewport */
     z-index: var(--z-sticky);
 

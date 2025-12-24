@@ -54,10 +54,9 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
                 <strong>Briefer.pro</strong> is a living library of practical How-To instructions, where AI and the community together build a network of clearly structured guides.
 
               </p>
-
+              <h3 className='text-2xl mt-4 font-bold mb-4 text-gray-900'>  Know how to do something in practice?</h3>
               <p className="mt-4 text-gray-800">
-                Know how to do something in practice? Describe it in one prompt for a How-To article — AI will create a draft, you'll check and make edits based on your experience, save it, and your article will be published on the site.
-
+                Whether creating a new article or improving an existing one, simply describe your insight in a single prompt. The AI Agent will instantly generate a draft for you to review, refine with your real-world experience, and publish. Your contribution updates the site, making you a co-author of the global knowledge base
 
               </p>
 
@@ -78,13 +77,56 @@ const ArticleGenerator = ({ onGenerate, isGenerating }) => {
           </div>
 
           <div className="mt-6 text-gray-800">
-            <p className="mb-2">
-              <strong>Minimal entry:</strong> your experience + one query = a published article!
-            </p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Choose a topic in which you are competent and enter a prompt for a How-To article — AI will create the foundation.</li>
-              <li>Generate new articles using AI, edit existing ones, publish your versions on the site.</li>
-            </ul>
+            <section class="ai-workflow max-w-3xl mx-auto  py-6 space-y-8">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Read
+                </h3>
+                <p class="mt-2 text-base leading-relaxed text-gray-700">
+                  Explore a knowledge base with a unified logical structure.
+                  Deeper exploration of complex topics happens instantly through AI links
+                  that automatically generate additional content.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Create
+                </h3>
+                <p class="mt-2 text-base leading-relaxed text-gray-700">
+                  Create new articles from scratch.
+                  AI automatically generates a structured draft that can be published
+                  and refined immediately.
+                  When a new article is created, the user becomes its author.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Edit
+                </h3>
+                <p class="mt-2 text-base leading-relaxed text-gray-700">
+                  Edit any article on the site by sending a single prompt through the
+                  built-in editor or by editing manually.
+                  AI applies changes while preserving the article’s context and structure.
+                  Every valid edit makes the user a co-author of the article.
+                </p>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">
+                  Post
+                </h3>
+                <p class="mt-2 text-base leading-relaxed text-gray-700">
+                  All new articles and edits go through AI moderation after being saved.
+                  Once approved, AI automatically updates an existing article or publishes
+                  a new one on the site.
+                  Authorship and co-authorship are recorded automatically.
+                </p>
+              </div>
+            </section>
+
+
           </div>
         </div>
 

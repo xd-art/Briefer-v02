@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
@@ -7,6 +7,7 @@ import LeftNavigation from './LeftNavigation';
 import RightSidebar from './RightSidebar';
 import { useAuth } from '../context/AuthContext';
 import SEO from '../utils/seo';
+import useDebounce from '../hooks/useDebounce';
 
 const CategoryArticlesPage = () => {
     const { category, subcategory } = useParams();
@@ -14,10 +15,16 @@ const CategoryArticlesPage = () => {
     const navigate = useNavigate();
 
     const [articles, setArticles] = useState([]);
+    const [initialArticles, setInitialArticles] = useState([]); // Store original articles
     const [categoryInfo, setCategoryInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 300);
+    const isFirstRun = useRef(true);
+
+    // Initial load of category articles
     useEffect(() => {
         const fetchCategoryArticles = async () => {
             try {
@@ -42,6 +49,7 @@ const CategoryArticlesPage = () => {
                 const data = await response.json();
                 setCategoryInfo(data.category);
                 setArticles(data.articles || []);
+                setInitialArticles(data.articles || []);
             } catch (err) {
                 console.error('Error fetching category articles:', err);
                 setError('Failed to fetch articles');
@@ -50,8 +58,47 @@ const CategoryArticlesPage = () => {
             }
         };
 
-        fetchCategoryArticles();
+        if (searchQuery === '') {
+            fetchCategoryArticles();
+        }
     }, [category, subcategory]);
+
+    // Search effect
+    useEffect(() => {
+        const performSearch = async () => {
+            if (debouncedSearch.trim() === '') {
+                // Restore original if search is cleared
+                if (initialArticles.length > 0) {
+                    setArticles(initialArticles);
+                }
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const facetValue = subcategory.replace(/-/g, '_');
+                const response = await fetch(
+                    `http://localhost:3003/api/articles/search?query=${encodeURIComponent(debouncedSearch)}&category=${facetValue}`
+                );
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setArticles(data.articles || []);
+                }
+            } catch (err) {
+                console.error('Search error:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (isFirstRun.current) {
+            isFirstRun.current = false;
+        } else {
+            performSearch();
+        }
+
+    }, [debouncedSearch, subcategory, initialArticles]);
 
     const handleEditArticle = (article) => {
         console.log('📝 Opening article:', article.title);
@@ -92,22 +139,7 @@ const CategoryArticlesPage = () => {
         navigate('/');
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-white">
-                <Header user={user} onLoginClick={handleLogin} onLogoutClick={logout} />
-                <ThreeColumnLayout
-                    left={<LeftNavigation />}
-                    right={<RightSidebar />}
-                >
-                    <div className="text-center py-12">
-                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-                        <p className="mt-4 text-gray-600">Loading articles...</p>
-                    </div>
-                </ThreeColumnLayout>
-            </div>
-        );
-    }
+
 
     if (error) {
         return (
@@ -154,10 +186,31 @@ const CategoryArticlesPage = () => {
                     </p>
                 </div>
 
-                {articles.length === 0 ? (
+                <div className="mb-6 bg-white p-1 rounded-md">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search in this category..."
+                            className="w-full pl-10 pr-4 py-3 border-0 border-b border-gray-300 focus:border-b-2 focus:border-blue-500 focus:outline-none"
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <div className="absolute left-3 top-3.5 text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {loading ? (
                     <div className="text-center py-12">
-                        <p className="text-gray-500 mb-4">No articles found in this category.</p>
-                        <p className="text-gray-400 text-sm">Check back later for new content.</p>
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                        <p className="mt-4 text-gray-600">Searching...</p>
+                    </div>
+                ) : articles.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 mb-4">No articles found.</p>
+                        <p className="text-gray-500 text-sm">Try different keywords.</p>
                     </div>
                 ) : (
                     <div className="bg-white shadow overflow-hidden sm:rounded-md">

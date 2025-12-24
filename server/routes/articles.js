@@ -23,6 +23,93 @@ router.post('/', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/articles/search
+ * Search articles by title/content and optionally filter by category
+ */
+router.get('/search', async (req, res) => {
+    try {
+        const { query, category, limit = 20, offset = 0 } = req.query;
+        let categoryIds = [];
+
+        // If category provided, find relevant facet IDs
+        if (category) {
+            const fv = await FacetValue.findOne({
+                where: { value: category },
+                include: [{ model: FacetValue, as: 'children' }]
+            });
+            
+            if (fv) {
+                categoryIds = [fv.id, ...(fv.children || []).map(c => c.id)];
+            }
+        }
+
+        const whereClause = {
+            status: 'approved',
+            is_published_in_categories: true
+        };
+
+        if (query) {
+            whereClause[Op.or] = [
+                { title: { [Op.like]: `%${query}%` } },
+                { content: { [Op.like]: `%${query}%` } }
+            ];
+        }
+
+        const include = [
+            {
+                model: User,
+                as: 'author',
+                attributes: ['id', 'email', 'name', 'bio', 'website']
+            }
+        ];
+
+        // Add category filter if needed
+        if (categoryIds.length > 0) {
+            include.push({
+                model: ArticleFacet,
+                as: 'facetAssignments',
+                where: {
+                    facet_value_id: { [Op.in]: categoryIds }
+                },
+                include: [{
+                    model: FacetValue,
+                    as: 'value'
+                }]
+            });
+        } else {
+             // Still include facets for display, but without where clause
+             include.push({
+                model: ArticleFacet,
+                as: 'facetAssignments',
+                include: [{
+                    model: FacetValue,
+                    as: 'value'
+                }]
+            });
+        }
+
+        const { count, rows } = await Article.findAndCountAll({
+            where: whereClause,
+            include,
+            limit: parseInt(limit),
+            offset: parseInt(offset),
+            order: [['created_at', 'DESC']],
+            distinct: true // Important for correct count with includes
+        });
+
+        res.json({
+            articles: rows,
+            total: count,
+            page: Math.floor(offset / limit) + 1,
+            totalPages: Math.ceil(count / limit)
+        });
+    } catch (error) {
+        console.error('Search articles error:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Attach Draft to User
 router.put('/:id/attach', requireAuth, async (req, res) => {
     try {
