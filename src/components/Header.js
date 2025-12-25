@@ -5,8 +5,8 @@ import Logo from '../assets/briefer-logo.svg';
 const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const isHome = location.pathname === '/home';
-    const isCreate = location.pathname === '/';
+    const isHome = location.pathname === '/';
+    const isCreate = location.pathname === '/create';
     const isBlog = location.pathname.startsWith('/blog');
     const isCategories = location.pathname.startsWith('/categories');
     const isAbout = location.pathname === '/about';
@@ -38,7 +38,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                     {/* Center Section: Navigation (Desktop) */}
                     <nav className="hidden md:flex space-x-8">
                         <Link
-                            to="/home"
+                            to="/"
                             className={`text-sm font-medium transition-colors duration-200 ${isHome
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-900'
@@ -47,7 +47,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                             Home
                         </Link>
                         <Link
-                            to="/"
+                            to="/create"
                             className={`text-sm font-medium transition-colors duration-200 ${isCreate
                                 ? 'text-blue-600'
                                 : 'text-gray-500 hover:text-gray-900'
@@ -139,7 +139,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                         {/* Drawer Links */}
                         <nav className="flex flex-col space-y-6">
                             <Link
-                                to="/home"
+                                to="/"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`text-lg font-medium transition-colors duration-200 ${isHome ? 'text-blue-600' : 'text-gray-700'
                                     }`}
@@ -147,7 +147,7 @@ const Header = ({ user, onLoginClick, onNavigate, currentView }) => {
                                 Home
                             </Link>
                             <Link
-                                to="/"
+                                to="/create"
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={`text-lg font-medium transition-colors duration-200 ${isCreate ? 'text-blue-600' : 'text-gray-700'
                                     }`}

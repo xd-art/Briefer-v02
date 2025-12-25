@@ -16,8 +16,9 @@ import TermsAndConditionsPage from '../components/TermsAndConditionsPage';
 const AppRoutes = () => {
     return (
         <Routes>
-            <Route path="/" element={<ArticleEditorApp />} />
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/create" element={<ArticleEditorApp />} />
+
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/categories" element={<CategoriesPage />} />
             <Route path="/categories/:category/:subcategory" element={<CategoryArticlesPage />} />

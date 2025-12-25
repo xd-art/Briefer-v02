@@ -83,7 +83,7 @@ const HomePage = () => {
             });
 
             // Navigate to editor with fully formed article
-            navigate('/', {
+            navigate('/create', {
                 state: {
                     editArticle: {
                         id: activeId,
@@ -122,7 +122,7 @@ const HomePage = () => {
                                 </p>
                                 <div className="flex flex-wrap gap-4 mt-6">
                                     <Link
-                                        to="/"
+                                        to="/create"
                                         className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow"
                                     >
                                         Create new article

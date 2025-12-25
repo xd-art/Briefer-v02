@@ -288,7 +288,7 @@ function ArticleEditorApp() {
         } catch (error) {
             console.error('Error fetching article from backend:', error);
             showNotificationMessage('Article not found. Redirecting to generator.', 'error');
-            window.history.replaceState(null, '', '/');
+            window.history.replaceState(null, '', '/create');
             setView('generator');
         }
     };
@@ -444,7 +444,7 @@ function ArticleEditorApp() {
         }
 
         if (window.confirm('Are you sure you want to start over? You will return to the generator.')) {
-            window.location.href = '/';
+            window.location.href = '/create';
         }
     };
 
@@ -553,7 +553,7 @@ function ArticleEditorApp() {
     const handleNavigate = (newView) => {
         setView(newView);
         if (newView === 'generator') {
-            window.history.pushState(null, '', '/');
+            window.history.pushState(null, '', '/create');
         } else if (newView === 'profile') {
             window.history.pushState(null, '', '/profile');
         }
