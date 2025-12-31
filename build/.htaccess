@@ -1,0 +1,24 @@
+# 301 Redirects for Old Blog Posts
+Redirect 301 /pages/blog/tesla-cybertruck-design.php /blog/tesla-cybertruck-design
+Redirect 301 /pages/blog/pleasure-vs-suffering.php /blog/pleasure-vs-suffering
+Redirect 301 /pages/blog/blue-ocean.php /blog/blue-ocean
+Redirect 301 /pages/blog/youtube-story.php /blog/youtube-story
+Redirect 301 /pages/blog/max-tegmark-ai-goals.php /blog/max-tegmark-ai-goals
+Redirect 301 /pages/blog/max-tegmark.php /blog/max-tegmark
+Redirect 301 /pages/blog/marketing-case-nike_v01.php /blog/marketing-case-nike_v01
+Redirect 301 /pages/blog/htc-growth-story.php /blog/htc-growth-story
+Redirect 301 /pages/blog/victorinox-story.php /blog/victorinox-story
+Redirect 301 /pages/blog/hilton-hotels-story.php /blog/hilton-hotels-story
+Redirect 301 /pages/blog/greek-peak-marketing-case.php /blog/greek-peak-marketing-case
+Redirect 301 /pages/blog/dual-system-theory.php /blog/dual-system-theory
+
+# React Router Rewrites
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-l
+  RewriteRule . /index.html [L]
+</IfModule>

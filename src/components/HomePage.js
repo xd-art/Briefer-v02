@@ -113,9 +113,9 @@ const HomePage = () => {
                     <div className="w-full max-w-3xl mx-auto p-6 sm:p-8 rounded-xl bg-white shadow-[0_4px_20px_rgba(0,0,0,0.08)] mb-6">
                         <h1 className="text-4xl font-bold mb-6 text-gray-900">How-To Article Generator</h1>
 
-                        <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="flex flex-col items-center gap-6">
                             {/* Text Column */}
-                            <div className="md:w-1/2 w-full">
+                            <div className="w-full">
                                 <p className="text-gray-800">
                                     <strong>Briefer.pro</strong> is a living library of practical How-To instructions, where AI and the community together build a network of clearly structured guides.
 
@@ -134,7 +134,7 @@ const HomePage = () => {
                                         Revise articles
                                     </Link>
                                 </div>
-                                <h3 className='text-2xl mt-4 font-bold mb-4 text-gray-900'>  Know how to do something in practice?</h3>
+                                <h3 className='text-2xl mt-8 font-bold mb-4 text-gray-900'>  Know how to do something in practice?</h3>
                                 <p className="mt-4 text-gray-800">
                                     Whether creating a new article or improving an existing one, simply describe your insight in a single prompt. The AI Agent will instantly generate a draft for you to review, refine with your real-world experience, and publish. Your contribution updates the site, making you a co-author of the global knowledge base
 
@@ -144,15 +144,19 @@ const HomePage = () => {
                             </div>
 
                             {/* Video Column */}
-                            <div className="md:w-1/2 w-full flex justify-center">
-                                <video
-                                    src="/videos/intro.mp4"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                    className="w-64 h-auto rounded"
-                                ></video>
+                            <div className="w-full flex justify-center">
+                                <iframe
+                                    title="briefer-intro-1"
+                                    src="https://player.vimeo.com/video/1150155829?badge=0&autopause=0&player_id=0&app_id=58479"
+                                    frameBorder="0"
+                                    allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+                                    allowFullScreen
+                                    referrerPolicy="strict-origin-when-cross-origin"
+                                    className="w-full aspect-video rounded shadow-lg"
+                                ></iframe>
+
+
+
                             </div>
                         </div>
 

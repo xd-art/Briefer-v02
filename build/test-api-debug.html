@@ -1,0 +1,35 @@
+// Debug page for testing API connection
+// Open this in browser: http://localhost:3000/test-api-debug.html
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Debug</title>
+</head>
+<body>
+    <h1>API Debug Test</h1>
+    <button onclick="testAPI()">Test API</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('result');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('http://localhost:3003/api/articles/categories/graphic_design');
+                const data = await response.json();
+                
+                result.textContent = JSON.stringify(data, null, 2);
+                console.log('API Response:', data);
+            } catch (error) {
+                result.textContent = 'ERROR: ' + error.message;
+                console.error('API Error:', error);
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', testAPI);
+    </script>
+</body>
+</html>

@@ -43,6 +43,18 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+    const path = require('path');
+    // Serve any static files
+    app.use(express.static(path.join(__dirname, '../build')));
+
+    // Handle React routing, return all requests to React app
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../build', 'index.html'));
+    });
+}
+
 // Start Server
 const startServer = async () => {
     try {
