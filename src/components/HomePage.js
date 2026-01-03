@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import config from '../config';
 import Header from './Header';
 import Footer from './Footer';
 import ThreeColumnLayout from './ThreeColumnLayout';
@@ -23,7 +24,7 @@ const HomePage = () => {
         setIsGenerating(true);
 
         try {
-            const response = await fetch('http://localhost:3003/api/ai/generate-article', {
+            const response = await fetch(`${config.API_BASE_URL}/api/ai/generate-article`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

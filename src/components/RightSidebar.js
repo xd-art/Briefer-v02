@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import config from '../config';
 
 /**
  * RightSidebar Component
@@ -72,7 +73,7 @@ const RightSidebar = () => {
     const fetchCategoryArticle = async (categoryValue) => {
         try {
             const response = await fetch(
-                `http://localhost:3003/api/articles/categories/${categoryValue}?limit=1`
+                `${config.API_BASE_URL}/api/articles/categories/${categoryValue}?limit=1`
             );
 
             if (!response.ok) {

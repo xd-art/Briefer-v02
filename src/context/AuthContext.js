@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import config from '../config';
 
 const AuthContext = createContext(null);
 
@@ -10,10 +11,10 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                const response = await fetch('http://localhost:3003/api/auth/me', {
+                const response = await fetch(`${config.API_BASE_URL}/api/auth/me`, {
                     credentials: 'include' // Include cookies in the request
                 });
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     setUser(data.user);
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const login = async (email, password) => {
-        const response = await fetch('http://localhost:3003/api/auth/login', {
+        const response = await fetch(`${config.API_BASE_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include', // Include cookies in the request
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (email, password) => {
-        const response = await fetch('http://localhost:3003/api/auth/register', {
+        const response = await fetch(`${config.API_BASE_URL}/api/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include', // Include cookies in the request
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         try {
-            await fetch('http://localhost:3003/api/auth/logout', {
+            await fetch(`${config.API_BASE_URL}/api/auth/logout`, {
                 method: 'POST',
                 credentials: 'include'
             });
@@ -97,15 +98,15 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithGoogle = () => {
         // Redirect to Google OAuth endpoint
-        window.location.href = 'http://localhost:3003/api/auth/google';
+        window.location.href = `${config.API_BASE_URL}/api/auth/google`;
     };
 
     const refreshUser = async () => {
         try {
-            const response = await fetch('http://localhost:3003/api/auth/me', {
+            const response = await fetch(`${config.API_BASE_URL}/api/auth/me`, {
                 credentials: 'include'
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setUser(data.user);

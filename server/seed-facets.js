@@ -3,123 +3,94 @@ const { sequelize, Facet, FacetValue } = require('./models');
 async function seedFacets() {
     try {
         console.log('🌱 Starting facets seed...');
-        
+
+        const findOrCreateFacet = async (name, label, is_required = false) => {
+            const [facet] = await Facet.findOrCreate({
+                where: { name },
+                defaults: { label, is_required }
+            });
+            return facet;
+        };
+
+        const findOrCreateValue = async (facet_id, value, label, parent_id = null) => {
+            const [val] = await FacetValue.findOrCreate({
+                where: { value, facet_id },
+                defaults: { label, parent_id }
+            });
+            return val;
+        };
+
         // 1. Domain facet
-        const domainFacet = await Facet.create({
-            name: 'domain',
-            label: 'Предметная область',
-            is_required: true
-        });
+        const domainFacet = await findOrCreateFacet('domain', 'Предметная область', true);
 
-        // Domain values with hierarchy
-        const programmingDev = await FacetValue.create({
-            facet_id: domainFacet.id,
-            value: 'programming_development',
-            label: 'Programming & Development'
-        });
+        // Domain values
+        const programmingDev = await findOrCreateValue(domainFacet.id, 'programming_development', 'Programming & Development');
 
-        await FacetValue.bulkCreate([
-            { facet_id: domainFacet.id, value: 'web_development', label: 'Web Development', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'backend_development', label: 'Backend Development', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'frontend_development', label: 'Frontend Development', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'mobile_development', label: 'Mobile Development', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'data_science_ml', label: 'Data Science & ML', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'devops_infrastructure', label: 'DevOps & Infrastructure', parent_id: programmingDev.id },
-            { facet_id: domainFacet.id, value: 'databases', label: 'Databases', parent_id: programmingDev.id }
-        ]);
+        await findOrCreateValue(domainFacet.id, 'web_development', 'Web Development', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'backend_development', 'Backend Development', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'frontend_development', 'Frontend Development', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'mobile_development', 'Mobile Development', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'data_science_ml', 'Data Science & ML', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'devops_infrastructure', 'DevOps & Infrastructure', programmingDev.id);
+        await findOrCreateValue(domainFacet.id, 'databases', 'Databases', programmingDev.id);
 
-        const businessMgmt = await FacetValue.create({
-            facet_id: domainFacet.id,
-            value: 'business_management',
-            label: 'Business & Management'
-        });
+        const businessMgmt = await findOrCreateValue(domainFacet.id, 'business_management', 'Business & Management');
 
-        await FacetValue.bulkCreate([
-            { facet_id: domainFacet.id, value: 'project_management', label: 'Project Management', parent_id: businessMgmt.id },
-            { facet_id: domainFacet.id, value: 'sales_marketing', label: 'Sales & Marketing', parent_id: businessMgmt.id },
-            { facet_id: domainFacet.id, value: 'human_resources', label: 'Human Resources', parent_id: businessMgmt.id },
-            { facet_id: domainFacet.id, value: 'finance_accounting', label: 'Finance & Accounting', parent_id: businessMgmt.id }
-        ]);
+        await findOrCreateValue(domainFacet.id, 'project_management', 'Project Management', businessMgmt.id);
+        await findOrCreateValue(domainFacet.id, 'sales_marketing', 'Sales & Marketing', businessMgmt.id);
+        await findOrCreateValue(domainFacet.id, 'digital_marketing', 'Digital Marketing', businessMgmt.id);
+        await findOrCreateValue(domainFacet.id, 'human_resources', 'Human Resources', businessMgmt.id);
+        await findOrCreateValue(domainFacet.id, 'finance_accounting', 'Finance & Accounting', businessMgmt.id);
 
-        const designCreative = await FacetValue.create({
-            facet_id: domainFacet.id,
-            value: 'design_creative',
-            label: 'Design & Creative'
-        });
+        const designCreative = await findOrCreateValue(domainFacet.id, 'design_creative', 'Design & Creative');
 
-        await FacetValue.bulkCreate([
-            { facet_id: domainFacet.id, value: 'ui_ux_design', label: 'UI/UX Design', parent_id: designCreative.id },
-            { facet_id: domainFacet.id, value: 'graphic_design', label: 'Graphic Design', parent_id: designCreative.id },
-            { facet_id: domainFacet.id, value: 'motion_graphics', label: 'Motion Graphics', parent_id: designCreative.id },
-            { facet_id: domainFacet.id, value: 'content_creation', label: 'Content Creation', parent_id: designCreative.id }
-        ]);
+        await findOrCreateValue(domainFacet.id, 'ui_ux_design', 'UI/UX Design', designCreative.id);
+        await findOrCreateValue(domainFacet.id, 'graphic_design', 'Graphic Design', designCreative.id);
+        await findOrCreateValue(domainFacet.id, 'motion_graphics', 'Motion Graphics', designCreative.id);
+        await findOrCreateValue(domainFacet.id, 'content_creation', 'Content Creation', designCreative.id);
 
         // 2. Difficulty facet
-        const difficultyFacet = await Facet.create({
-            name: 'difficulty',
-            label: 'Уровень сложности',
-            is_required: true
-        });
+        const difficultyFacet = await findOrCreateFacet('difficulty', 'Уровень сложности', true);
 
-        await FacetValue.bulkCreate([
-            { facet_id: difficultyFacet.id, value: 'beginner', label: 'Beginner' },
-            { facet_id: difficultyFacet.id, value: 'intermediate', label: 'Intermediate' },
-            { facet_id: difficultyFacet.id, value: 'advanced', label: 'Advanced' },
-            { facet_id: difficultyFacet.id, value: 'expert', label: 'Expert' }
-        ]);
+        await findOrCreateValue(difficultyFacet.id, 'beginner', 'Beginner');
+        await findOrCreateValue(difficultyFacet.id, 'intermediate', 'Intermediate');
+        await findOrCreateValue(difficultyFacet.id, 'advanced', 'Advanced');
+        await findOrCreateValue(difficultyFacet.id, 'expert', 'Expert');
 
         // 3. Instruction Type facet
-        const instructionFacet = await Facet.create({
-            name: 'instruction_type',
-            label: 'Тип инструкции',
-            is_required: true
-        });
+        const instructionFacet = await findOrCreateFacet('instruction_type', 'Тип инструкции', true);
 
-        await FacetValue.bulkCreate([
-            { facet_id: instructionFacet.id, value: 'step_by_step_guide', label: 'Step-by-step Guide' },
-            { facet_id: instructionFacet.id, value: 'tutorial', label: 'Tutorial' },
-            { facet_id: instructionFacet.id, value: 'reference', label: 'Reference' },
-            { facet_id: instructionFacet.id, value: 'conceptual', label: 'Conceptual Overview' },
-            { facet_id: instructionFacet.id, value: 'troubleshooting', label: 'Troubleshooting' },
-            { facet_id: instructionFacet.id, value: 'best_practices', label: 'Best Practices' }
-        ]);
+        await findOrCreateValue(instructionFacet.id, 'step_by_step_guide', 'Step-by-step Guide');
+        await findOrCreateValue(instructionFacet.id, 'tutorial', 'Tutorial');
+        await findOrCreateValue(instructionFacet.id, 'reference', 'Reference');
+        await findOrCreateValue(instructionFacet.id, 'conceptual', 'Conceptual Overview');
+        await findOrCreateValue(instructionFacet.id, 'troubleshooting', 'Troubleshooting');
+        await findOrCreateValue(instructionFacet.id, 'best_practices', 'Best Practices');
 
         // 4. Target Audience facet
-        const audienceFacet = await Facet.create({
-            name: 'target_audience',
-            label: 'Целевая аудитория',
-            is_required: true
-        });
+        const audienceFacet = await findOrCreateFacet('target_audience', 'Целевая аудитория', true);
 
-        await FacetValue.bulkCreate([
-            { facet_id: audienceFacet.id, value: 'developer', label: 'Developer' },
-            { facet_id: audienceFacet.id, value: 'designer', label: 'Designer' },
-            { facet_id: audienceFacet.id, value: 'manager', label: 'Manager' },
-            { facet_id: audienceFacet.id, value: 'student', label: 'Student' },
-            { facet_id: audienceFacet.id, value: 'general', label: 'General Audience' }
-        ]);
+        await findOrCreateValue(audienceFacet.id, 'developer', 'Developer');
+        await findOrCreateValue(audienceFacet.id, 'designer', 'Designer');
+        await findOrCreateValue(audienceFacet.id, 'manager', 'Manager');
+        await findOrCreateValue(audienceFacet.id, 'student', 'Student');
+        await findOrCreateValue(audienceFacet.id, 'general', 'General Audience');
 
-        // 5. Technology facet (optional, commonly used technologies)
-        const technologyFacet = await Facet.create({
-            name: 'technology',
-            label: 'Технология',
-            is_required: false
-        });
+        // 5. Technology facet (optional)
+        const technologyFacet = await findOrCreateFacet('technology', 'Технология', false);
 
-        await FacetValue.bulkCreate([
-            { facet_id: technologyFacet.id, value: 'javascript', label: 'JavaScript' },
-            { facet_id: technologyFacet.id, value: 'typescript', label: 'TypeScript' },
-            { facet_id: technologyFacet.id, value: 'python', label: 'Python' },
-            { facet_id: technologyFacet.id, value: 'react', label: 'React' },
-            { facet_id: technologyFacet.id, value: 'nodejs', label: 'Node.js' },
-            { facet_id: technologyFacet.id, value: 'express', label: 'Express' },
-            { facet_id: technologyFacet.id, value: 'sql', label: 'SQL' },
-            { facet_id: technologyFacet.id, value: 'mongodb', label: 'MongoDB' },
-            { facet_id: technologyFacet.id, value: 'docker', label: 'Docker' },
-            { facet_id: technologyFacet.id, value: 'kubernetes', label: 'Kubernetes' },
-            { facet_id: technologyFacet.id, value: 'aws', label: 'AWS' },
-            { facet_id: technologyFacet.id, value: 'figma', label: 'Figma' }
-        ]);
+        await findOrCreateValue(technologyFacet.id, 'javascript', 'JavaScript');
+        await findOrCreateValue(technologyFacet.id, 'typescript', 'TypeScript');
+        await findOrCreateValue(technologyFacet.id, 'python', 'Python');
+        await findOrCreateValue(technologyFacet.id, 'react', 'React');
+        await findOrCreateValue(technologyFacet.id, 'nodejs', 'Node.js');
+        await findOrCreateValue(technologyFacet.id, 'express', 'Express');
+        await findOrCreateValue(technologyFacet.id, 'sql', 'SQL');
+        await findOrCreateValue(technologyFacet.id, 'mongodb', 'MongoDB');
+        await findOrCreateValue(technologyFacet.id, 'docker', 'Docker');
+        await findOrCreateValue(technologyFacet.id, 'kubernetes', 'Kubernetes');
+        await findOrCreateValue(technologyFacet.id, 'aws', 'AWS');
+        await findOrCreateValue(technologyFacet.id, 'figma', 'Figma');
 
         console.log('✅ Facets seeded successfully!');
         console.log(`   - ${domainFacet.label}: ${await FacetValue.count({ where: { facet_id: domainFacet.id } })} values`);

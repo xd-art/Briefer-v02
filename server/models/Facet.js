@@ -10,7 +10,6 @@ const Facet = sequelize.define('Facet', {
     name: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
         comment: 'System name (domain, difficulty, technology, etc.)'
     },
     label: {
@@ -28,7 +27,13 @@ const Facet = sequelize.define('Facet', {
     tableName: 'facets',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: 'updated_at'
+    updatedAt: 'updated_at',
+    indexes: [
+        {
+            unique: true,
+            fields: ['name']
+        }
+    ]
 });
 
 module.exports = Facet;

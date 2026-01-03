@@ -37,8 +37,7 @@ const ArticleFacet = sequelize.define('ArticleFacet', {
     source: {
         type: DataTypes.ENUM('manual', 'auto_suggested'),
         defaultValue: 'manual',
-        allowNull: false,
-        comment: 'How this tag was assigned'
+        allowNull: false
     },
     confidence: {
         type: DataTypes.FLOAT,
