@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import config from '../config';
 import Header from './Header';
 import Footer from './Footer';
+import RegistrationModal from './RegistrationModal';
 import ThreeColumnLayout from './ThreeColumnLayout';
 import LeftNavigation from './LeftNavigation';
 import RightSidebar from './RightSidebar';
@@ -19,6 +20,7 @@ const HomePage = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [isGenerating, setIsGenerating] = useState(false);
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
     const handleGenerate = async (topic, detailedPrompt) => {
         setIsGenerating(true);
@@ -109,7 +111,7 @@ const HomePage = () => {
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
-            <Header user={user} onLoginClick={() => { }} onNavigate={() => { }} />
+            <Header user={user} onLoginClick={() => setShowRegistrationModal(true)} onNavigate={() => { }} />
 
             <ThreeColumnLayout
                 left={<LeftNavigation />}
@@ -273,6 +275,11 @@ const HomePage = () => {
             </ThreeColumnLayout>
 
             <Footer />
+
+            <RegistrationModal
+                isOpen={showRegistrationModal}
+                onClose={() => setShowRegistrationModal(false)}
+            />
         </div>
     );
 };

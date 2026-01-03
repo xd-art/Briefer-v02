@@ -717,6 +717,7 @@ function ArticleEditorApp() {
                 setIsEditingTitle={setIsEditingTitle}
                 titleInputRef={titleInputRef}
                 user={user}
+                onLoginClick={handleLoginClick}
                 loading={loading}
                 logout={logout}
                 view={view}

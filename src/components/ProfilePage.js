@@ -3,6 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import ThreeColumnLayout from './ThreeColumnLayout';
+import LeftNavigation from './LeftNavigation';
+import RightSidebar from './RightSidebar';
 
 const ProfilePage = () => {
     const { user, logout, refreshUser } = useAuth();
@@ -172,7 +175,10 @@ const ProfilePage = () => {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             <Header user={user} onLoginClick={() => { }} currentView="profile" />
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <ThreeColumnLayout
+                left={<LeftNavigation />}
+                right={<RightSidebar />}
+            >
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
                     <button
@@ -354,7 +360,7 @@ const ProfilePage = () => {
                         </ul>
                     </div>
                 )}
-            </div>
+            </ThreeColumnLayout>
             <Footer />
         </div>
     );
