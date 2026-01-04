@@ -45,7 +45,7 @@ const PublishedArticle = () => {
             }
         };
 
-        navigate('/', { state: navigationState });
+        navigate('/create', { state: navigationState });
     };
 
     const handleLogin = () => {
