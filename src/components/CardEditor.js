@@ -355,7 +355,7 @@ const CardEditor = React.forwardRef(({ cards, setCards, showNotification }, ref)
     }
 
     try {
-      const response = await fetch('http://localhost:3003/api/ai/improve-content', {
+      const response = await fetch('/api/ai/improve-content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -23,7 +23,7 @@ const LeftNavigation = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3003/api/facets');
+            const response = await fetch('/api/facets');
 
             if (!response.ok) {
                 throw new Error('Failed to fetch categories');

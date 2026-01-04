@@ -34,7 +34,7 @@ const CategoryArticlesPage = () => {
                 const facetValue = subcategory.replace(/-/g, '_');
 
                 const response = await fetch(
-                    `http://localhost:3003/api/articles/categories/${facetValue}`
+                    `/api/articles/categories/${facetValue}`
                 );
 
                 if (!response.ok) {
@@ -78,7 +78,7 @@ const CategoryArticlesPage = () => {
                 setLoading(true);
                 const facetValue = subcategory.replace(/-/g, '_');
                 const response = await fetch(
-                    `http://localhost:3003/api/articles/search?query=${encodeURIComponent(debouncedSearch)}&category=${facetValue}`
+                    `/api/articles/search?query=${encodeURIComponent(debouncedSearch)}&category=${facetValue}`
                 );
 
                 if (response.ok) {
@@ -128,8 +128,8 @@ const CategoryArticlesPage = () => {
 
         console.log('🚀 Navigating with state:', navigationState);
 
-        // Navigate to home with article data in state
-        navigate('/', {
+        // Navigate to editor with article data in state
+        navigate('/create', {
             state: navigationState
         });
     };
@@ -243,7 +243,7 @@ const CategoryArticlesPage = () => {
                                                     onClick={() => handleEditArticle(article)}
                                                     className="text-sm font-medium text-blue-600 hover:text-blue-800 focus:outline-none"
                                                 >
-                                                    Edit &amp; save to profile
+                                                    Edit & save (Fixed)
                                                 </button>
                                             </div>
                                         </div>

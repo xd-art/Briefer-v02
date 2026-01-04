@@ -68,7 +68,7 @@ const CategoriesPage = () => {
                 setLoading(true);
                 setIsSearching(true);
                 const response = await fetch(
-                    `http://localhost:3003/api/articles/search?query=${encodeURIComponent(debouncedSearch)}`
+                    `/api/articles/search?query=${encodeURIComponent(debouncedSearch)}`
                 );
 
                 if (response.ok) {

@@ -1,14 +1,18 @@
 {
   "files": {
     "main.css": "/static/css/main.5d65534a.css",
-    "main.js": "/static/js/main.c7a7c41d.js",
+    "main.js": "/static/js/main.840d9cfd.js",
+    "static/media/icon-edit.png": "/static/media/icon-edit.a5472e159b2c844d13c4.png",
+    "static/media/icon-create.png": "/static/media/icon-create.a20dde0caa7805b758b7.png",
+    "static/media/icon-post.png": "/static/media/icon-post.6c00aa265b10e8abca19.png",
+    "static/media/icon-read.png": "/static/media/icon-read.c5b40ae3422cb59a508d.png",
     "static/media/briefer-logo.svg": "/static/media/briefer-logo.c6b2fa69159d93e85004a78d4bae6756.svg",
     "index.html": "/index.html",
     "main.5d65534a.css.map": "/static/css/main.5d65534a.css.map",
-    "main.c7a7c41d.js.map": "/static/js/main.c7a7c41d.js.map"
+    "main.840d9cfd.js.map": "/static/js/main.840d9cfd.js.map"
   },
   "entrypoints": [
     "static/css/main.5d65534a.css",
-    "static/js/main.c7a7c41d.js"
+    "static/js/main.840d9cfd.js"
   ]
 }

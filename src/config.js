@@ -1,5 +1,5 @@
 const config = {
-    API_BASE_URL: process.env.REACT_APP_API_URL || 'http://localhost:3003',
+    API_BASE_URL: process.env.REACT_APP_API_URL || '',
     // Add other configuration constants here
 };
 

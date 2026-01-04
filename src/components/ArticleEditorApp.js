@@ -62,7 +62,7 @@ function ArticleEditorApp() {
         }
 
         try {
-            const response = await fetch('http://localhost:3003/api/ai/generate-article', {
+            const response = await fetch('/api/ai/generate-article', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -256,7 +256,7 @@ function ArticleEditorApp() {
     // Fetch article from backend if not in localStorage
     const fetchArticleFromBackend = async (articleId) => {
         try {
-            const response = await fetch(`http://localhost:3003/api/articles/${articleId}`, {
+            const response = await fetch(`/api/articles/${articleId}`, {
                 credentials: 'include'
             });
 
@@ -381,7 +381,7 @@ function ArticleEditorApp() {
 
             // Always create a new draft for category articles (they're copies)
             // For user's own articles, we could add update logic later
-            const createResponse = await fetch('http://localhost:3003/api/articles', {
+            const createResponse = await fetch('/api/articles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -402,7 +402,7 @@ function ArticleEditorApp() {
             console.log('✅ Article created with ID:', backendArticleId);
 
             // Attach it to the authenticated user
-            const attachResponse = await fetch(`http://localhost:3003/api/articles/${backendArticleId}/attach`, {
+            const attachResponse = await fetch(`/api/articles/${backendArticleId}/attach`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

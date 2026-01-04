@@ -61,7 +61,7 @@ const PublishedArticle = () => {
                 const facetValue = subcategory.replace(/-/g, '_');
 
                 const response = await fetch(
-                    `http://localhost:3003/api/articles/categories/${facetValue}`
+                    `/api/articles/categories/${facetValue}`
                 );
 
                 if (!response.ok) {

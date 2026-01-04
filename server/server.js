@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://briefer-v02.onrender.com'],
     credentials: true
 }));
 app.use(express.json({ limit: '50mb' }));
@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../build')));
 
     // Handle React routing, return all requests to React app
-        app.get(/(.*)/, (req, res) => {
+    app.get(/(.*)/, (req, res) => {
 
         res.sendFile(path.join(__dirname, '../build', 'index.html'));
     });

@@ -23,7 +23,7 @@ const ProfilePage = () => {
         const fetchArticles = async () => {
             if (!user) return;
             try {
-                const response = await fetch(`http://localhost:3003/api/articles/user/${user.id}`, {
+                const response = await fetch(`/api/articles/user/${user.id}`, {
                     credentials: 'include',
                 });
                 if (!response.ok) throw new Error('Failed to fetch articles');
@@ -64,7 +64,7 @@ const ProfilePage = () => {
     const handleDelete = async (articleId) => {
         if (!window.confirm('Are you sure you want to delete this article?')) return;
         try {
-            const response = await fetch(`http://localhost:3003/api/articles/${articleId}`, {
+            const response = await fetch(`/api/articles/${articleId}`, {
                 method: 'DELETE',
                 credentials: 'include',
             });
@@ -79,7 +79,7 @@ const ProfilePage = () => {
     const handleSaveProfile = async (data) => {
         try {
             setIsSaving(true);
-            const response = await fetch('http://localhost:3003/api/auth/profile', {
+            const response = await fetch('/api/auth/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
